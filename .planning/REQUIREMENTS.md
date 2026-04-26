@@ -97,38 +97,51 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CAP-01 | TBD | Pending |
-| CAP-02 | TBD | Pending |
-| CAP-03 | TBD | Pending |
-| CAP-04 | TBD | Pending |
-| TRA-01 | TBD | Pending |
-| TRA-02 | TBD | Pending |
-| TRA-03 | TBD | Pending |
-| TRA-04 | TBD | Pending |
-| TRA-05 | TBD | Pending |
-| TRA-06 | TBD | Pending |
-| INJ-01 | TBD | Pending |
-| INJ-02 | TBD | Pending |
-| INJ-03 | TBD | Pending |
-| INJ-04 | TBD | Pending |
-| FBK-01 | TBD | Pending |
-| FBK-02 | TBD | Pending |
-| FBK-03 | TBD | Pending |
-| ROB-01 | TBD | Pending |
-| ROB-02 | TBD | Pending |
-| ROB-03 | TBD | Pending |
-| ROB-04 | TBD | Pending |
-| ROB-05 | TBD | Pending |
-| DST-01 | TBD | Pending |
-| DST-02 | TBD | Pending |
-| DST-03 | TBD | Pending |
-| DST-04 | TBD | Pending |
+| CAP-01 | Phase 1: Spike | Pending |
+| CAP-02 | Phase 1: Spike | Pending |
+| CAP-03 | Phase 1: Spike | Pending |
+| CAP-04 | Phase 1: Spike | Pending |
+| TRA-01 | Phase 1: Spike | Pending |
+| TRA-02 | Phase 1: Spike | Pending |
+| TRA-03 | Phase 1: Spike | Pending |
+| TRA-04 | Phase 2: Hardening | Pending |
+| TRA-05 | Phase 2: Hardening | Pending |
+| TRA-06 | Phase 2: Hardening | Pending |
+| INJ-01 | Phase 1: Spike | Pending |
+| INJ-02 | Phase 2: Hardening | Pending |
+| INJ-03 | Phase 2: Hardening | Pending |
+| INJ-04 | Phase 2: Hardening | Pending |
+| FBK-01 | Phase 2: Hardening | Pending |
+| FBK-02 | Phase 2: Hardening | Pending |
+| FBK-03 | Phase 2: Hardening | Pending |
+| ROB-01 | Phase 2: Hardening | Pending |
+| ROB-02 | Phase 2: Hardening | Pending |
+| ROB-03 | Phase 1: Spike | Pending |
+| ROB-04 | Phase 2: Hardening | Pending |
+| ROB-05 | Phase 1: Spike | Pending |
+| DST-01 | Phase 3: Distribution & Benchmarking | Pending |
+| DST-02 | Phase 3: Distribution & Benchmarking | Pending |
+| DST-03 | Phase 3: Distribution & Benchmarking | Pending |
+| DST-04 | Phase 3: Distribution & Benchmarking | Pending |
+| QOL-01 | Phase 4 (v1.x): Quality of Life | Deferred |
+| QOL-02 | Phase 4 (v1.x): Quality of Life | Deferred |
+| QOL-03 | Phase 4 (v1.x): Quality of Life | Deferred |
+| QOL-04 | Phase 4 (v1.x): Quality of Life | Deferred |
+| QOL-05 | Phase 4 (v1.x): Quality of Life | Deferred |
+| PERF-01 | Phase 5 (v1.1, conditional): Warm-Process Upgrade | Conditional |
+| PERF-02 | Phase 5 (v1.1, conditional): Warm-Process Upgrade | Conditional |
 
 **Coverage:**
 - v1 requirements: 26 total
-- Mapped to phases: 0 (will be filled by roadmapper)
-- Unmapped: 26 ⚠️ (expected pre-roadmap)
+- Mapped to phases: 26 / 26 (100%)
+- Unmapped: 0
+- v2 requirements: 7 total (5 QOL → Phase 4, 2 PERF → Phase 5 conditional)
+
+**Per-phase counts (v1 only):**
+- Phase 1: Spike — 10 requirements (CAP-01..04, TRA-01..03, INJ-01, ROB-03, ROB-05)
+- Phase 2: Hardening — 12 requirements (TRA-04..06, INJ-02..04, FBK-01..03, ROB-01, ROB-02, ROB-04)
+- Phase 3: Distribution & Benchmarking — 4 requirements (DST-01..04)
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-26 after initial definition*
+*Last updated: 2026-04-23 — traceability table populated by roadmapper*
