@@ -1,0 +1,14 @@
+# macOS noise
+.DS_Store
+# Local working WAVs (Phase 1 uses /tmp; this guards future repo-local debugging)
+*.wav
+/tmp/voice-cc/
+# Model files (downloaded via setup.sh, never committed)
+*.bin
+*.mlmodelc/
+# Hammerspoon spoon caches
+.hammerspoon/
+# Editor cruft
+*.swp
+.idea/
+.vscode/
