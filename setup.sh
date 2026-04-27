@@ -78,10 +78,13 @@ echo "OK: XDG directories ensured (~/.config/voice-cc, ~/.local/share/voice-cc/m
 MODEL="$HOME/.local/share/voice-cc/models/ggml-small.en.bin"
 MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin"
 # SHA256 for ggml-small.en.bin from the HuggingFace ggerganov/whisper.cpp mirror.
-# If verification fails, re-fetch the published checksum from
-# https://huggingface.co/ggerganov/whisper.cpp/blob/main/ggml-small.en.bin
-# and update this constant — do NOT silently accept a mismatched file.
-MODEL_SHA256="1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b"
+# Verified 2026-04-27 against the upstream `x-linked-etag` HTTP header on
+#   https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin
+# (file size 487,614,201 bytes, repo commit 5359861c739e955e79d9a303bcbc70fb988958b1).
+# If verification fails, re-fetch the published checksum from that URL's
+# response headers (or the model card on huggingface.co) and update this
+# constant — do NOT silently accept a mismatched file.
+MODEL_SHA256="c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d"
 
 verify_model_checksum() {
   local actual
