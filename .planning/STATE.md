@@ -1,33 +1,49 @@
+---
+gsd_state_version: 1.0
+milestone: v1.1
+milestone_name: milestone
+status: executing
+last_updated: "2026-04-27T08:00:00.000Z"
+progress:
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 3
+  completed_plans: 1
+---
+
 # State: voice-cc
 
-**Last updated:** 2026-04-23
+**Last updated:** 2026-04-27
 
 ## Project Reference
 
 - **Name:** voice-cc
 - **Core value:** Speak → text appears in Claude Code, instantly and reliably, with no recurring cost or external dependency.
-- **Current focus:** Roadmap created; awaiting Phase 1 planning.
+- **Current focus:** Phase 01 — spike
 - **Mode:** yolo
 - **Granularity:** standard
 - **Parallelization:** enabled
 
 ## Current Position
 
+Phase: 01 (spike) — EXECUTING
+Plan: 2 of 3 (next)
+
 - **Milestone:** v1
-- **Phase:** — (none in progress)
-- **Plan:** — (none in progress)
-- **Status:** Roadmap defined. Ready for `/gsd:plan-phase 1`.
+- **Phase:** 01 (spike) — in progress
+- **Plan:** 01-02 (bash glue, voice-cc-record) — next up
+- **Status:** Plan 01-01 complete (Task 3 deferred to Plan 01-03 walkthrough); ready for Wave 2 (Plan 01-02)
 
 ### Progress
 
 ```
-Phase 1: Spike                            ░░░░░░░░░░  0%   [Not started]
+Phase 1: Spike                            ███░░░░░░░  33%  [1/3 plans complete; Plan 01-02 next]
 Phase 2: Hardening                        ░░░░░░░░░░  0%   [Not started]
 Phase 3: Distribution & Benchmarking      ░░░░░░░░░░  0%   [Not started]
 Phase 4 (v1.x): Quality of Life           ░░░░░░░░░░  0%   [Queued]
 Phase 5 (v1.1, cond.): Warm-Process       ░░░░░░░░░░  0%   [Conditional on Phase 3]
 
-Overall v1 (Phases 1–3):                  ░░░░░░░░░░  0%
+Overall v1 (Phases 1–3):                  █░░░░░░░░░  11%
 ```
 
 ## Performance Metrics
@@ -49,7 +65,7 @@ Overall v1 (Phases 1–3):                  ░░░░░░░░░░  0%
 | One-shot CLI per utterance for v1 (no daemon) | ARCHITECTURE.md | 2026-04-23 |
 | whisper.cpp + `ggml-small.en.bin` (Q5_0, ~190 MB) | STACK.md / SUMMARY.md | 2026-04-23 |
 | Hammerspoon (Lua) + sox + bash glue + whisper-cli | SUMMARY.md | 2026-04-23 |
-| Default hotkey: `cmd+option+space` | PITFALLS.md (avoids Spotlight/Globe/Dictation conflicts) | 2026-04-23 |
+| Default hotkey: `cmd+shift+e` (changed from the original combo (cmd then option then the space bar) by user) | User decision 2026-04-27 during Plan 01-01 execution; VS Code/Cursor "Show Explorer" conflict accepted | 2026-04-27 |
 | XDG file layout (`~/.config`, `~/.local/share`, `~/.cache`) | ARCHITECTURE.md | 2026-04-23 |
 | `transcribe()` is a single bash function (Pattern 2) for v1.1 drop-in swap | ARCHITECTURE.md | 2026-04-23 |
 | Exit codes (0/2/3/10/11/12) are the entire bash↔Lua control protocol | ARCHITECTURE.md | 2026-04-23 |
@@ -57,10 +73,12 @@ Overall v1 (Phases 1–3):                  ░░░░░░░░░░  0%
 
 ### Open TODOs (cross-phase)
 
-- [ ] Phase 1: validate Silero VAD is bundled in installed whisper.cpp (`whisper-cli --help | grep -i vad`)
+- [x] Phase 1: validate Silero VAD is bundled in installed whisper.cpp — VAD flags exposed by brew bottle (`--vad`, `--vad-model`, etc.) but `--vad-model` default is empty; Phase 2 must source Silero weights separately. See 01-01-SUMMARY.md "VAD Audit Result".
+- [ ] Phase 1: end-to-end manual walkthrough of the 5 ROADMAP success criteria (consolidates the deferred Plan 01-01 Task 3 pipeline-isolation test) — happens in Plan 01-03 Task 2.
 - [ ] Phase 2: spike `hs.pasteboard` multi-type write API for `org.nspasteboard.TransientType`
 - [ ] Phase 2: verify current macOS Settings deep-link URL for Microphone privacy pane
 - [ ] Phase 2: deliberately revoke mic permission and capture sox stderr fingerprint for TCC detection grep
+- [ ] Phase 2: source Silero VAD model weights (or pin a brew bottle version that bundles them, or source-build whisper.cpp with VAD vendored) — surfaced by Plan 01-01 VAD audit
 - [ ] Phase 3: produce hyperfine numbers; explicitly decide go/no-go on Phase 5
 
 ### Blockers
@@ -69,19 +87,24 @@ Overall v1 (Phases 1–3):                  ░░░░░░░░░░  0%
 
 ### Recently Validated
 
-(None — ship to validate)
+- Plan 01-01 (2026-04-27): setup.sh idempotent, model SHA256 verified, Hammerspoon + sox + whisper-cli installed, XDG layout + vocab seed in place. Manual pipeline test deferred to Plan 01-03 walkthrough per user.
 
 ## Session Continuity
 
 ### Next Action
 
-Run `/gsd:plan-phase 1` to decompose Phase 1 (Spike) into executable plans.
+Run Plan 01-02 (Wave 2 — bash glue `voice-cc-record` with `transcribe()` abstraction). Wave dependency satisfied: all Plan 01-01 host-side prerequisites verified.
+
+### Stopped At
+
+Completed Plan 01-01 (`.planning/phases/01-spike/01-01-PLAN.md`). Task 3 of that plan deferred to Plan 01-03 Task 2 per user request. Hotkey rename `cmd+shift+e` applied repository-wide. Ready for Plan 01-02 executor.
 
 ### Last Session Summary
 
-- Initialized project (PROJECT.md, REQUIREMENTS.md, research bundle: STACK / FEATURES / ARCHITECTURE / PITFALLS / SUMMARY).
-- Created ROADMAP.md with 3 v1 phases + 1 v1.x phase + 1 conditional v1.1 phase.
-- 26/26 v1 requirements mapped; 0 orphans.
+- Plan 01-01 executed: setup.sh + vocab seed + .gitignore + README stub created and committed (`ccf34c2`); MODEL_SHA256 corrected mid-execution (`8b7e4d0`); setup.sh proven idempotent on re-run; VAD audit completed (flags present, model weights absent — Phase 2 follow-up logged).
+- User directive: hotkey changed from the original three-key combo to `cmd+shift+e`; updated across README + REQUIREMENTS + ROADMAP + CONTEXT + 01-01-PLAN + 01-03-PLAN + all 4 research docs (`7030eee`).
+- User directive: Plan 01-01 Task 3 manual pipeline test deferred (not skipped) to Plan 01-03 end-to-end walkthrough.
+- 01-01-SUMMARY.md authored with full deviation audit trail.
 
 ### Files of Record
 

@@ -11,12 +11,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **CAP-01**: User holds a global hotkey to start recording, releases to stop (push-and-hold semantics; press and release events both detected reliably)
 - [ ] **CAP-02**: System captures clean 16 kHz mono PCM audio from the default macOS input device while hotkey is held
-- [ ] **CAP-03**: Hotkey choice does not collide with macOS Spotlight, system Dictation, or commonly-used app shortcuts (default: `cmd+shift+e`, configurable; VS Code/Cursor "Show Explorer" conflict accepted by user 2026-04-27)
+- [x] **CAP-03**: Hotkey choice does not collide with macOS Spotlight, system Dictation, or commonly-used app shortcuts (default: `cmd+shift+e`, configurable; VS Code/Cursor "Show Explorer" conflict accepted by user 2026-04-27)
 - [ ] **CAP-04**: Recording cleanly truncates on hotkey release (sox receives SIGTERM, WAV is finalised, no partial-buffer corruption)
 
 ### Transcription
 
-- [ ] **TRA-01**: Audio is transcribed locally via whisper.cpp using the `small.en` model — no network calls, no API keys, no quotas
+- [x] **TRA-01**: Audio is transcribed locally via whisper.cpp using the `small.en` model — no network calls, no API keys, no quotas
 - [ ] **TRA-02**: Transcript includes native punctuation and capitalisation as Whisper produces them (no post-processing pass beyond filtering)
 - [ ] **TRA-03**: User can supply custom vocabulary in `~/.config/voice-cc/vocab.txt` which is passed to Whisper via `--prompt` to bias recognition toward technical terms (Claude, MCP, Hammerspoon, etc.)
 - [ ] **TRA-04**: System uses `--vad` flag with Silero VAD to suppress silence-region hallucinations
@@ -99,9 +99,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | CAP-01 | Phase 1: Spike | Pending |
 | CAP-02 | Phase 1: Spike | Pending |
-| CAP-03 | Phase 1: Spike | Pending |
+| CAP-03 | Phase 1: Spike | Complete |
 | CAP-04 | Phase 1: Spike | Pending |
-| TRA-01 | Phase 1: Spike | Pending |
+| TRA-01 | Phase 1: Spike | Complete |
 | TRA-02 | Phase 1: Spike | Pending |
 | TRA-03 | Phase 1: Spike | Pending |
 | TRA-04 | Phase 2: Hardening | Pending |
