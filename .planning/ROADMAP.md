@@ -49,7 +49,11 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
   3. Revoking Hammerspoon's microphone permission via `tccutil reset` and pressing the hotkey produces an actionable macOS notification with a working deep link to System Settings → Privacy → Microphone — never silent failure.
   4. After a successful paste, the user's prior clipboard contents are restored within ~250 ms; clipboard managers (1Password, Raycast, Maccy) do not retain the transcript permanently because the clipboard set is marked `org.nspasteboard.TransientType`.
   5. Holding the hotkey shows a visible menu-bar indicator change and (unless `VOICE_CC_NO_SOUNDS=1`) plays brief start/stop audio cues; rapid double-presses do not spawn duplicate sox processes; no WAV files accumulate in `/tmp/voice-cc/` across exit paths including SIGINT.
-**Plans**: TBD
+**Plans:** 4 plans
+  - [ ] 02-00-PLAN.md — Wave 0: test infrastructure + Silero VAD weights install + denylist.txt seed (no requirements; foundation)
+  - [ ] 02-01-PLAN.md — Bash hardening: VAD + duration gate + denylist + empty-drop + TCC stderr fingerprint + EXIT-trap WAV cleanup + suppress whisper sibling .txt (TRA-04, TRA-05, TRA-06, INJ-04, ROB-02, ROB-04 + Phase-1 TODO c)
+  - [ ] 02-02-PLAN.md — Lua hardening: hs.accessibilityState + menubar + audio cues + clipboard preserve/restore with transient UTI + re-entrancy guard + handleExit stub + require("hs.ipc") snippet (FBK-01, FBK-02, INJ-02, INJ-03, ROB-01 + Phase-1 TODOs a, b)
+  - [ ] 02-03-PLAN.md — Failure surfacing: hs.notify dispatch for exit 10/11/12 + System Settings deep links + dedup cooldown + defence-in-depth Accessibility-deny notification (FBK-03)
 **UI hint**: yes
 
 ### Phase 2.5: Branding
@@ -64,7 +68,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
   2. README.md, the Hammerspoon Lua module name (or alert strings if module name is preserved for backwards-compat), the `setup.sh` banner, and any other user-visible text use the new name consistently.
   3. The install process and any future public-facing artifacts (Phase 3) inherit the brand without rework.
   4. Optional: a minimal icon (Hammerspoon menu-bar glyph override or 256×256 PNG) — punted to Phase 4 QoL if not trivially achievable.
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: light (naming + minor visual polish, no full design system)
 
 ### Phase 3: Distribution & Benchmarking + Public Install
@@ -77,7 +81,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
   3. README walks through the Microphone + Accessibility grant for Hammerspoon, the macOS Dictation shortcut disable, and the `tccutil reset Microphone org.hammerspoon.Hammerspoon` recovery procedure.
   4. `hyperfine` produces p50 and p95 end-to-end latency numbers for short (~2 s), medium (~5 s), and long (~10 s) utterances on Oliver's machine; the numbers explicitly inform a documented go/no-go decision for Phase 5.
   5. **A public one-line installer** (`curl -fsSL https://<host>/install | bash`, where `<host>` is GitHub raw or a stable redirect) clones the repo (or downloads a release tarball) into a sensible location, then invokes the local `install.sh`. The public install is idempotent, prints next steps including the brand-aware `require()` line, and is documented in the README. The repo must be public on GitHub before this success criterion can pass.
-**Plans**: TBD
+**Plans**: 4 plans
 
 ### Phase 3.5: Hover UI / HUD
 **Goal**: A small floating HUD that surfaces voice-cc state at-a-glance — visible "● recording" indicator while the hotkey is held, fading or hideable when idle. Complements (does not replace) Phase 2's menu-bar indicator. Optimised for low CPU when idle and zero distraction when not actively recording.
@@ -92,7 +96,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
   2. The HUD disappears within ~250 ms of release; while idle, no HUD is on screen and no measurable CPU is consumed.
   3. A config toggle hides the HUD entirely for users who only want the menu-bar indicator (Phase 2 still ships the menu-bar indicator regardless of HUD state).
   4. The HUD does not steal focus, does not interfere with paste, and does not appear in screen recordings unless the user explicitly enables it.
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes (this IS the UI phase)
 
 ### Phase 4 (v1.x): Quality of Life
@@ -105,7 +109,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
   3. `~/.config/voice-cc/replacements.txt` find/replace pairs are applied to transcripts as a `sed` post-filter step ("Versel" → "Vercel").
   4. A capped (≤10 MB) rolling history log lives at `~/.cache/voice-cc/history.log` for debugging.
   5. `VOICE_CC_MODEL=medium.en` (or any other model present in the models dir) is honoured at runtime without code changes.
-**Plans**: TBD
+**Plans**: 4 plans
 
 ### Phase 5 (v1.1, CONDITIONAL): Warm-Process Upgrade
 **Goal**: Cut latency below 1 second by replacing per-utterance `whisper-cli` invocation with a long-running `whisper-server` over localhost HTTP, managed by a LaunchAgent. **CONDITIONAL: only triggered if Phase 3 hyperfine measurements show p50 > 2.0 s OR p95 > 3.0 s on Oliver's hardware.**
@@ -116,7 +120,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
   2. The bash `transcribe()` function swap from `whisper-cli` to `curl 127.0.0.1:8080/inference -F file=@...` is the *only* change in the pipeline — Hammerspoon code, file layout, config, and failure model are unchanged.
   3. Re-running the Phase 3 hyperfine benchmark shows p50 latency < 1.0 s for short utterances.
   4. An optional Core ML encoder build (`-DWHISPER_COREML=1`) for ~3× ANE encoder speedup is documented and either automated by an upgrade path in `install.sh` or covered by a clear manual-build section in the README.
-**Plans**: TBD
+**Plans**: 4 plans
 
 ## Research Flags
 
@@ -138,7 +142,7 @@ Phases with well-documented standard patterns (skip research-phase):
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Spike | 3/3 | Complete | 2026-04-27 |
-| 2. Hardening | 0/0 | Not started | - |
+| 2. Hardening | 0/4 | Not started | - |
 | 2.5. Branding | 0/0 | Not started | - |
 | 3. Distribution & Benchmarking + Public Install | 0/0 | Not started | - |
 | 3.5. Hover UI / HUD | 0/0 | Not started | - |
