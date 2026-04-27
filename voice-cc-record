@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# voice-cc-record — Phase 1 spike bash glue
+# Lifecycle: spawned by Hammerspoon hs.task (or invoked manually);
+# records mic audio via sox until SIGTERM (or Ctrl-C); transcribes via
+# whisper-cli; prints transcript to stdout for caller to paste.
+#
+# Phase 1 deliberately OMITS: VAD, hallucination filter, duration gate, TCC
+# detection, WAV cleanup trap, semantic exit codes. All deferred to Phase 2.
+
+set -euo pipefail
+
+# --- Absolute binary paths (Pitfall 2, ROB-03) -------------------------
+# hs.task does NOT include /opt/homebrew/bin in PATH on Apple Silicon.
+# Override via env vars if you're on Intel (/usr/local/bin) or custom install.
+SOX_BIN="${SOX_BIN:-/opt/homebrew/bin/sox}"
+WHISPER_BIN="${WHISPER_BIN:-/opt/homebrew/bin/whisper-cli}"
+
+# --- Paths (D-03 XDG layout) -------------------------------------------
+MODEL="${VOICE_CC_MODEL:-$HOME/.local/share/voice-cc/models/ggml-small.en.bin}"
+VOCAB_FILE="$HOME/.config/voice-cc/vocab.txt"
+WAV_DIR="/tmp/voice-cc"
+WAV="$WAV_DIR/recording.wav"
+
+mkdir -p "$WAV_DIR"
+
+# --- Read vocab if available (TRA-03) ----------------------------------
+# Tolerate missing/unreadable vocab.txt — vocab is enhancement, not critical.
+if [ -r "$VOCAB_FILE" ]; then
+  VOCAB="$(cat "$VOCAB_FILE")"
+else
+  VOCAB=""
+fi
+
+# --- transcribe() — the SOLE STT abstraction boundary (ARCHITECTURE.md Pattern 2) ---
+# v1: one-shot whisper-cli per utterance.
+# v1.1 (deferred): swap body to `curl 127.0.0.1:8080/inference -F file=@"$1"`.
+# NOTHING else in this script may invoke whisper-cli directly.
+transcribe() {
+  local wav_path="$1"
+  local out_base="${wav_path%.wav}"
+  "$WHISPER_BIN" \
+    -m "$MODEL" \
+    --language en \
+    --no-timestamps \
+    --prompt "$VOCAB" \
+    -otxt -of "$out_base" \
+    -f "$wav_path" >/dev/null 2>&1
+  cat "${out_base}.txt"
+}
+
+# --- Capture: sox in foreground; SIGTERM (from Hammerspoon task:terminate
+# or manual Ctrl-C → SIGINT, which sox also handles cleanly) finalises the
+# WAV header before sox exits. CAP-04. ----------------------------------
+# We launch sox in the background and wait for it so this script's process
+# group stays clean and a SIGTERM to this script propagates to sox via the
+# trap below.
+"$SOX_BIN" -d -r 16000 -c 1 -b 16 "$WAV" >/dev/null 2>&1 &
+SOX_PID=$!
+
+# When this script receives SIGTERM (Hammerspoon) or SIGINT (Ctrl-C),
+# forward to sox so it finalises the WAV cleanly before we proceed.
+trap 'kill -TERM "$SOX_PID" 2>/dev/null || true' TERM INT
+
+# Block until sox exits (after SIGTERM forward, or natural exit).
+# `wait` returns sox's exit code; we use `|| true` so set -e doesn't kill
+# us on the expected non-zero from being signalled.
+wait "$SOX_PID" || true
+
+# --- Reset trap so we don't re-signal during transcription -------------
+trap - TERM INT
+
+# --- Transcribe ---------------------------------------------------------
+TRANSCRIPT="$(transcribe "$WAV")"
+
+# --- Emit on stdout (no trailing newline — caller pastes verbatim) -----
+# Trim leading/trailing whitespace that whisper-cli often emits.
+# Phase 2 will add the hallucination filter + empty-drop; Phase 1 just trims and emits.
+TRANSCRIPT="$(printf "%s" "$TRANSCRIPT" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+printf "%s" "$TRANSCRIPT"
