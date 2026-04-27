@@ -10,15 +10,15 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Capture
 
 - [ ] **CAP-01**: User holds a global hotkey to start recording, releases to stop (push-and-hold semantics; press and release events both detected reliably)
-- [ ] **CAP-02**: System captures clean 16 kHz mono PCM audio from the default macOS input device while hotkey is held
+- [x] **CAP-02**: System captures clean 16 kHz mono PCM audio from the default macOS input device while hotkey is held
 - [x] **CAP-03**: Hotkey choice does not collide with macOS Spotlight, system Dictation, or commonly-used app shortcuts (default: `cmd+shift+e`, configurable; VS Code/Cursor "Show Explorer" conflict accepted by user 2026-04-27)
-- [ ] **CAP-04**: Recording cleanly truncates on hotkey release (sox receives SIGTERM, WAV is finalised, no partial-buffer corruption)
+- [x] **CAP-04**: Recording cleanly truncates on hotkey release (sox receives SIGTERM, WAV is finalised, no partial-buffer corruption)
 
 ### Transcription
 
 - [x] **TRA-01**: Audio is transcribed locally via whisper.cpp using the `small.en` model — no network calls, no API keys, no quotas
-- [ ] **TRA-02**: Transcript includes native punctuation and capitalisation as Whisper produces them (no post-processing pass beyond filtering)
-- [ ] **TRA-03**: User can supply custom vocabulary in `~/.config/voice-cc/vocab.txt` which is passed to Whisper via `--prompt` to bias recognition toward technical terms (Claude, MCP, Hammerspoon, etc.)
+- [x] **TRA-02**: Transcript includes native punctuation and capitalisation as Whisper produces them (no post-processing pass beyond filtering)
+- [x] **TRA-03**: User can supply custom vocabulary in `~/.config/voice-cc/vocab.txt` which is passed to Whisper via `--prompt` to bias recognition toward technical terms (Claude, MCP, Hammerspoon, etc.)
 - [ ] **TRA-04**: System uses `--vad` flag with Silero VAD to suppress silence-region hallucinations
 - [ ] **TRA-05**: System drops audio clips shorter than 0.4 seconds without invoking Whisper (defends against accidental hotkey taps)
 - [ ] **TRA-06**: System filters whole-transcript matches against a denylist of known Whisper hallucinations ("thanks for watching", "thank you", "[BLANK_AUDIO]", "subtitles by amara.org" etc.) — exact-match only, never substring
@@ -40,7 +40,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **ROB-01**: Rapid repeated hotkey presses do not spawn duplicate recording processes (in-memory re-entrancy guard prevents overlapping captures)
 - [ ] **ROB-02**: TCC microphone-permission denial is detected from sox stderr and surfaced as a notification with a deep link to System Settings → Privacy → Microphone
-- [ ] **ROB-03**: All external binaries (sox, whisper-cli) are invoked by absolute path so the system works when Hammerspoon spawns them (Hammerspoon's `hs.task` does not include `/opt/homebrew/bin` in PATH on Apple Silicon)
+- [x] **ROB-03**: All external binaries (sox, whisper-cli) are invoked by absolute path so the system works when Hammerspoon spawns them (Hammerspoon's `hs.task` does not include `/opt/homebrew/bin` in PATH on Apple Silicon)
 - [ ] **ROB-04**: Temporary WAV files are cleaned up via shell trap on every exit path, including signal interruption — no accumulation in `/tmp/voice-cc/`
 - [ ] **ROB-05**: End-to-end latency (key release to text appearing in focused window) is under 2 seconds for a typical 5-second utterance on Apple Silicon
 
@@ -98,12 +98,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CAP-01 | Phase 1: Spike | Pending |
-| CAP-02 | Phase 1: Spike | Pending |
+| CAP-02 | Phase 1: Spike | Complete |
 | CAP-03 | Phase 1: Spike | Complete |
-| CAP-04 | Phase 1: Spike | Pending |
+| CAP-04 | Phase 1: Spike | Complete |
 | TRA-01 | Phase 1: Spike | Complete |
-| TRA-02 | Phase 1: Spike | Pending |
-| TRA-03 | Phase 1: Spike | Pending |
+| TRA-02 | Phase 1: Spike | Complete |
+| TRA-03 | Phase 1: Spike | Complete |
 | TRA-04 | Phase 2: Hardening | Pending |
 | TRA-05 | Phase 2: Hardening | Pending |
 | TRA-06 | Phase 2: Hardening | Pending |
@@ -116,7 +116,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FBK-03 | Phase 2: Hardening | Pending |
 | ROB-01 | Phase 2: Hardening | Pending |
 | ROB-02 | Phase 2: Hardening | Pending |
-| ROB-03 | Phase 1: Spike | Pending |
+| ROB-03 | Phase 1: Spike | Complete |
 | ROB-04 | Phase 2: Hardening | Pending |
 | ROB-05 | Phase 1: Spike | Pending |
 | DST-01 | Phase 3: Distribution & Benchmarking | Pending |

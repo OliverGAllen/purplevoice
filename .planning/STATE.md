@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-27T08:00:00.000Z"
+last_updated: "2026-04-27T08:33:56Z"
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # State: voice-cc
@@ -27,23 +27,23 @@ progress:
 ## Current Position
 
 Phase: 01 (spike) — EXECUTING
-Plan: 2 of 3 (next)
+Plan: 3 of 3 (next)
 
 - **Milestone:** v1
 - **Phase:** 01 (spike) — in progress
-- **Plan:** 01-02 (bash glue, voice-cc-record) — next up
-- **Status:** Plan 01-01 complete (Task 3 deferred to Plan 01-03 walkthrough); ready for Wave 2 (Plan 01-02)
+- **Plan:** 01-03 (Hammerspoon wiring) — next up (Wave 3)
+- **Status:** Plans 01-01 and 01-02 complete (Task 2 of each deferred to Plan 01-03 end-to-end walkthrough); ready for Wave 3 (Plan 01-03)
 
 ### Progress
 
 ```
-Phase 1: Spike                            ███░░░░░░░  33%  [1/3 plans complete; Plan 01-02 next]
+Phase 1: Spike                            ███████░░░  67%  [2/3 plans complete; Plan 01-03 next]
 Phase 2: Hardening                        ░░░░░░░░░░  0%   [Not started]
 Phase 3: Distribution & Benchmarking      ░░░░░░░░░░  0%   [Not started]
 Phase 4 (v1.x): Quality of Life           ░░░░░░░░░░  0%   [Queued]
 Phase 5 (v1.1, cond.): Warm-Process       ░░░░░░░░░░  0%   [Conditional on Phase 3]
 
-Overall v1 (Phases 1–3):                  █░░░░░░░░░  11%
+Overall v1 (Phases 1–3):                  ██░░░░░░░░  22%
 ```
 
 ## Performance Metrics
@@ -55,6 +55,7 @@ Overall v1 (Phases 1–3):                  █░░░░░░░░░  11%
 | p95 latency (Phase 3 hyperfine) | < 3.0 s | TBD | gates Phase 5 |
 | Hallucination paste rate | 0 (caught by VAD + duration gate + denylist) | unmeasured | TRA-04..06 |
 | Silent-failure rate on permission denial | 0 (all denials → actionable toast) | unmeasured | FBK-03, ROB-02 |
+| Plan 01-02 executor wall-clock | n/a | ~12 min (Task 1 only; Task 2 deferred) | this session |
 
 ## Accumulated Context
 
@@ -70,6 +71,8 @@ Overall v1 (Phases 1–3):                  █░░░░░░░░░  11%
 | `transcribe()` is a single bash function (Pattern 2) for v1.1 drop-in swap | ARCHITECTURE.md | 2026-04-23 |
 | Exit codes (0/2/3/10/11/12) are the entire bash↔Lua control protocol | ARCHITECTURE.md | 2026-04-23 |
 | Build order: manual pipeline → bash glue → Hammerspoon (non-negotiable) | ARCHITECTURE.md | 2026-04-23 |
+| `transcribe()` Pattern 2 boundary discipline confirmed in voice-cc-record (grep -c WHISPER_BIN == 2 — single assignment + single use inside transcribe()); Phase 5 v1.1 warm-process upgrade is now a one-function-body swap | Plan 01-02 execution | 2026-04-27 |
+| Plan 01-02 Task 2 (manual `voice-cc-record` invocation checkpoint) deferred to Plan 01-03 end-to-end walkthrough; matches Plan 01-01 Task 3 deferral precedent | User directive 2026-04-27 during Plan 01-02 execution | 2026-04-27 |
 
 ### Open TODOs (cross-phase)
 
@@ -88,18 +91,27 @@ Overall v1 (Phases 1–3):                  █░░░░░░░░░  11%
 ### Recently Validated
 
 - Plan 01-01 (2026-04-27): setup.sh idempotent, model SHA256 verified, Hammerspoon + sox + whisper-cli installed, XDG layout + vocab seed in place. Manual pipeline test deferred to Plan 01-03 walkthrough per user.
+- Plan 01-02 (2026-04-27): voice-cc-record bash glue written + symlinked into ~/.local/bin/. transcribe() Pattern 2 boundary discipline confirmed (grep -c WHISPER_BIN == 2). All 16 plan automated-verify clauses pass. Manual invocation Task 2 deferred to Plan 01-03 walkthrough per user (precedent: Plan 01-01 Task 3 deferral).
 
 ## Session Continuity
 
 ### Next Action
 
-Run Plan 01-02 (Wave 2 — bash glue `voice-cc-record` with `transcribe()` abstraction). Wave dependency satisfied: all Plan 01-01 host-side prerequisites verified.
+Run Plan 01-03 (Wave 3 — Hammerspoon wiring: hotkey + hs.task spawn + clipboard + cmd+v paste). Wave dependency satisfied: bash glue contract in place (~/.local/bin/voice-cc-record honours spawn + SIGTERM + stdout-transcript semantics). Plan 01-03 Task 2 (end-to-end walkthrough) will also exercise the deferred Plan 01-01 Task 3 and Plan 01-02 Task 2 manual-verification work.
 
 ### Stopped At
 
-Completed Plan 01-01 (`.planning/phases/01-spike/01-01-PLAN.md`). Task 3 of that plan deferred to Plan 01-03 Task 2 per user request. Hotkey rename `cmd+shift+e` applied repository-wide. Ready for Plan 01-02 executor.
+Completed Plan 01-02 (`.planning/phases/01-spike/01-02-PLAN.md`). Task 2 of that plan deferred to Plan 01-03 Task 2 per user directive (consolidated end-to-end walkthrough). voice-cc-record committed at `b6dbf74`. Ready for Plan 01-03 executor.
 
 ### Last Session Summary
+
+- Plan 01-02 executed: voice-cc-record (79 lines, bash strict mode, executable) created in repo root; symlinked into ~/.local/bin/voice-cc-record (committed in `b6dbf74`).
+- transcribe() function isolates the SOLE whisper-cli invocation (Pattern 2 / v1.1 swap site). Absolute /opt/homebrew/bin/* paths used (Pitfall 2 / ROB-03). --language en + --prompt vocab.txt passed (Pitfall 4 + TRA-03). SIGTERM/SIGINT trap forwards to sox PID for clean WAV finalisation (CAP-04).
+- Auto-fix (Rule 1): plan template's two `denylist` literal occurrences in comments contradicted the plan's own `! grep -q denylist` automated-verify clause; replaced with "hallucination filter" (functionality unchanged).
+- User directive: Plan 01-02 Task 2 (manual `~/.local/bin/voice-cc-record` invocation + reference-utterance transcript test) deferred (not skipped) to Plan 01-03 end-to-end walkthrough — same precedent as Plan 01-01 Task 3.
+- 01-02-SUMMARY.md authored with full deviation audit trail and Pattern 2 boundary confirmation.
+
+#### Prior session
 
 - Plan 01-01 executed: setup.sh + vocab seed + .gitignore + README stub created and committed (`ccf34c2`); MODEL_SHA256 corrected mid-execution (`8b7e4d0`); setup.sh proven idempotent on re-run; VAD audit completed (flags present, model weights absent — Phase 2 follow-up logged).
 - User directive: hotkey changed from the original three-key combo to `cmd+shift+e`; updated across README + REQUIREMENTS + ROADMAP + CONTEXT + 01-01-PLAN + 01-03-PLAN + all 4 research docs (`7030eee`).

@@ -31,7 +31,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
   5. All external binaries (sox, whisper-cli) are invoked by absolute path so the loop works under Hammerspoon's restricted PATH from day one.
 **Plans:** 3 plans
   - [x] 01-01-PLAN.md — Setup script + manual sox/whisper-cli pipeline validation (TRA-01, CAP-03)
-  - [ ] 01-02-PLAN.md — Bash glue voice-cc-record with transcribe() abstraction (CAP-02, CAP-04, TRA-02, TRA-03, ROB-03)
+  - [x] 01-02-PLAN.md — Bash glue voice-cc-record with transcribe() abstraction (CAP-02, CAP-04, TRA-02, TRA-03, ROB-03)
   - [ ] 01-03-PLAN.md — Hammerspoon Lua module — hotkey wiring + paste (CAP-01, INJ-01, ROB-05)
 **UI hint**: yes
 
@@ -99,7 +99,7 @@ Phases with well-documented standard patterns (skip research-phase):
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Spike | 0/3 | Planned | - |
+| 1. Spike | 2/3 | In Progress | - |
 | 2. Hardening | 0/0 | Not started | - |
 | 3. Distribution & Benchmarking | 0/0 | Not started | - |
 | 4. (v1.x) Quality of Life | 0/0 | Queued (not blocking v1) | - |
