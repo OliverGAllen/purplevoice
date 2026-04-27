@@ -32,7 +32,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
 **Plans:** 3 plans
   - [x] 01-01-PLAN.md — Setup script + manual sox/whisper-cli pipeline validation (TRA-01, CAP-03)
   - [x] 01-02-PLAN.md — Bash glue voice-cc-record with transcribe() abstraction (CAP-02, CAP-04, TRA-02, TRA-03, ROB-03)
-  - [ ] 01-03-PLAN.md — Hammerspoon Lua module — hotkey wiring + paste (CAP-01, INJ-01, ROB-05)
+  - [x] 01-03-PLAN.md — Hammerspoon Lua module — hotkey wiring + paste (CAP-01, INJ-01, ROB-05)
 **UI hint**: yes
 
 ### Phase 2: Hardening

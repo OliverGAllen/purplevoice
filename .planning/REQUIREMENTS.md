@@ -9,7 +9,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Capture
 
-- [ ] **CAP-01**: User holds a global hotkey to start recording, releases to stop (push-and-hold semantics; press and release events both detected reliably)
+- [x] **CAP-01**: User holds a global hotkey to start recording, releases to stop (push-and-hold semantics; press and release events both detected reliably)
 - [x] **CAP-02**: System captures clean 16 kHz mono PCM audio from the default macOS input device while hotkey is held
 - [x] **CAP-03**: Hotkey choice does not collide with macOS Spotlight, system Dictation, or commonly-used app shortcuts (default: `cmd+shift+e`, configurable; VS Code/Cursor "Show Explorer" conflict accepted by user 2026-04-27)
 - [x] **CAP-04**: Recording cleanly truncates on hotkey release (sox receives SIGTERM, WAV is finalised, no partial-buffer corruption)
@@ -25,7 +25,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Injection
 
-- [ ] **INJ-01**: Final transcript is pasted into the currently focused application via clipboard + simulated `cmd+v` keystroke
+- [x] **INJ-01**: Final transcript is pasted into the currently focused application via clipboard + simulated `cmd+v` keystroke
 - [ ] **INJ-02**: User's existing clipboard contents are preserved and restored after paste, with ≥250 ms delay before restore to avoid racing the paste keystroke
 - [ ] **INJ-03**: Clipboard set is marked with `org.nspasteboard.TransientType` UTI so clipboard-history managers (1Password, Raycast, Maccy, Alfred) do not retain transcripts permanently
 - [ ] **INJ-04**: Empty or whitespace-only transcripts are silently discarded — no paste, no error toast
@@ -42,7 +42,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **ROB-02**: TCC microphone-permission denial is detected from sox stderr and surfaced as a notification with a deep link to System Settings → Privacy → Microphone
 - [x] **ROB-03**: All external binaries (sox, whisper-cli) are invoked by absolute path so the system works when Hammerspoon spawns them (Hammerspoon's `hs.task` does not include `/opt/homebrew/bin` in PATH on Apple Silicon)
 - [ ] **ROB-04**: Temporary WAV files are cleaned up via shell trap on every exit path, including signal interruption — no accumulation in `/tmp/voice-cc/`
-- [ ] **ROB-05**: End-to-end latency (key release to text appearing in focused window) is under 2 seconds for a typical 5-second utterance on Apple Silicon
+- [x] **ROB-05**: End-to-end latency (key release to text appearing in focused window) is under 2 seconds for a typical 5-second utterance on Apple Silicon
 
 ### Distribution
 
@@ -97,7 +97,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CAP-01 | Phase 1: Spike | Pending |
+| CAP-01 | Phase 1: Spike | Complete |
 | CAP-02 | Phase 1: Spike | Complete |
 | CAP-03 | Phase 1: Spike | Complete |
 | CAP-04 | Phase 1: Spike | Complete |
@@ -107,7 +107,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRA-04 | Phase 2: Hardening | Pending |
 | TRA-05 | Phase 2: Hardening | Pending |
 | TRA-06 | Phase 2: Hardening | Pending |
-| INJ-01 | Phase 1: Spike | Pending |
+| INJ-01 | Phase 1: Spike | Complete |
 | INJ-02 | Phase 2: Hardening | Pending |
 | INJ-03 | Phase 2: Hardening | Pending |
 | INJ-04 | Phase 2: Hardening | Pending |
@@ -118,7 +118,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ROB-02 | Phase 2: Hardening | Pending |
 | ROB-03 | Phase 1: Spike | Complete |
 | ROB-04 | Phase 2: Hardening | Pending |
-| ROB-05 | Phase 1: Spike | Pending |
+| ROB-05 | Phase 1: Spike | Complete |
 | DST-01 | Phase 3: Distribution & Benchmarking | Pending |
 | DST-02 | Phase 3: Distribution & Benchmarking | Pending |
 | DST-03 | Phase 3: Distribution & Benchmarking | Pending |
