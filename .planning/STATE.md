@@ -2,48 +2,47 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
-status: executing
-last_updated: "2026-04-27T14:30:00Z"
+status: planning
+last_updated: "2026-04-27T13:00:00.000Z"
 progress:
-  total_phases: 3
-  completed_phases: 0
+  total_phases: 7
+  completed_phases: 1
   total_plans: 3
   completed_plans: 3
 ---
 
 # State: voice-cc
 
-**Last updated:** 2026-04-27 (Plan 01-03 closure)
+**Last updated:** 2026-04-27 (Phase 1 complete; roadmap extended with Phase 2.5 Branding, Phase 3 Public Install scope, Phase 3.5 Hover UI per user)
 
 ## Project Reference
 
-- **Name:** voice-cc
+- **Name:** voice-cc *(working name; new product brand TBD in Phase 2.5)*
 - **Core value:** Speak → text appears in Claude Code, instantly and reliably, with no recurring cost or external dependency.
-- **Current focus:** Phase 01 — spike
+- **Current focus:** Phase 02 — hardening (next up; needs planning)
 - **Mode:** yolo
 - **Granularity:** standard
 - **Parallelization:** enabled
 
 ## Current Position
 
-Phase: 01 (spike) — AWAITING PHASE VERIFICATION
-Plan: 3 of 3 (complete)
-
 - **Milestone:** v1
-- **Phase:** 01 (spike) — all 3 plans complete; awaiting orchestrator-side phase verifier before advancing to Phase 2
-- **Plan:** 01-03 (Hammerspoon wiring) — COMPLETE; user approved end-to-end walkthrough of all 5 ROADMAP success criteria (4 PASS + 1 SKIPPED-BUT-NOT-GATING per user choice)
-- **Status:** Phase 1 spike loop demonstrably works end-to-end on Oliver's machine (cmd+shift+e push-and-hold → bash glue → whisper-cli → clipboard → cmd+v paste, well under 2s for short utterance). Three Phase 2 candidates surfaced during walkthrough — all logged below under Open TODOs.
+- **Phase:** 02 (hardening)
+- **Plan:** Not started — phase needs planning before execution
+- **Status:** Ready to plan (Phase 1 complete; verifier explicitly skipped per user — manual walkthrough sufficient for spike)
 
 ### Progress
 
 ```
-Phase 1: Spike                            ██████████  100% [3/3 plans complete; Phase 1 awaiting verifier]
-Phase 2: Hardening                        ░░░░░░░░░░  0%   [Not started]
-Phase 3: Distribution & Benchmarking      ░░░░░░░░░░  0%   [Not started]
+Phase 1: Spike                            ██████████  100% [3/3 plans; user-validated end-to-end 2026-04-27]
+Phase 2: Hardening                        ░░░░░░░░░░  0%   [Next up — needs planning]
+Phase 2.5: Branding                       ░░░░░░░░░░  0%   [Added 2026-04-27 — needs planning]
+Phase 3: Distribution + Public Install    ░░░░░░░░░░  0%   [Extended scope 2026-04-27 — needs planning]
+Phase 3.5: Hover UI / HUD                 ░░░░░░░░░░  0%   [Added 2026-04-27 — needs planning]
 Phase 4 (v1.x): Quality of Life           ░░░░░░░░░░  0%   [Queued]
 Phase 5 (v1.1, cond.): Warm-Process       ░░░░░░░░░░  0%   [Conditional on Phase 3]
 
-Overall v1 (Phases 1–3):                  ███░░░░░░░  33%
+Overall v1 (Phases 1–3.5):                █░░░░░░░░░  ~14% (1 of 5 effective v1 phases)
 ```
 
 ## Performance Metrics
@@ -106,11 +105,17 @@ Overall v1 (Phases 1–3):                  ███░░░░░░░  33%
 
 ### Next Action
 
-Run Phase 1 verifier (orchestrator-side). All three Phase 1 plans are complete and the end-to-end walkthrough was user-approved. After verifier passes, the orchestrator's `update_roadmap` step will check off the top-level `Phase 1: Spike` box in ROADMAP.md and Phase 2 (Hardening) becomes startable. Phase 2 should pick up the three Phase-1-walkthrough-surfaced candidates from Open TODOs above (hs.accessibilityState for deterministic TCC prompt, hs.ipc for scripted reload, suppress whisper sibling .txt) alongside the originally planned Phase 2 work.
+Plan Phase 2 (Hardening) with `/gsd:plan-phase 2` (recommend `/clear` first for a fresh context window — this orchestrator's context is heavily used). Phase 2 should pick up the three Phase-1-walkthrough-surfaced candidates from Open TODOs above (hs.accessibilityState for deterministic TCC prompt, hs.ipc for scripted reload, suppress whisper sibling .txt) alongside the originally planned hardening work (TRA-04..06, INJ-02..04, FBK-01..03, ROB-01..04).
+
+After Phase 2: Phase 2.5 Branding (newly added — naming + propagation), then Phase 3 (now extended with public one-line installer), then Phase 3.5 (Hover UI / HUD).
+
+Phase 1 verifier was explicitly skipped by user direction ("Phase 1 verifier doesn't need to run, it's already good"). Manual end-to-end walkthrough by user on 2026-04-27 served as authoritative verification for the spike.
 
 ### Stopped At
 
-Completed Plan 01-03 (`.planning/phases/01-spike/01-03-PLAN.md`). Task 1 (Lua module + symlink + ~/.hammerspoon/init.lua) committed at `0fbbcc0`. Task 2 (end-to-end walkthrough of 5 ROADMAP success criteria) approved by user verbatim ("approved") after a two-stage walkthrough that diagnosed and resolved the Accessibility-not-auto-prompted quirk inline. Phase 1 spike loop demonstrably works end-to-end on Oliver's machine. Awaiting orchestrator-side phase verifier before Phase 2 starts.
+Phase 1 closed via `gsd-tools phase complete 01` (date 2026-04-27, no warnings). ROADMAP extended to add Phase 2.5 Branding, extend Phase 3 with Public Install scope, and add Phase 3.5 Hover UI per user request. New requirement IDs sketched for elaboration during respective `/gsd:plan-phase` runs: BRD-01..03 (Branding), DST-05 (Public Install extension), HUD-01..04 (Hover UI). Total v1 requirement count grows from 26 to ~33-34.
+
+User intent stated: proceed to Phase 2 (Hardening) next.
 
 ### Last Session Summary
 

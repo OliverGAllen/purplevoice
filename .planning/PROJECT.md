@@ -14,17 +14,22 @@ If everything else fails, this single loop must work: hold key → talk → rele
 
 ### Validated
 
-(None yet — ship to validate)
+*Validated by Phase 1 spike, end-to-end user walkthrough on 2026-04-27 (cmd+shift+e push-and-hold → bash glue → whisper-cli → clipboard + cmd+v paste, well under 2s):*
+
+- [x] Push-and-hold global hotkey triggers mic recording on macOS *(Phase 1; CAP-01)*
+- [x] Audio captured cleanly from system mic while hotkey held *(Phase 1; CAP-02, CAP-03, CAP-04)*
+- [x] Transcription happens locally via whisper.cpp (no network calls) *(Phase 1; TRA-01, TRA-02, TRA-03)*
+- [x] Transcript injected into the currently focused window (clipboard + paste) *(Phase 1; INJ-01)*
+- [x] Latency from key release to text appearing is under ~2 seconds for short utterances on Apple Silicon *(Phase 1 — observational; formal hyperfine numbers in Phase 3)*
+- [x] Stack runs entirely from local binaries — no API keys, no signups, no quotas *(Phase 1; ROB-03)*
 
 ### Active
 
-- [ ] Push-and-hold global hotkey triggers mic recording on macOS
-- [ ] Audio captured cleanly from system mic while hotkey held
-- [ ] Transcription happens locally via whisper.cpp or mlx-whisper (no network calls)
-- [ ] Transcript injected into the currently focused window (clipboard + paste)
-- [ ] Latency from key release to text appearing is under ~2 seconds for short utterances on Apple Silicon
-- [ ] Setup is reproducible from a single install script / README
-- [ ] Stack runs entirely from local binaries — no API keys, no signups, no quotas
+- [ ] Loop is robust against TCC silent-deny, hallucinations, re-entrancy, clipboard manager retention *(Phase 2; TRA-04..06, INJ-02..04, FBK-01..03, ROB-01..04)*
+- [ ] **Public-facing product name (rebrand from working name "voice-cc")** *(Phase 2.5 — added 2026-04-27; BRD-01..03)*
+- [ ] Setup is reproducible from a single install script / README *(Phase 3; DST-01..04)*
+- [ ] **Public one-line installer (`curl ... | bash`) so others can install voice-cc** *(Phase 3 extension — added 2026-04-27; DST-05)*
+- [ ] **Small floating recording-state HUD (hideable)** *(Phase 3.5 — added 2026-04-27; HUD-01..04)*
 
 ### Out of Scope
 
@@ -35,8 +40,8 @@ If everything else fails, this single loop must work: hold key → talk → rele
 - **Wake word activation** — explicit hotkey only; wake words add false-trigger and always-on mic concerns
 - **Cross-platform support (Linux, Windows)** — macOS Apple Silicon only; cross-platform deferred indefinitely
 - **Cloud STT (Whisper API, Deepgram, etc.)** — violates the no-subscriptions / no-limits constraint
-- **GUI / preferences app** — config lives in dotfiles; no Electron/SwiftUI shell needed
-- **Distribution to other users** — personal tool first; if it generalises, package later
+- **GUI / preferences app** — config lives in dotfiles; no Electron/SwiftUI shell needed (a small floating HUD is in scope per Phase 3.5, but it's not a settings UI)
+- ~~**Distribution to other users** — personal tool first; if it generalises, package later~~ — **REVERSED 2026-04-27 by user**: now in scope as Phase 3 Public Install + Phase 2.5 Branding. Phase 1 demonstrably worked, so the case for sharing it has materialised earlier than anticipated.
 
 ## Context
 
@@ -89,4 +94,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-26 after initialization*
+*Last updated: 2026-04-27 — Phase 1 validated; roadmap extended with Phase 2.5 Branding, Phase 3 Public Install, Phase 3.5 Hover UI (per user); "Distribution to other users" reversed from Out-of-Scope to Active.*

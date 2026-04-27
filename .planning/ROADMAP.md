@@ -1,8 +1,9 @@
 # Roadmap: voice-cc
 
 **Created:** 2026-04-23
+**Updated:** 2026-04-27 (added Phase 2.5 Branding, extended Phase 3 with Public Install, added Phase 3.5 Hover UI)
 **Granularity:** standard
-**Coverage:** 26/26 v1 requirements mapped
+**Coverage:** 26/26 original v1 requirements mapped; new branding/HUD/public-install requirements TBD during planning
 **Build-order constraint:** manual pipeline → bash glue → Hammerspoon wiring (non-negotiable per ARCHITECTURE.md)
 
 ## Core Value
@@ -11,9 +12,11 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
 
 ## Phases
 
-- [ ] **Phase 1: Spike** — Prove the end-to-end loop works on Oliver's machine. Thin slice, no polish.
+- [x] **Phase 1: Spike** — Prove the end-to-end loop works on Oliver's machine. Thin slice, no polish. *(completed 2026-04-27)*
 - [ ] **Phase 2: Hardening** — Make the loop robust against TCC silent-deny, hallucinations, re-entrancy, clipboard manager leakage, and AirPods surprises.
-- [ ] **Phase 3: Distribution & Benchmarking** — Reproducible install + README + `hyperfine` measurements that gate the v1.1 decision.
+- [ ] **Phase 2.5: Branding** — Pick a public-facing product name and apply it across user-visible surfaces. Pre-requisite for Distribution and HUD because both reference the brand.
+- [ ] **Phase 3: Distribution & Benchmarking + Public Install** — Reproducible local install, public one-line installer for sharing online, README, and `hyperfine` measurements that gate the v1.1 decision.
+- [ ] **Phase 3.5: Hover UI / HUD** — Small floating recording-state indicator that complements the menu-bar indicator. Hideable. Branded per Phase 2.5.
 - [ ] **Phase 4 (v1.x): Quality of Life** — Triggered by post-Phase-3 frustrations; queued, not blocking v1.
 - [ ] **Phase 5 (v1.1, conditional): Warm-Process Upgrade** — Gated on Phase 3 hyperfine results.
 
@@ -34,6 +37,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
   - [x] 01-02-PLAN.md — Bash glue voice-cc-record with transcribe() abstraction (CAP-02, CAP-04, TRA-02, TRA-03, ROB-03)
   - [x] 01-03-PLAN.md — Hammerspoon Lua module — hotkey wiring + paste (CAP-01, INJ-01, ROB-05)
 **UI hint**: yes
+**Verification**: User-validated end-to-end on 2026-04-27. Formal `gsd-verifier` skipped per user direction (manual walkthrough sufficient for spike). Three Phase 2 candidates surfaced — see Phase 1 Plan 03 SUMMARY "Quirks Discovered".
 
 ### Phase 2: Hardening
 **Goal**: Make the loop trustworthy. Eliminate the documented failure modes — Whisper hallucinations, TCC silent-deny, clipboard manager retention, paste-restore races, re-entrant double-recordings, WAV leaks, and silent failures with no user-visible cause.
@@ -48,20 +52,52 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
 **Plans**: TBD
 **UI hint**: yes
 
-### Phase 3: Distribution & Benchmarking
-**Goal**: Make voice-cc reproducible on a fresh machine via a single idempotent script, document the permission grants and recovery procedures, and produce `hyperfine` measurements on Oliver's actual hardware that determine whether Phase 5 (warm-process upgrade) is needed.
-**Depends on**: Phase 2 (install.sh ships the production configuration, which only exists once hardening is in; benchmarks must measure that production configuration).
-**Requirements**: DST-01, DST-02, DST-03, DST-04
+### Phase 2.5: Branding
+**Goal**: Pick a public-facing product name (replacing the working name "voice-cc") and apply it consistently across all user-visible surfaces. Establish enough brand presence that the public install (Phase 3) and HUD (Phase 3.5) can reference a stable identity. Small phase — naming and propagation, not a full design system.
+**Depends on**: Phase 2 (brand the production behavior, not the spike). Could technically be done in parallel with Phase 2; sequencing it after keeps the brand decision informed by what users actually experience.
+**Requirements**: TBD — defined during `/gsd:discuss-phase 2.5`. Likely shape:
+  - **BRD-01** — Product name chosen and recorded as authoritative in PROJECT.md with brief rationale
+  - **BRD-02** — All user-visible strings (README, Hammerspoon alerts, install messages, error messages) use the new name; "voice-cc" survives only in repo path, git history, and historical .planning/ artifacts
+  - **BRD-03** *(optional)* — Minimal app icon or menu-bar glyph
+**Success Criteria** (what must be TRUE):
+  1. A name is chosen and documented in PROJECT.md as the official product name with a one-paragraph rationale (what it suggests, what it avoids).
+  2. README.md, the Hammerspoon Lua module name (or alert strings if module name is preserved for backwards-compat), the `setup.sh` banner, and any other user-visible text use the new name consistently.
+  3. The install process and any future public-facing artifacts (Phase 3) inherit the brand without rework.
+  4. Optional: a minimal icon (Hammerspoon menu-bar glyph override or 256×256 PNG) — punted to Phase 4 QoL if not trivially achievable.
+**Plans**: TBD
+**UI hint**: light (naming + minor visual polish, no full design system)
+
+### Phase 3: Distribution & Benchmarking + Public Install
+**Goal**: Make voice-cc reproducible on a fresh machine via a single idempotent local script, AND make it shareable online via a one-line `curl ... | bash` public installer. Document the permission grants and recovery procedures. Produce `hyperfine` measurements on Oliver's actual hardware that determine whether Phase 5 (warm-process upgrade) is needed.
+**Depends on**: Phase 2.5 (the public install banner, README, and any branded distribution artifacts must use the chosen name). Also Phase 2 (install.sh ships the production configuration, which only exists once hardening is in; benchmarks must measure that production configuration).
+**Requirements**: DST-01, DST-02, DST-03, DST-04, **plus DST-05 (TBD — public one-line installer)**
 **Success Criteria** (what must be TRUE):
   1. Running `./install.sh` on a clean machine installs Hammerspoon, sox, whisper-cpp, downloads `ggml-small.en.bin`, creates `~/.config/voice-cc/`, `~/.local/share/voice-cc/models/`, `~/.cache/voice-cc/`, and symlinks `voice-cc-record` into `~/.local/bin/`. Re-running it changes nothing and never clobbers user-edited config (`config.sh`, `vocab.txt`).
-  2. `install.sh` finishes by *printing* (never auto-appending) the exact `require("voice-cc")` line for the user to paste into their own `~/.hammerspoon/init.lua`.
+  2. `install.sh` finishes by *printing* (never auto-appending) the exact `require("voice-cc")` (or branded equivalent) line for the user to paste into their own `~/.hammerspoon/init.lua`.
   3. README walks through the Microphone + Accessibility grant for Hammerspoon, the macOS Dictation shortcut disable, and the `tccutil reset Microphone org.hammerspoon.Hammerspoon` recovery procedure.
   4. `hyperfine` produces p50 and p95 end-to-end latency numbers for short (~2 s), medium (~5 s), and long (~10 s) utterances on Oliver's machine; the numbers explicitly inform a documented go/no-go decision for Phase 5.
+  5. **A public one-line installer** (`curl -fsSL https://<host>/install | bash`, where `<host>` is GitHub raw or a stable redirect) clones the repo (or downloads a release tarball) into a sensible location, then invokes the local `install.sh`. The public install is idempotent, prints next steps including the brand-aware `require()` line, and is documented in the README. The repo must be public on GitHub before this success criterion can pass.
 **Plans**: TBD
+
+### Phase 3.5: Hover UI / HUD
+**Goal**: A small floating HUD that surfaces voice-cc state at-a-glance — visible "● recording" indicator while the hotkey is held, fading or hideable when idle. Complements (does not replace) Phase 2's menu-bar indicator. Optimised for low CPU when idle and zero distraction when not actively recording.
+**Depends on**: Phase 3 (HUD is polish — it ships after distribution proves the core loop is share-worthy and the brand from Phase 2.5 is stable). Also Phase 2 (the press/release lifecycle and menu-bar indicator are the layer the HUD piggybacks on).
+**Requirements**: TBD — defined during `/gsd:discuss-phase 3.5`. Likely shape:
+  - **HUD-01** — Floating canvas widget (`hs.canvas` or `hs.drawing`) appears within ~50 ms of hotkey press and disappears within ~250 ms of release
+  - **HUD-02** — User-toggle-able visibility (env var or `~/.config/voice-cc/config.sh` setting)
+  - **HUD-03** — Effectively zero CPU when idle (no animation loops; only redraws on state change)
+  - **HUD-04** — Position configurable (near cursor / screen edge / fixed coordinates) with a sensible default
+**Success Criteria** (what must be TRUE):
+  1. While the hotkey is held, a floating HUD element appears with a visible "● recording" affordance using the brand chosen in Phase 2.5.
+  2. The HUD disappears within ~250 ms of release; while idle, no HUD is on screen and no measurable CPU is consumed.
+  3. A config toggle hides the HUD entirely for users who only want the menu-bar indicator (Phase 2 still ships the menu-bar indicator regardless of HUD state).
+  4. The HUD does not steal focus, does not interfere with paste, and does not appear in screen recordings unless the user explicitly enables it.
+**Plans**: TBD
+**UI hint**: yes (this IS the UI phase)
 
 ### Phase 4 (v1.x): Quality of Life
 **Goal**: Address the first real-use frustrations once v1 is shipping. Each item has a specific trigger; do not build speculatively.
-**Depends on**: Phase 3 (must be triggered by observed v1 frustrations, not anticipated).
+**Depends on**: Phase 3.5 (must be triggered by observed v1 frustrations after the polished v1 ships, not anticipated).
 **Requirements**: QOL-01, QOL-02, QOL-03, QOL-04, QOL-05 (all v2-tier, deferred until use-driven trigger fires)
 **Success Criteria** (what must be TRUE):
   1. A second hotkey re-pastes the most recent transcript (recovery for focus-lost paste).
@@ -87,37 +123,45 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
 Phases that may need `/gsd:research-phase` during planning:
 
 - **Phase 2 (Hardening)** — needs targeted spike on (a) the exact `hs.pasteboard` multi-type write API for the `org.nspasteboard.TransientType` UTI and (b) the macOS Settings deep-link URL format for the Microphone privacy pane (changes across major releases).
+- **Phase 3 (Distribution)** — public one-line installer (`curl ... | bash`) needs a quick check on hosting (GitHub raw vs. release tarball vs. short URL), atomic-download safety, and whether to validate signatures.
+- **Phase 3.5 (Hover UI)** — `hs.canvas` vs `hs.drawing` ergonomics for a low-CPU "show only on press" overlay; whether a transparent always-on-top window has any focus-stealing implications.
 - **Phase 5 (v1.1)** — if it triggers, needs hands-on research on `whisper-server`'s exact HTTP API contract under high-frequency PTT load, LaunchAgent `KeepAlive` interactions, and Core ML compilation reproducibility.
 
 Phases with well-documented standard patterns (skip research-phase):
 
-- **Phase 1 (Spike)** — Spellspoon and local-whisper are direct reference implementations.
-- **Phase 3 (Distribution)** — install.sh idempotency is solved; README + hyperfine are commodity work.
+- **Phase 1 (Spike)** — Spellspoon and local-whisper were direct reference implementations. ✓ DONE.
+- **Phase 2.5 (Branding)** — naming and string propagation; standard work.
 - **Phase 4 (v1.x)** — every item is < 1 day with an obvious implementation.
 
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Spike | 2/3 | In Progress | - |
+| 1. Spike | 3/3 | Complete | 2026-04-27 |
 | 2. Hardening | 0/0 | Not started | - |
-| 3. Distribution & Benchmarking | 0/0 | Not started | - |
+| 2.5. Branding | 0/0 | Not started | - |
+| 3. Distribution & Benchmarking + Public Install | 0/0 | Not started | - |
+| 3.5. Hover UI / HUD | 0/0 | Not started | - |
 | 4. (v1.x) Quality of Life | 0/0 | Queued (not blocking v1) | - |
 | 5. (v1.1, conditional) Warm-Process Upgrade | 0/0 | Conditional on Phase 3 hyperfine | - |
 
 ## Coverage Summary
 
-- **v1 requirements:** 26 total (CAP-01..04, TRA-01..06, INJ-01..04, FBK-01..03, ROB-01..05, DST-01..04)
+- **Original v1 requirements:** 26 total (CAP-01..04, TRA-01..06, INJ-01..04, FBK-01..03, ROB-01..05, DST-01..04)
 - **Mapped to v1 phases (1–3):** 26
 - **Unmapped v1:** 0
+- **New requirements added 2026-04-27 (TBD elaboration):** BRD-01..03 (Phase 2.5), DST-05 (Phase 3 extension), HUD-01..04 (Phase 3.5)
 - **v2 requirements (deferred):** QOL-01..05, PERF-01..02 — assigned to Phase 4 (QoL) and Phase 5 (conditional warm process)
 
 | Phase | v1 Requirements | Count |
 |-------|-----------------|-------|
 | 1. Spike | CAP-01, CAP-02, CAP-03, CAP-04, TRA-01, TRA-02, TRA-03, INJ-01, ROB-03, ROB-05 | 10 |
 | 2. Hardening | TRA-04, TRA-05, TRA-06, INJ-02, INJ-03, INJ-04, FBK-01, FBK-02, FBK-03, ROB-01, ROB-02, ROB-04 | 12 |
-| 3. Distribution & Benchmarking | DST-01, DST-02, DST-03, DST-04 | 4 |
-| **Total v1** | | **26** |
+| 2.5. Branding | BRD-01, BRD-02, (BRD-03) | 2-3 (TBD) |
+| 3. Distribution & Benchmarking + Public Install | DST-01, DST-02, DST-03, DST-04, DST-05 | 5 |
+| 3.5. Hover UI / HUD | HUD-01, HUD-02, HUD-03, HUD-04 | 4 (TBD) |
+| **Total v1** | | **33-34** (was 26) |
 
 ---
 *Roadmap created: 2026-04-23*
+*Roadmap extended: 2026-04-27 (Phase 2.5 Branding, Phase 3 Public Install extension, Phase 3.5 Hover UI per user request)*
