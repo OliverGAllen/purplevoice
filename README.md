@@ -10,7 +10,7 @@ Phase 1 spike — proving the end-to-end loop on Oliver's machine. Not yet distr
 
 ## Hotkey
 
-`cmd+option+space` (push-and-hold). Locked decision; see `.planning/phases/01-spike/01-CONTEXT.md` D-01.
+`cmd+shift+e` (push-and-hold). Locked decision; see `.planning/phases/01-spike/01-CONTEXT.md` D-01. (Hotkey was changed from the original combo (cmd then option then the space bar) during Plan 01-01 execution. Known minor conflict: VS Code/Cursor "Show Explorer" sidebar — accepted.)
 
 ## Setup
 

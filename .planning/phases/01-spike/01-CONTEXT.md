@@ -6,7 +6,7 @@
 <domain>
 ## Phase Boundary
 
-**What this phase delivers:** A working end-to-end push-to-talk dictation loop on Oliver's machine. Holding `cmd+option+space`, speaking a sentence, and releasing causes that sentence to appear in the focused window in under 2 seconds.
+**What this phase delivers:** A working end-to-end push-to-talk dictation loop on Oliver's machine. Holding `cmd+shift+e`, speaking a sentence, and releasing causes that sentence to appear in the focused window in under 2 seconds.
 
 **Thin slice — what is NOT in this phase:**
 - Hallucination guards (VAD flag, denylist, duration gate) → Phase 2
@@ -20,7 +20,7 @@
 **Requirements covered (10):** CAP-01, CAP-02, CAP-03, CAP-04, TRA-01, TRA-02, TRA-03, INJ-01, ROB-03, ROB-05
 
 **Success criteria (from ROADMAP.md, used verbatim as the verification checklist):**
-1. Holding `cmd+option+space` and saying "refactor the auth middleware to use JWTs" results in that sentence appearing in the focused text field within ~2 seconds of release on Oliver's Apple Silicon Mac.
+1. Holding `cmd+shift+e` and saying "refactor the auth middleware to use JWTs" results in that sentence appearing in the focused text field within ~2 seconds of release on Oliver's Apple Silicon Mac.
 2. The bash glue script can be invoked manually (outside Hammerspoon) and produces the same transcript on stdout for a hand-recorded WAV — the pipeline composes.
 3. Native Whisper punctuation and capitalisation appear in the pasted output (no post-processing pass yet).
 4. Custom vocabulary in `~/.config/voice-cc/vocab.txt` measurably biases recognition toward technical terms (Anthropic, Hammerspoon, MCP) when supplied via `--prompt`.
@@ -32,7 +32,8 @@
 ## Implementation Decisions
 
 ### Hammerspoon Setup
-- **D-01:** Hammerspoon is installed via `brew install --cask hammerspoon` from inside `setup.sh`. Hammerspoon does not currently exist on this machine — clean install. Setup script is idempotent: re-running checks `/Applications/Hammerspoon.app` first and only installs if missing.
+- **D-01:** Hotkey is `cmd+shift+e` (push-and-hold). Hammerspoon is installed via `brew install --cask hammerspoon` from inside `setup.sh`. Hammerspoon does not currently exist on this machine — clean install. Setup script is idempotent: re-running checks `/Applications/Hammerspoon.app` first and only installs if missing.
+  # Hotkey was the original combo (cmd then option then the space bar) until 2026-04-27, when the user changed it to cmd+shift+e during Plan 01-01 execution. Known minor conflict: VS Code/Cursor "Show Explorer" — accepted.
 - **D-02:** The voice-cc Lua module is loaded into Hammerspoon by symlinking `~/.hammerspoon/voice-cc/` → `<repo>/voice-cc-lua/` (or whatever the repo Lua source folder is named) and writing a minimal `~/.hammerspoon/init.lua` that does `require("voice-cc")`. Setup script will NOT overwrite an existing init.lua silently — if one exists with content, it asks (in Phase 1, this is fine because there is no existing init.lua).
 
 ### File Layout (XDG, from day one)
@@ -79,7 +80,7 @@
 - `.planning/research/STACK.md` — Specific binaries, versions, install commands; whisper.cpp v1.8.4, sox 14.4.2, Hammerspoon 1.1.1, `ggml-small.en.bin` choice rationale
 - `.planning/research/ARCHITECTURE.md` — Build order (manual pipeline → bash glue → Hammerspoon), one-shot CLI process model, `transcribe()` abstraction boundary, exit code registry (relevant for Phase 2 but informs Phase 1 structure)
 - `.planning/research/FEATURES.md` — Phase 1 v1 must-haves vs deferred features; custom vocab via `--prompt` mechanics (224-token limit)
-- `.planning/research/PITFALLS.md` §"Pitfall 2 (PATH on Apple Silicon)" — Why ROB-03 demands absolute paths from day one; §"Pitfall 5 (hotkey conflicts)" — why `cmd+option+space` was chosen over `fn`/`Space`/`cmd+space`
+- `.planning/research/PITFALLS.md` §"Pitfall 2 (PATH on Apple Silicon)" — Why ROB-03 demands absolute paths from day one; §"Pitfall 5 (hotkey conflicts)" — `cmd+shift+e` selected by user; supersedes the original rationale (see Pitfall 5 update note)
 
 ### External (upstream)
 - whisper.cpp repo: https://github.com/ggml-org/whisper.cpp — `whisper-cli` flags, model file naming, build instructions

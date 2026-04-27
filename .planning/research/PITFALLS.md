@@ -283,7 +283,8 @@ You bind `cmd+space` (Spotlight), `ctrl+cmd+space` (Character Picker / Emoji), `
 
 **How to avoid:**
 1. **Pick a hotkey from the safe list** (confirmed by reference implementations and FEATURES.md):
-   - `cmd+option+space` — works, no system conflict on macOS 14+.
+   - `cmd+shift+e` — voice-cc's chosen hotkey (per user, 2026-04-27). Known minor conflict: VS Code/Cursor's "Show Explorer" sidebar — accepted trade-off. The original recommendation was the original combo (cmd then option then the space bar); user changed during Plan 01-01 execution.
+   - The original combo (cmd then option then the space bar) — works, no system conflict on macOS 14+. (Was the original recommendation; remains a safe fallback.)
    - `ctrl+option+space` — works.
    - `right_option` (alone) — non-trivial; requires `hs.eventtap` not `hs.hotkey`. Defer unless wanted.
    - `F18`, `F19`, `F20` — unused by macOS; map a real key to F19 via `hidutil` if your keyboard lacks F-keys.
@@ -292,13 +293,13 @@ You bind `cmd+space` (Spotlight), `ctrl+cmd+space` (Character Picker / Emoji), `
 4. **Validate at startup**: check `hs.hotkey.bind(...)` return value; if nil, `hs.notify` an error.
 
 ```lua
-local hk = hs.hotkey.bind({"cmd", "alt"}, "space",
+local hk = hs.hotkey.bind({"cmd", "shift"}, "e",
   function() startRecording() end,
   function() stopRecording() end)
 if not hk then
   hs.notify.new({
     title = "voice-cc: hotkey binding failed",
-    informativeText = "cmd+option+space is in use by another app or macOS",
+    informativeText = "cmd+shift+e is in use by another app or macOS",
   }):send()
 end
 ```
@@ -655,7 +656,7 @@ Despite local-only STT, several real concerns.
 | User installs but never grants Accessibility (only Mic) | Hotkey records audio fine but `cmd+v` never fires; user sees clipboard has correct text but nothing pastes | Hammerspoon's own startup prompt for Accessibility helps; install.sh README step explicitly mentions both grants |
 | Audible cue too loud / too quiet / wrong sound | Annoyance | Make sounds toggleable via `ENABLE_SOUNDS=true/false` in config.sh; use macOS system sounds (consistent with user's volume preferences) not custom WAVs |
 | No way to retry a failed/wrong transcription | User has to re-speak the whole thing | v1.x: paste-last-transcript hotkey; v2: cancel-in-flight; the current WAV stays in /tmp until next run, so could even add a `voice-cc-redo` that re-transcribes the existing WAV |
-| First-time experience: user doesn't know what hotkey is bound | Tries random keys, gives up | README screenshot + the install completion message explicitly states the hotkey: `cmd+option+space` |
+| First-time experience: user doesn't know what hotkey is bound | Tries random keys, gives up | README screenshot + the install completion message explicitly states the hotkey: `cmd+shift+e` |
 | pbcopy adds newline (using `echo` not `printf`) | Pasted text includes trailing `\n` which auto-submits in some chat UIs | Use `printf "%s"` not `echo "$T"` |
 | No way to know which model is loaded | If user has both small.en and medium.en, can't tell which is in use | `voice-cc-record --version` or include in install completion: "Using model: $MODEL" |
 
@@ -722,7 +723,7 @@ How roadmap phases should address these pitfalls.
 | 2: Hammerspoon `hs.task` doesn't see Homebrew binaries | **Phase 1** (use absolute paths from day one); **Phase 2** (sanity check binaries exist at script start with exit 11) | Test with PATH cleared: `env -i bash voice-cc-record` from Hammerspoon should still work |
 | 3: Whisper short-clip / silence hallucinations | **Phase 2** (Hardening: VAD flag + duration gate + denylist post-filter) | Tap-the-hotkey-10-times test produces 0 pastes |
 | 4: Whisper language auto-detect wrong | **Phase 1** (use `.en` model from start); **Phase 2** (add `--language en` explicitly) | whisper-cli stderr never logs auto-detected language; transcripts are always English |
-| 5: Hotkey conflicts with system shortcuts | **Phase 1** (pick `cmd+option+space` or similar; never bare `fn`); **Phase 3** (README documents disabling macOS Dictation) | `hs.hotkey.bind` returns non-nil; manual test of Spotlight / Emoji / Dictation does not interfere |
+| 5: Hotkey conflicts with system shortcuts | **Phase 1** (pick `cmd+shift+e` per user choice 2026-04-27 — supersedes the original recommendation that used cmd plus option plus the space bar; never bare `fn`); **Phase 3** (README documents disabling macOS Dictation + the VS Code "Show Explorer" override) | `hs.hotkey.bind` returns non-nil; manual test of Spotlight / Emoji / Dictation does not interfere |
 | 6: Re-entrancy on rapid keypresses | **Phase 2** (Lua re-entrancy guard + bash `kill 0` on EXIT trap) | Rapid hold-release-hold-release test shows at most one sox process |
 | 7: Clipboard manager captures transcripts | **Phase 2** (transient clipboard UTI marker); **Phase 3** (README documents residual risk) | Install Maccy/Raycast/Maccy in test; verify transcripts don't appear in history |
 | 8: Synchronous clipboard restore race | **Phase 2** (use `hs.timer.doAfter(0.30, ...)` with content-equality guard) | Test in Microsoft Word (slow paste path): transcript pastes correctly, original clipboard restored intact |

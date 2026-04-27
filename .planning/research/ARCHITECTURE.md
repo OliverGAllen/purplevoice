@@ -47,7 +47,7 @@ Add `whisper-server` mode in v1.x **if and only if** `hyperfine` measurements sh
 ┌──────────────────────────────────────────────────────────────────────┐
 │                            User Input                                 │
 │  ┌────────────────────────────────────────────────────────────────┐  │
-│  │  Push-and-hold global hotkey (e.g. cmd+option+space, fn, F19)  │  │
+│  │  Push-and-hold global hotkey (cmd+shift+e — voice-cc choice)   │  │
 │  └────────────────────────────────────────────────────────────────┘  │
 └──────────────────────────────────┬───────────────────────────────────┘
                                    │ press / release
@@ -149,7 +149,7 @@ Add `whisper-server` mode in v1.x **if and only if** `hyperfine` measurements sh
 ### Single-utterance flow (the only path that matters)
 
 ```
-T+0ms     User presses cmd+option+space
+T+0ms     User presses cmd+shift+e
           ├─ Hammerspoon onPress fires
           ├─ Plays start.aiff (async, fire-and-forget)
           ├─ Sets menubar dot to red
@@ -160,7 +160,7 @@ T+0ms     User presses cmd+option+space
           │              └─ trap "kill -TERM $SOX_PID" SIGTERM
           │              └─ wait $SOX_PID   # block until sox exits
 
-T+1500ms  User releases cmd+option+space
+T+1500ms  User releases cmd+shift+e
           ├─ Hammerspoon onRelease fires
           ├─ Plays stop.aiff
           ├─ Calls task:terminate()  # sends SIGTERM
@@ -487,7 +487,7 @@ Phase 5 (v1.1, conditional): Warm process upgrade
 By the end of Phase 1, this must work:
 
 1. Open Terminal, focus a text editor or Claude Code prompt
-2. Hold `cmd+option+space`
+2. Hold `cmd+shift+e`
 3. Say: "Refactor the auth middleware to use JWTs instead of session cookies"
 4. Release the key
 5. Within ~2 seconds, the sentence appears in the focused text field

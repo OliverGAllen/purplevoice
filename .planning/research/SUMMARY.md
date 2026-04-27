@@ -35,7 +35,7 @@ Feature research surveyed six shipping competitors (Wispr Flow, SuperWhisper, Ma
 
 **Must have (table stakes confirmed across all competitors):**
 - Push-and-hold global hotkey with reliable press/release detection
-- Conflict-free key choice (NOT bare `Space`, NOT `fn`/Globe, NOT `cmd+space`) — recommend `cmd+option+space`, `ctrl+option+space`, or remapped F18/F19
+- Conflict-free key choice (NOT bare `Space`, NOT `fn`/Globe, NOT `cmd+space`) — voice-cc uses `cmd+shift+e` (per user choice 2026-04-27; VS Code "Show Explorer" conflict accepted). Original recommendation was the original combo (cmd then option then the space bar), `ctrl+option+space`, or remapped F18/F19.
 - Clean 16 kHz mono audio capture from default mic
 - Local Whisper transcription with native punctuation/capitalisation
 - **Hallucination suppression** (VAD flag + min-duration drop + denylist of top 5–10 known phrases like "thanks for watching", "[BLANK_AUDIO]")
@@ -104,7 +104,7 @@ Pitfall research identified ten failure classes, of which the top five are non-n
 Honourable mentions (also addressed in Phase 2):
 - **Synchronous clipboard restore races paste keystroke** — restore via `hs.timer.doAfter(0.30, ...)` with `getContents() == transcript` content-equality guard
 - **Whisper language auto-detect picks wrong language on short English clips** — always use `.en` model, always pass `--language en`, never `--translate`
-- **Hotkey conflicts** (`fn`/Globe, Spotlight, system Dictation) — pick `cmd+option+space` or `ctrl+option+space`; document disabling macOS Dictation shortcut in README
+- **Hotkey conflicts** (`fn`/Globe, Spotlight, system Dictation) — voice-cc chose `cmd+shift+e` (user decision 2026-04-27; VS Code conflict accepted). Original alternatives: the original combo (cmd then option then the space bar) or `ctrl+option+space`. Document disabling macOS Dictation shortcut in README.
 - **AirPods auto-switch breaks mid-recording** — duration-ratio sanity check; document `VOICE_CC_INPUT_DEVICE` env var pinning
 - **Disk fills with WAV / log unbounded** — trap-cleanup BEFORE WAV creation; sweep stale files at startup; cap history log at 10 MB
 
@@ -118,7 +118,7 @@ The build order is non-negotiable and was established by architecture research: 
 
 **Rationale:** Architecture research is unambiguous that you cannot build the Hammerspoon wiring before there is a bash script to spawn, and you cannot build the bash script before you have a working manual pipeline. This phase is intentionally a thin slice: minimum viable end-to-end loop, no polish.
 
-**Delivers:** Holding `cmd+option+space`, saying "refactor the auth middleware to use JWTs instead of session cookies", releasing — within ~2 seconds the sentence appears in the focused text field. That's the entire validation target.
+**Delivers:** Holding `cmd+shift+e`, saying "refactor the auth middleware to use JWTs instead of session cookies", releasing — within ~2 seconds the sentence appears in the focused text field. That's the entire validation target.
 
 **Sub-steps (from ARCHITECTURE.md build order):**
 - 1.1: Manual `sox -d -r 16000 -c 1 -b 16 /tmp/test.wav` → manual `whisper-cli` → manual paste — validates model + latency + vocab.txt help on Oliver's actual machine
@@ -130,7 +130,7 @@ The build order is non-negotiable and was established by architecture research: 
 **Avoids (architectural choices that prevent rework later):**
 - Pitfall 2: absolute paths in bash from day one
 - Pitfall 4: `.en` model from day one
-- Pitfall 5: pick `cmd+option+space`
+- Pitfall 5: hotkey is `cmd+shift+e` (user choice 2026-04-27; supersedes the original recommendation that used cmd plus option plus the space bar)
 - Pitfall 1 awareness: test end-to-end, NOT standalone bash, before declaring done
 
 ### Phase 2: Hardening — Make the Loop Robust

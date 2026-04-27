@@ -11,7 +11,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **CAP-01**: User holds a global hotkey to start recording, releases to stop (push-and-hold semantics; press and release events both detected reliably)
 - [ ] **CAP-02**: System captures clean 16 kHz mono PCM audio from the default macOS input device while hotkey is held
-- [ ] **CAP-03**: Hotkey choice does not collide with macOS Spotlight, system Dictation, or commonly-used app shortcuts (default: `cmd+option+space`, configurable)
+- [ ] **CAP-03**: Hotkey choice does not collide with macOS Spotlight, system Dictation, or commonly-used app shortcuts (default: `cmd+shift+e`, configurable; VS Code/Cursor "Show Explorer" conflict accepted by user 2026-04-27)
 - [ ] **CAP-04**: Recording cleanly truncates on hotkey release (sox receives SIGTERM, WAV is finalised, no partial-buffer corruption)
 
 ### Transcription

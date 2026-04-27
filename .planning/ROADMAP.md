@@ -20,11 +20,11 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
 ## Phase Details
 
 ### Phase 1: Spike
-**Goal**: Prove the end-to-end loop works — hold `cmd+option+space`, say a sentence, release, watch the sentence appear in the focused window in under 2 seconds. No polish, no robustness, no installer.
+**Goal**: Prove the end-to-end loop works — hold `cmd+shift+e`, say a sentence, release, watch the sentence appear in the focused window in under 2 seconds. No polish, no robustness, no installer.
 **Depends on**: Nothing (first phase).
 **Requirements**: CAP-01, CAP-02, CAP-03, CAP-04, TRA-01, TRA-02, TRA-03, INJ-01, ROB-03, ROB-05
 **Success Criteria** (what must be TRUE):
-  1. Holding `cmd+option+space` and saying "refactor the auth middleware to use JWTs" results in that sentence appearing in the focused text field within ~2 seconds of release on Oliver's Apple Silicon Mac.
+  1. Holding `cmd+shift+e` and saying "refactor the auth middleware to use JWTs" results in that sentence appearing in the focused text field within ~2 seconds of release on Oliver's Apple Silicon Mac.
   2. The bash glue script can be invoked manually (outside Hammerspoon) and produces the same transcript on stdout for a hand-recorded WAV — the pipeline composes.
   3. Native Whisper punctuation and capitalisation appear in the pasted output (no post-processing pass yet).
   4. Custom vocabulary in `~/.config/voice-cc/vocab.txt` measurably biases recognition toward technical terms (Anthropic, Hammerspoon, MCP) when supplied via `--prompt`.
