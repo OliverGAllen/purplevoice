@@ -52,7 +52,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
 **Plans:** 4 plans
   - [x] 02-00-PLAN.md — Wave 0: test infrastructure + Silero VAD weights install + denylist.txt seed (no requirements; foundation) — completed 2026-04-28, see 02-00-SUMMARY.md
   - [x] 02-01-PLAN.md — Bash hardening: VAD + duration gate + denylist + empty-drop + TCC stderr fingerprint + EXIT-trap WAV cleanup + suppress whisper sibling .txt (TRA-04, TRA-05, TRA-06, INJ-04, ROB-02, ROB-04 + Phase-1 TODO c)
-  - [ ] 02-02-PLAN.md — Lua hardening: hs.accessibilityState + menubar + audio cues + clipboard preserve/restore with transient UTI + re-entrancy guard + handleExit stub + require("hs.ipc") snippet (FBK-01, FBK-02, INJ-02, INJ-03, ROB-01 + Phase-1 TODOs a, b)
+  - [x] 02-02-PLAN.md — Lua hardening: hs.accessibilityState + menubar + audio cues + clipboard preserve/restore with transient UTI + re-entrancy guard + handleExit stub + require("hs.ipc") snippet (FBK-01, FBK-02, INJ-02, INJ-03, ROB-01 + Phase-1 TODOs a, b)
   - [ ] 02-03-PLAN.md — Failure surfacing: hs.notify dispatch for exit 10/11/12 + System Settings deep links + dedup cooldown + defence-in-depth Accessibility-deny notification (FBK-03)
 **UI hint**: yes
 
