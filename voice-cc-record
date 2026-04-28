@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
-# voice-cc-record — Phase 1 spike bash glue
-# Lifecycle: spawned by Hammerspoon hs.task (or invoked manually);
-# records mic audio via sox until SIGTERM (or Ctrl-C); transcribes via
-# whisper-cli; prints transcript to stdout for caller to paste.
+# voice-cc-record — Phase 2 hardened bash glue
+# Owns sox capture + transcription pipeline. Pattern 2 boundary: the whisper-cli
+# binary reference appears on exactly two lines (assignment + single use inside
+# the transcribe function) — this is the v1.1 swap site for warm-process upgrade.
 #
-# Phase 1 deliberately OMITS: VAD, hallucination filter, duration gate, TCC
-# detection, WAV cleanup trap, semantic exit codes. All deferred to Phase 2.
+# Phase 2 additions over Phase 1:
+#   - VAD flags + Silero model in transcribe() body (TRA-04)
+#   - Duration gate via soxi -D (TRA-05)
+#   - Denylist exact-match filter (TRA-06)
+#   - Empty/whitespace transcript drop (INJ-04)
+#   - TCC stderr fingerprint detection (ROB-02)
+#   - EXIT trap covering ALL exit paths including SIGINT (ROB-04)
+#   - Semantic exit codes 2/3/10/11/12 for Lua dispatch
+#   - --no-prints + removal of file-output flags (Phase-1 TODO c — suppress sibling .txt)
+#   - VOICE_CC_TEST_SKIP_SOX env var hook for tests/test_*.sh
 
 set -euo pipefail
 
@@ -13,15 +21,46 @@ set -euo pipefail
 # hs.task does NOT include /opt/homebrew/bin in PATH on Apple Silicon.
 # Override via env vars if you're on Intel (/usr/local/bin) or custom install.
 SOX_BIN="${SOX_BIN:-/opt/homebrew/bin/sox}"
-WHISPER_BIN="${WHISPER_BIN:-/opt/homebrew/bin/whisper-cli}"
+SOXI_BIN="${SOXI_BIN:-/opt/homebrew/bin/soxi}"
+# Pattern 2 boundary: the whisper-cli binary reference appears on exactly two
+# lines — the assignment immediately below (with folded -x existence check)
+# and the invocation inside transcribe() near line 79. This is the v1.1 swap
+# site for the warm-process upgrade.
+WHISPER_BIN="${WHISPER_BIN:-/opt/homebrew/bin/whisper-cli}"; [ -x "$WHISPER_BIN" ] || { echo "voice-cc: whisper-cli missing — run setup.sh" >&2; exit 11; }
 
 # --- Paths (D-03 XDG layout) -------------------------------------------
 MODEL="${VOICE_CC_MODEL:-$HOME/.local/share/voice-cc/models/ggml-small.en.bin}"
+SILERO_MODEL="${VOICE_CC_SILERO_MODEL:-$HOME/.local/share/voice-cc/models/ggml-silero-v6.2.0.bin}"
 VOCAB_FILE="$HOME/.config/voice-cc/vocab.txt"
+DENYLIST="$HOME/.config/voice-cc/denylist.txt"
+VAD_THRESHOLD="${VOICE_CC_VAD_THRESHOLD:-0.50}"
 WAV_DIR="/tmp/voice-cc"
 WAV="$WAV_DIR/recording.wav"
+SOX_ERR_LOG="$WAV_DIR/sox.stderr"
 
 mkdir -p "$WAV_DIR"
+
+# --- Per-startup sweep of stale leftovers (>5 min old) -----------------
+# Defends against SIGKILL exit paths (which don't fire EXIT trap).
+find "$WAV_DIR" -maxdepth 1 -name "*.wav" -mmin +5 -delete 2>/dev/null || true
+find "$WAV_DIR" -maxdepth 1 -name "*.txt" -mmin +5 -delete 2>/dev/null || true
+find "$WAV_DIR" -maxdepth 1 -name "sox.stderr" -mmin +5 -delete 2>/dev/null || true
+
+# --- EXIT trap covers ALL exit paths (success, exit codes, signals) ----
+# Bash's EXIT trap fires on every exit including after signal-specific traps.
+trap 'rm -f "$WAV" "$SOX_ERR_LOG"' EXIT
+
+# --- Verify required model files exist (TRA-04, TRA-01) ----------------
+# Exit 11 = binary or model missing (whisper-cli existence is folded onto the
+# assignment line above to preserve the Pattern 2 boundary).
+if [ ! -f "$MODEL" ]; then
+  echo "voice-cc: Whisper model missing at $MODEL — run setup.sh" >&2
+  exit 11
+fi
+if [ ! -f "$SILERO_MODEL" ]; then
+  echo "voice-cc: Silero VAD weights missing at $SILERO_MODEL — run setup.sh" >&2
+  exit 11
+fi
 
 # --- Read vocab if available (TRA-03) ----------------------------------
 # Tolerate missing/unreadable vocab.txt — vocab is enhancement, not critical.
@@ -31,49 +70,77 @@ else
   VOCAB=""
 fi
 
-# --- transcribe() — the SOLE STT abstraction boundary (ARCHITECTURE.md Pattern 2) ---
-# v1: one-shot whisper-cli per utterance.
+# --- transcribe() — the SOLE STT abstraction boundary (Pattern 2) ------
+# v1: one-shot whisper-cli with VAD + suppress-nst.
 # v1.1 (deferred): swap body to `curl 127.0.0.1:8080/inference -F file=@"$1"`.
 # NOTHING else in this script may invoke whisper-cli directly.
 transcribe() {
   local wav_path="$1"
-  local out_base="${wav_path%.wav}"
   "$WHISPER_BIN" \
     -m "$MODEL" \
     --language en \
     --no-timestamps \
+    --no-prints \
+    --vad \
+    --vad-model "$SILERO_MODEL" \
+    --vad-threshold "$VAD_THRESHOLD" \
+    --suppress-nst \
     --prompt "$VOCAB" \
-    -otxt -of "$out_base" \
-    -f "$wav_path" >/dev/null 2>&1
-  cat "${out_base}.txt"
+    -f "$wav_path" 2>/dev/null
 }
 
-# --- Capture: sox in foreground; SIGTERM (from Hammerspoon task:terminate
-# or manual Ctrl-C → SIGINT, which sox also handles cleanly) finalises the
-# WAV header before sox exits. CAP-04. ----------------------------------
-# We launch sox in the background and wait for it so this script's process
-# group stays clean and a SIGTERM to this script propagates to sox via the
-# trap below.
-"$SOX_BIN" -d -r 16000 -c 1 -b 16 "$WAV" >/dev/null 2>&1 &
-SOX_PID=$!
+# --- Capture: sox in background, signals forwarded for clean WAV finalise -
+# VOICE_CC_TEST_SKIP_SOX=1 → skip capture (tests pre-stage the WAV).
+if [ "${VOICE_CC_TEST_SKIP_SOX:-0}" != "1" ]; then
+  : > "$SOX_ERR_LOG"   # initialise empty (so grep doesn't error)
+  "$SOX_BIN" -d -r 16000 -c 1 -b 16 "$WAV" >/dev/null 2>"$SOX_ERR_LOG" &
+  SOX_PID=$!
+  trap 'kill -TERM "$SOX_PID" 2>/dev/null || true' TERM INT
+  # CRITICAL: capture wait's exit status correctly. The naive masking pattern
+  # (wait piped through "or-true" then $?) reads $? as 0 always because the
+  # mask succeeded — making SOX_EXIT a dead variable and the TCC fingerprint
+  # below dead code. Initialise SOX_EXIT to 0 first, then capture only on
+  # failure so $? reflects wait's real exit code.
+  SOX_EXIT=0
+  wait "$SOX_PID" || SOX_EXIT=$?
+  trap - TERM INT
 
-# When this script receives SIGTERM (Hammerspoon) or SIGINT (Ctrl-C),
-# forward to sox so it finalises the WAV cleanly before we proceed.
-trap 'kill -TERM "$SOX_PID" 2>/dev/null || true' TERM INT
+  # --- TCC silent-deny detection (ROB-02) ------------------------------
+  if [ "$SOX_EXIT" -ne 0 ]; then
+    if grep -qE 'Permission denied|AudioObject(GetPropertyData|SetPropertyData)|kAudio.*Error' "$SOX_ERR_LOG" 2>/dev/null; then
+      exit 10
+    fi
+    exit 12
+  fi
+fi
 
-# Block until sox exits (after SIGTERM forward, or natural exit).
-# `wait` returns sox's exit code; we use `|| true` so set -e doesn't kill
-# us on the expected non-zero from being signalled.
-wait "$SOX_PID" || true
+# --- Duration gate (TRA-05, success criterion #1) ----------------------
+DURATION=$("$SOXI_BIN" -D "$WAV" 2>/dev/null || echo 0)
+if awk -v d="$DURATION" 'BEGIN { exit !(d < 0.4) }'; then
+  exit 2
+fi
 
-# --- Reset trap so we don't re-signal during transcription -------------
-trap - TERM INT
-
-# --- Transcribe ---------------------------------------------------------
+# --- Transcribe (Pattern 2 boundary — sole whisper-cli call) -----------
 TRANSCRIPT="$(transcribe "$WAV")"
-
-# --- Emit on stdout (no trailing newline — caller pastes verbatim) -----
-# Trim leading/trailing whitespace that whisper-cli often emits.
-# Phase 2 will add the hallucination filter + empty-drop; Phase 1 just trims and emits.
 TRANSCRIPT="$(printf "%s" "$TRANSCRIPT" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+
+# --- Empty drop (INJ-04) -----------------------------------------------
+if [ -z "$TRANSCRIPT" ]; then
+  exit 3
+fi
+
+# --- Denylist exact-match (TRA-06) -------------------------------------
+if [ -r "$DENYLIST" ]; then
+  CANON_T="$(printf "%s" "$TRANSCRIPT" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')"
+  while IFS= read -r phrase; do
+    case "$phrase" in ''|'#'*) continue ;; esac
+    CANON_P="$(printf "%s" "$phrase" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')"
+    [ -z "$CANON_P" ] && continue
+    if [ "$CANON_T" = "$CANON_P" ]; then
+      exit 3
+    fi
+  done < "$DENYLIST"
+fi
+
+# --- Emit transcript (no trailing newline — caller pastes verbatim) ----
 printf "%s" "$TRANSCRIPT"
