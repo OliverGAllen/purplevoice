@@ -112,6 +112,29 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Step 5b: Download Silero VAD weights (Phase 2 / TRA-04)
+# ---------------------------------------------------------------------------
+# Silero VAD ggml weights for whisper.cpp's --vad flag. Without this file,
+# --vad is a silent no-op. Sourced from the official ggml-org Hugging Face
+# repo (see 02-RESEARCH.md §2). 885 KB; size sanity check >= 800000 bytes.
+SILERO_MODEL="$HOME/.local/share/voice-cc/models/ggml-silero-v6.2.0.bin"
+SILERO_URL="https://huggingface.co/ggml-org/whisper-vad/resolve/main/ggml-silero-v6.2.0.bin"
+SILERO_SIZE_MIN=800000
+
+if [ -f "$SILERO_MODEL" ] && [ "$(stat -f%z "$SILERO_MODEL" 2>/dev/null || echo 0)" -ge "$SILERO_SIZE_MIN" ]; then
+  echo "Silero VAD weights present at $SILERO_MODEL, skipping."
+else
+  echo "Downloading Silero VAD weights (~885 KB) from huggingface.co/ggml-org/whisper-vad ..."
+  curl -L -C - --fail -o "$SILERO_MODEL" "$SILERO_URL"
+  if [ "$(stat -f%z "$SILERO_MODEL" 2>/dev/null || echo 0)" -lt "$SILERO_SIZE_MIN" ]; then
+    echo "Silero VAD download size suspiciously small (< $SILERO_SIZE_MIN bytes). Aborting." >&2
+    rm -f "$SILERO_MODEL"
+    exit 1
+  fi
+  echo "OK: Silero VAD weights downloaded."
+fi
+
+# ---------------------------------------------------------------------------
 # Step 6: Seed vocab.txt.default -> ~/.config/voice-cc/vocab.txt (D-08, no-clobber)
 # ---------------------------------------------------------------------------
 VOCAB_DEST="$HOME/.config/voice-cc/vocab.txt"
@@ -126,6 +149,21 @@ if [ ! -f "$VOCAB_DEST" ]; then
 else
   echo "vocab.txt already exists at $VOCAB_DEST, preserving user edits."
 fi
+
+# ---------------------------------------------------------------------------
+# Step 6b: Install denylist.txt (Phase 2 / TRA-06) — project-owned, always-overwrite
+# ---------------------------------------------------------------------------
+# Hallucination denylist is project-owned (we add new known-hallucinations as
+# the community reports them). Always overwrites ~/.config/voice-cc/denylist.txt.
+# If a user wants to pin a custom version, they can `chmod -w` the destination.
+DENYLIST_DEST="$HOME/.config/voice-cc/denylist.txt"
+DENYLIST_SRC="$(dirname "$0")/config/denylist.txt"
+if [ ! -f "$DENYLIST_SRC" ]; then
+  echo "Missing source: $DENYLIST_SRC (run setup.sh from the voice-cc repo root)." >&2
+  exit 1
+fi
+cp "$DENYLIST_SRC" "$DENYLIST_DEST"
+echo "OK: denylist.txt installed at $DENYLIST_DEST (project-owned, overwritten on every setup.sh run)."
 
 # ---------------------------------------------------------------------------
 # Step 7: Next-step reminders (do NOT auto-edit anything)

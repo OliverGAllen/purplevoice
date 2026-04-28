@@ -1,0 +1,27 @@
+# ~/.config/voice-cc/denylist.txt — Whisper hallucination denylist
+# Compiled from whisper.cpp #1592, #1724 and openai/whisper #1873.
+# Each line is a complete hallucinated transcript that MUST be dropped silently.
+# Substring matching is FORBIDDEN — only whole-transcript exact matches drop.
+# Comparison is case-insensitive after collapsing all whitespace.
+# This file is project-owned: setup.sh always overwrites it on re-run.
+# To pin a custom version, chmod -w ~/.config/voice-cc/denylist.txt after install.
+
+thank you
+thank you.
+thank you for watching
+thank you for watching.
+thanks for watching
+thanks for watching!
+thanks for watching.
+subtitles by the amara.org community
+transcription by castingwords
+[blank_audio]
+[silence]
+[music]
+[applause]
+[typing]
+you
+you.
+.
+the end
+the end.
