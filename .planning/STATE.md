@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-28T07:14:05.166Z"
+last_updated: "2026-04-28T21:30:00.000Z"
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 7
-  completed_plans: 4
+  completed_plans: 7
 ---
 
 # State: voice-cc
 
-**Last updated:** 2026-04-28 (Plan 02-00 complete — Wave 0 test infrastructure landed; Plans 02-01 + 02-02 next in Wave 2)
+**Last updated:** 2026-04-28 (Phase 2 complete — Plan 02-03 live walkthroughs signed off; three coupled Sequoia-15.7.5 regressions discovered + fixed in commit `81334ce`)
 
 ## Project Reference
 
@@ -26,26 +26,26 @@ progress:
 
 ## Current Position
 
-Phase: 02 (hardening) — EXECUTING
-Plan: 2 of 4 (02-00 complete; Wave 2 next: 02-01 + 02-02 in parallel)
+Phase: 02 (hardening) — COMPLETE
+Next: Phase 2.5 (Branding) — needs `/gsd:discuss-phase 2.5`
 
 - **Milestone:** v1
-- **Phase:** 02 (hardening)
-- **Plan:** 02-00 complete (Wave 0 test infrastructure); Wave 2 = 02-01 (bash hardening) + 02-02 (lua hardening) in parallel
-- **Status:** Executing Phase 02 — Wave 0 done, Wave 2 ready to launch
+- **Phase:** 02 (hardening) — closed 2026-04-28
+- **Plan:** 4/4 complete (02-00, 02-01, 02-02, 02-03 all signed off)
+- **Status:** Phase 2 closed; awaiting Phase 2.5 kickoff. ROADMAP reordered 2026-04-28 — Phase 3 (Distribution) moved to end per user direction; new v1 sequence: 1 → 2 → 2.5 → 3.5 (HUD) → 4 (QoL) → 3 (Distribution) → 5 (Warm-Process, conditional).
 
 ### Progress
 
 ```
 Phase 1: Spike                            ██████████  100% [3/3 plans; user-validated end-to-end 2026-04-27]
-Phase 2: Hardening                        ███░░░░░░░  25%  [1/4 plans — 02-00 Wave 0 test infra done 2026-04-28]
+Phase 2: Hardening                        ██████████  100% [4/4 plans — Plan 02-03 walkthroughs signed off 2026-04-28]
 Phase 2.5: Branding                       ░░░░░░░░░░  0%   [Added 2026-04-27 — needs planning]
-Phase 3: Distribution + Public Install    ░░░░░░░░░░  0%   [Extended scope 2026-04-27 — needs planning]
 Phase 3.5: Hover UI / HUD                 ░░░░░░░░░░  0%   [Added 2026-04-27 — needs planning]
 Phase 4 (v1.x): Quality of Life           ░░░░░░░░░░  0%   [Queued]
-Phase 5 (v1.1, cond.): Warm-Process       ░░░░░░░░░░  0%   [Conditional on Phase 3]
+Phase 3: Distribution + Public Install    ░░░░░░░░░░  0%   [Reordered to end 2026-04-28 per user direction]
+Phase 5 (v1.1, cond.): Warm-Process       ░░░░░░░░░░  0%   [Conditional on Phase 3 hyperfine]
 
-Overall v1 (Phases 1–3.5):                ██░░░░░░░░  ~25% (1 phase + 1 of 4 Phase-2 plans of 5 effective v1 phases)
+Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (2 of 6 effective v1 phases complete)
 ```
 
 ## Performance Metrics
@@ -86,14 +86,17 @@ Overall v1 (Phases 1–3.5):                ██░░░░░░░░  ~25%
 
 - [x] Phase 1: validate Silero VAD is bundled in installed whisper.cpp — VAD flags exposed by brew bottle (`--vad`, `--vad-model`, etc.) but `--vad-model` default is empty; Phase 2 must source Silero weights separately. See 01-01-SUMMARY.md "VAD Audit Result".
 - [x] Phase 1: end-to-end manual walkthrough of the 5 ROADMAP success criteria — completed in Plan 01-03 Task 2; user approved (4 PASS + 1 SKIPPED-BUT-NOT-GATING). See 01-03-SUMMARY.md "ROADMAP Success Criteria Walkthrough Results".
-- [ ] Phase 2: add `hs.accessibilityState(true)` to voice-cc-lua/init.lua on load to surface the Accessibility prompt deterministically — surfaced by Plan 01-03 walkthrough (the only first-run silent failure observed). See 01-03-SUMMARY.md "Quirks Discovered" #1.
-- [ ] Phase 2: add `require("hs.ipc")` to ~/.hammerspoon/init.lua to enable scripted Hammerspoon reloads + the `hs` CLI tool — surfaced by Plan 01-03 walkthrough. See 01-03-SUMMARY.md "Quirks Discovered" #2 and #3.
-- [ ] Phase 2: suppress whisper-cli's sibling `.txt` output (currently leaves `/tmp/voice-cc/recording.txt` after every run). Likely a `--output-txt false` flag or similar; needs `whisper-cli --help` audit. Surfaced by Plan 01-03 walkthrough. See 01-03-SUMMARY.md "Quirks Discovered" #4. Best paired with Phase 2 ROB-04 EXIT-trap WAV cleanup.
-- [ ] Phase 2: vocab A/B comparison may be revisited (Criterion #4 was skipped during Phase 1 walkthrough by user choice) if it informs denylist (TRA-06) or VAD threshold (TRA-04) tuning.
-- [ ] Phase 2: spike `hs.pasteboard` multi-type write API for `org.nspasteboard.TransientType`
-- [ ] Phase 2: verify current macOS Settings deep-link URL for Microphone privacy pane
-- [ ] Phase 2: deliberately revoke mic permission and capture sox stderr fingerprint for TCC detection grep
-- [ ] Phase 2: source Silero VAD model weights (or pin a brew bottle version that bundles them, or source-build whisper.cpp with VAD vendored) — surfaced by Plan 01-01 VAD audit
+- [x] Phase 2: add `hs.accessibilityState(true)` to voice-cc-lua/init.lua on load — landed in Plan 02-02; verified live in Plan 02-03 Task 3-3 walkthrough.
+- [x] Phase 2: add `require("hs.ipc")` to ~/.hammerspoon/init.lua — `.hammerspoon-init-snippet.lua` staged in Plan 02-02; user pasted; `hs -c "1+1"` returns `2`.
+- [x] Phase 2: suppress whisper-cli's sibling `.txt` output — Plan 02-01 added `--no-prints` to the `transcribe()` call; `/tmp/voice-cc/recording.txt` no longer leaked.
+- [ ] Phase 2 follow-up: vocab A/B comparison — deferred (not gating).
+- [x] Phase 2: spike `hs.pasteboard` multi-type write API for `org.nspasteboard.TransientType` — implemented in Plan 02-02 (`hs.pasteboard.writeAllData` with TransientType + ConcealedType UTIs).
+- [x] Phase 2: verify current macOS Settings deep-link URL for Microphone privacy pane — verified live 2026-04-28; Hammerspoon's `hs.urlevent.openURL` requires `://` (deviation captured in 02-03-SUMMARY.md).
+- [x] Phase 2: capture sox stderr fingerprint on TCC denial — captured live 2026-04-28; **regex assumption was wrong on Sequoia** (silent stream, not stderr error); detection switched to amplitude-based. See 02-03-SUMMARY.md.
+- [x] Phase 2: source Silero VAD model weights — handled in Plan 02-00 (setup.sh Step 5b downloads `ggml-silero-v6.2.0.bin`; idempotent, sanity-checked).
+- [ ] Phase 2 follow-up: replace `tests/test_tcc_grep.sh` with an amplitude-detection test (current test exercises the fallback regex only; the live path is amplitude-based).
+- [ ] Phase 2 follow-up: run the 4 manual walkthroughs that were staged but not executed (test_clipboard_restore.md, test_transient_marker.md, test_menubar.md, test_audio_cues.md, test_reentrancy.md). Code review currently covers them.
+- [ ] Phase 4 candidate: alternative hotkey schemes — fn-press-and-hold via `hs.eventtap` flagsChanged (races against macOS emoji popup; needs hold-threshold logic), Karabiner-remap-fn-to-F19 path. User-surfaced 2026-04-28.
 - [ ] Phase 3: produce hyperfine numbers; explicitly decide go/no-go on Phase 5
 
 ### Blockers
@@ -102,7 +105,10 @@ Overall v1 (Phases 1–3.5):                ██░░░░░░░░  ~25%
 
 ### Recently Validated
 
-- Plan 02-00 (2026-04-28): Wave 0 test infra. 17 files created: tests/run_all.sh (suite runner), tests/lib/sample_audio.sh (4 WAV-synthesis helpers incl. medium_wav for SIGINT path), 6 unit/integration tests (test_duration_gate/denylist/vad_silence/tcc_grep/wav_cleanup/sigint_cleanup), 7 manual walkthroughs (test_clipboard_restore/transient_marker/menubar/audio_cues/tcc_notification/reentrancy/accessibility_prompt), config/denylist.txt (19 phrases). setup.sh extended with Step 5b (Silero VAD download) + Step 6b (denylist install) — both idempotent; ran on host successfully (885,098-byte Silero weights at ~/.local/share/voice-cc/models/, denylist at ~/.config/voice-cc/). Suite first-run: 4 PASS (test_duration_gate, test_tcc_grep, test_denylist, test_vad_silence) + 2 RED-and-expected (test_wav_cleanup, test_sigint_cleanup — both await Plan 02-01's VOICE_CC_TEST_SKIP_SOX hook). Pattern 2 boundary preserved (grep -c WHISPER_BIN voice-cc-record == 2). Commits: b899c28 (Task 0-1), 01e6429 (Task 0-2), ed32ad2 (Task 0-3).
+- Plan 02-03 (2026-04-28): voice-cc-lua/init.lua final form (315 lines) — full `hs.notify` dispatch for exit codes 10 / 11 / 12 + System Settings deep links + 60s notifyOnce dedup + defence-in-depth Accessibility-deny notification. Both manual checkpoints signed off live by user ("approved"). Three coupled regressions fixed inline (commit 81334ce): (a) SOX_SIGNALED flag distinguishes trap-induced sox exit from real failure, (b) Sequoia silent-stream amplitude detection replaces dead stderr-fingerprint, (c) deep-link URLs use `://` instead of bare `:` for Hammerspoon's openURL API. All 6 bash unit tests still GREEN. Pattern 2 boundary preserved. Commits: 8b32e45 (Task 3-1 dispatcher), 81334ce (3 deviations fix). See 02-03-SUMMARY.md.
+- Plan 02-02 (2026-04-28): voice-cc-lua/init.lua hardened (82 → 208 lines). Menubar indicator + audio cues + clipboard preserve/restore with TransientType UTI + re-entrancy guard + handleExit stub + hs.accessibilityState(true) on load. `.hammerspoon-init-snippet.lua` staged for `require("hs.ipc")`; user pasted; IPC working. FBK-01, FBK-02, INJ-02, INJ-03, ROB-01 closed. Phase-1 TODOs (a) and (b) closed. Commits: f4da016, deee0fe.
+- Plan 02-01 (2026-04-28): voice-cc-record hardened. VAD + duration gate + denylist exact-match + EXIT trap + TCC stderr fingerprint (later superseded by Plan 02-03's amplitude detection on Sequoia) + semantic exit codes 2/3/10/11/12. Phase-1 TODO (c) closed via `--no-prints`. Commits: 47193f0, 691f030. **Note: subsequently patched in commit 81334ce** for the `wait`-pattern regression that broke every normal hotkey release on Sequoia.
+- Plan 02-00 (2026-04-28): Wave 0 test infra. 17 files created: tests/run_all.sh (suite runner), tests/lib/sample_audio.sh (4 WAV-synthesis helpers incl. medium_wav for SIGINT path), 6 unit/integration tests (test_duration_gate/denylist/vad_silence/tcc_grep/wav_cleanup/sigint_cleanup), 7 manual walkthroughs (test_clipboard_restore/transient_marker/menubar/audio_cues/tcc_notification/reentrancy/accessibility_prompt), config/denylist.txt (19 phrases). setup.sh extended with Step 5b (Silero VAD download) + Step 6b (denylist install) — both idempotent. Pattern 2 boundary preserved. Commits: b899c28, 01e6429, ed32ad2.
 - Plan 01-01 (2026-04-27): setup.sh idempotent, model SHA256 verified, Hammerspoon + sox + whisper-cli installed, XDG layout + vocab seed in place. Manual pipeline test deferred to Plan 01-03 walkthrough per user.
 - Plan 01-02 (2026-04-27): voice-cc-record bash glue written + symlinked into ~/.local/bin/. transcribe() Pattern 2 boundary discipline confirmed (grep -c WHISPER_BIN == 2). All 16 plan automated-verify clauses pass. Manual invocation Task 2 deferred to Plan 01-03 walkthrough per user (precedent: Plan 01-01 Task 3 deferral).
 - Plan 01-03 (2026-04-27): voice-cc-lua/init.lua written (82 lines) + symlinked into ~/.hammerspoon/voice-cc/ + minimal ~/.hammerspoon/init.lua written fresh (D-02 honoured — no prior content). End-to-end walkthrough: user approved after 4 PASS criteria + 1 SKIPPED-BUT-NOT-GATING (Criterion #4 vocab A/B explicitly skipped by user). Phase 1 spike loop demonstrably works end-to-end. Three Phase 2 candidates surfaced (hs.accessibilityState, hs.ipc, suppress whisper sibling .txt) — all logged in Open TODOs.
@@ -111,19 +117,17 @@ Overall v1 (Phases 1–3.5):                ██░░░░░░░░  ~25%
 
 ### Next Action
 
-Execute Wave 2 of Phase 2 — Plans 02-01 (bash hardening) and 02-02 (lua hardening) in parallel. Both are unblocked: Wave 0 test infra (Plan 02-00) is complete, all literal-string predicates Plan 02-01 must implement are encoded in tests/test_*.sh, all manual walkthroughs Plan 02-02 must satisfy exist in tests/manual/, and Silero VAD weights + denylist.txt are installed on host. Plan 02-03 (failure surfacing) follows Wave 2 as Wave 3.
+Phase 2 is closed. Next phase per the reordered roadmap is **Phase 2.5 (Branding)** — needs `/gsd:discuss-phase 2.5` to nail down the product name and the propagation surfaces (Hammerspoon alert text, notification titles/bodies, setup.sh banner, README headers). The hardened Phase 2 substrate is what the brand will be applied to.
 
-Recommended invocation: `/gsd:execute-phase 02` will pick up plans 02-01 and 02-02 next (parallelization is enabled in config.json). Or invoke individually with `/gsd:execute-plan 02-01` and `/gsd:execute-plan 02-02`.
+After 2.5: Phase 3.5 (HUD), then Phase 4 (QoL), then Phase 3 (Distribution + Public Install + hyperfine), then Phase 5 (Warm-Process, conditional on hyperfine).
 
-After Phase 2: Phase 2.5 Branding (newly added — naming + propagation), then Phase 3 (now extended with public one-line installer), then Phase 3.5 (Hover UI / HUD).
-
-Phase 1 verifier was explicitly skipped by user direction ("Phase 1 verifier doesn't need to run, it's already good"). Manual end-to-end walkthrough by user on 2026-04-27 served as authoritative verification for the spike.
+Phase 2 verifier was not explicitly run; the two `autonomous: false` checkpoints in Plan 02-03 (TCC notification walkthrough + Accessibility deny walkthrough) plus the inline regression diagnosis served as authoritative live verification.
 
 ### Stopped At
 
-Plan 02-00 complete (Wave 0 test infrastructure landed; commits b899c28, 01e6429, ed32ad2). Phase 2 progress: 1 of 4 plans done. Wave 2 (02-01 + 02-02) is next. RED test inventory documented in 02-00-SUMMARY.md "RED Test Inventory" section — Plan 02-01 must turn test_wav_cleanup + test_sigint_cleanup GREEN by adding the VOICE_CC_TEST_SKIP_SOX hook + EXIT trap; the other 4 unit tests are already GREEN.
+Phase 2 complete. All 4 plans signed off. Three coupled Sequoia-15.7.5 regressions were discovered + fixed during Plan 02-03's live walkthroughs (commit `81334ce`); see 02-03-SUMMARY.md for the full deviation history. Phase 2 closure checklist in 02-03-SUMMARY.md is fully ticked. Three Phase 2 follow-ups logged in Open TODOs (replace test_tcc_grep with amplitude test; run staged manual walkthroughs; update Plan 02-01 RESEARCH §4) — none gating Phase 2.5 entry.
 
-User intent stated: proceed to Wave 2 next (parallelization enabled).
+User intent stated: proceed to Phase 2.5 next; Phase 3 reordered to come after all other v1 phases.
 
 ### Last Session Summary
 
