@@ -2,47 +2,50 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
-status: planning
-last_updated: "2026-04-27T13:00:00.000Z"
+status: executing
+last_updated: "2026-04-28T07:14:05.166Z"
 progress:
-  total_phases: 7
+  total_phases: 5
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 7
+  completed_plans: 4
 ---
 
 # State: voice-cc
 
-**Last updated:** 2026-04-27 (Phase 1 complete; roadmap extended with Phase 2.5 Branding, Phase 3 Public Install scope, Phase 3.5 Hover UI per user)
+**Last updated:** 2026-04-28 (Plan 02-00 complete — Wave 0 test infrastructure landed; Plans 02-01 + 02-02 next in Wave 2)
 
 ## Project Reference
 
 - **Name:** voice-cc *(working name; new product brand TBD in Phase 2.5)*
 - **Core value:** Speak → text appears in Claude Code, instantly and reliably, with no recurring cost or external dependency.
-- **Current focus:** Phase 02 — hardening (next up; needs planning)
+- **Current focus:** Phase 02 — hardening
 - **Mode:** yolo
 - **Granularity:** standard
 - **Parallelization:** enabled
 
 ## Current Position
 
+Phase: 02 (hardening) — EXECUTING
+Plan: 2 of 4 (02-00 complete; Wave 2 next: 02-01 + 02-02 in parallel)
+
 - **Milestone:** v1
 - **Phase:** 02 (hardening)
-- **Plan:** Not started — phase needs planning before execution
-- **Status:** Ready to plan (Phase 1 complete; verifier explicitly skipped per user — manual walkthrough sufficient for spike)
+- **Plan:** 02-00 complete (Wave 0 test infrastructure); Wave 2 = 02-01 (bash hardening) + 02-02 (lua hardening) in parallel
+- **Status:** Executing Phase 02 — Wave 0 done, Wave 2 ready to launch
 
 ### Progress
 
 ```
 Phase 1: Spike                            ██████████  100% [3/3 plans; user-validated end-to-end 2026-04-27]
-Phase 2: Hardening                        ░░░░░░░░░░  0%   [Next up — needs planning]
+Phase 2: Hardening                        ███░░░░░░░  25%  [1/4 plans — 02-00 Wave 0 test infra done 2026-04-28]
 Phase 2.5: Branding                       ░░░░░░░░░░  0%   [Added 2026-04-27 — needs planning]
 Phase 3: Distribution + Public Install    ░░░░░░░░░░  0%   [Extended scope 2026-04-27 — needs planning]
 Phase 3.5: Hover UI / HUD                 ░░░░░░░░░░  0%   [Added 2026-04-27 — needs planning]
 Phase 4 (v1.x): Quality of Life           ░░░░░░░░░░  0%   [Queued]
 Phase 5 (v1.1, cond.): Warm-Process       ░░░░░░░░░░  0%   [Conditional on Phase 3]
 
-Overall v1 (Phases 1–3.5):                █░░░░░░░░░  ~14% (1 of 5 effective v1 phases)
+Overall v1 (Phases 1–3.5):                ██░░░░░░░░  ~25% (1 phase + 1 of 4 Phase-2 plans of 5 effective v1 phases)
 ```
 
 ## Performance Metrics
@@ -56,6 +59,8 @@ Overall v1 (Phases 1–3.5):                █░░░░░░░░░  ~14%
 | Silent-failure rate on permission denial | 0 (all denials → actionable toast) | unmeasured | FBK-03, ROB-02 |
 | Plan 01-02 executor wall-clock | n/a | ~12 min (Task 1 only; Task 2 deferred) | this session |
 | Plan 01-03 executor + walkthrough wall-clock | n/a | ~30 min (Task 1 write + Hammerspoon launch + Task 2 5-criterion walkthrough including mid-test Accessibility diagnosis and re-test) | this session |
+| Plan 02-00 executor wall-clock | n/a | ~9 min (3 tasks autonomous; setup.sh Silero download + denylist seed; 17 files created) | this session |
+| Phase 02 P00 | 9 min | 3 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -97,6 +102,7 @@ Overall v1 (Phases 1–3.5):                █░░░░░░░░░  ~14%
 
 ### Recently Validated
 
+- Plan 02-00 (2026-04-28): Wave 0 test infra. 17 files created: tests/run_all.sh (suite runner), tests/lib/sample_audio.sh (4 WAV-synthesis helpers incl. medium_wav for SIGINT path), 6 unit/integration tests (test_duration_gate/denylist/vad_silence/tcc_grep/wav_cleanup/sigint_cleanup), 7 manual walkthroughs (test_clipboard_restore/transient_marker/menubar/audio_cues/tcc_notification/reentrancy/accessibility_prompt), config/denylist.txt (19 phrases). setup.sh extended with Step 5b (Silero VAD download) + Step 6b (denylist install) — both idempotent; ran on host successfully (885,098-byte Silero weights at ~/.local/share/voice-cc/models/, denylist at ~/.config/voice-cc/). Suite first-run: 4 PASS (test_duration_gate, test_tcc_grep, test_denylist, test_vad_silence) + 2 RED-and-expected (test_wav_cleanup, test_sigint_cleanup — both await Plan 02-01's VOICE_CC_TEST_SKIP_SOX hook). Pattern 2 boundary preserved (grep -c WHISPER_BIN voice-cc-record == 2). Commits: b899c28 (Task 0-1), 01e6429 (Task 0-2), ed32ad2 (Task 0-3).
 - Plan 01-01 (2026-04-27): setup.sh idempotent, model SHA256 verified, Hammerspoon + sox + whisper-cli installed, XDG layout + vocab seed in place. Manual pipeline test deferred to Plan 01-03 walkthrough per user.
 - Plan 01-02 (2026-04-27): voice-cc-record bash glue written + symlinked into ~/.local/bin/. transcribe() Pattern 2 boundary discipline confirmed (grep -c WHISPER_BIN == 2). All 16 plan automated-verify clauses pass. Manual invocation Task 2 deferred to Plan 01-03 walkthrough per user (precedent: Plan 01-01 Task 3 deferral).
 - Plan 01-03 (2026-04-27): voice-cc-lua/init.lua written (82 lines) + symlinked into ~/.hammerspoon/voice-cc/ + minimal ~/.hammerspoon/init.lua written fresh (D-02 honoured — no prior content). End-to-end walkthrough: user approved after 4 PASS criteria + 1 SKIPPED-BUT-NOT-GATING (Criterion #4 vocab A/B explicitly skipped by user). Phase 1 spike loop demonstrably works end-to-end. Three Phase 2 candidates surfaced (hs.accessibilityState, hs.ipc, suppress whisper sibling .txt) — all logged in Open TODOs.
@@ -105,7 +111,9 @@ Overall v1 (Phases 1–3.5):                █░░░░░░░░░  ~14%
 
 ### Next Action
 
-Plan Phase 2 (Hardening) with `/gsd:plan-phase 2` (recommend `/clear` first for a fresh context window — this orchestrator's context is heavily used). Phase 2 should pick up the three Phase-1-walkthrough-surfaced candidates from Open TODOs above (hs.accessibilityState for deterministic TCC prompt, hs.ipc for scripted reload, suppress whisper sibling .txt) alongside the originally planned hardening work (TRA-04..06, INJ-02..04, FBK-01..03, ROB-01..04).
+Execute Wave 2 of Phase 2 — Plans 02-01 (bash hardening) and 02-02 (lua hardening) in parallel. Both are unblocked: Wave 0 test infra (Plan 02-00) is complete, all literal-string predicates Plan 02-01 must implement are encoded in tests/test_*.sh, all manual walkthroughs Plan 02-02 must satisfy exist in tests/manual/, and Silero VAD weights + denylist.txt are installed on host. Plan 02-03 (failure surfacing) follows Wave 2 as Wave 3.
+
+Recommended invocation: `/gsd:execute-phase 02` will pick up plans 02-01 and 02-02 next (parallelization is enabled in config.json). Or invoke individually with `/gsd:execute-plan 02-01` and `/gsd:execute-plan 02-02`.
 
 After Phase 2: Phase 2.5 Branding (newly added — naming + propagation), then Phase 3 (now extended with public one-line installer), then Phase 3.5 (Hover UI / HUD).
 
@@ -113,11 +121,22 @@ Phase 1 verifier was explicitly skipped by user direction ("Phase 1 verifier doe
 
 ### Stopped At
 
-Phase 1 closed via `gsd-tools phase complete 01` (date 2026-04-27, no warnings). ROADMAP extended to add Phase 2.5 Branding, extend Phase 3 with Public Install scope, and add Phase 3.5 Hover UI per user request. New requirement IDs sketched for elaboration during respective `/gsd:plan-phase` runs: BRD-01..03 (Branding), DST-05 (Public Install extension), HUD-01..04 (Hover UI). Total v1 requirement count grows from 26 to ~33-34.
+Plan 02-00 complete (Wave 0 test infrastructure landed; commits b899c28, 01e6429, ed32ad2). Phase 2 progress: 1 of 4 plans done. Wave 2 (02-01 + 02-02) is next. RED test inventory documented in 02-00-SUMMARY.md "RED Test Inventory" section — Plan 02-01 must turn test_wav_cleanup + test_sigint_cleanup GREEN by adding the VOICE_CC_TEST_SKIP_SOX hook + EXIT trap; the other 4 unit tests are already GREEN.
 
-User intent stated: proceed to Phase 2 (Hardening) next.
+User intent stated: proceed to Wave 2 next (parallelization enabled).
 
 ### Last Session Summary
+
+- Plan 02-00 executed (autonomous, Wave 1, no checkpoints, ~9 min wall-clock):
+  - Task 0-1 (commit `b899c28`): tests/run_all.sh (39 lines, exec) iterates tests/test_*.sh, captures pass/fail, exits 0 only if all pass; tests/lib/sample_audio.sh (44 lines, sourced) exposes silence_wav / tone_wav / short_tap_wav / medium_wav helpers. Empty suite handled cleanly (exit 0).
+  - Task 0-2 (commit `01e6429`): 6 unit/integration tests written. test_duration_gate uses the EXACT awk float-compare predicate Plan 02-01 must use. test_denylist encodes the EXACT canonicalisation pipeline. test_vad_silence runs whisper-cli with --vad/--vad-model on synthesised silence. test_tcc_grep uses the EXACT fingerprint regex (positive + negative). test_wav_cleanup + test_sigint_cleanup use VOICE_CC_TEST_SKIP_SOX hook (Plan 02-01 dependency); sigint test uses medium_wav (1s) so duration gate is cleared and SIGINT path is genuinely exercised.
+  - Task 0-3 (commit `ed32ad2`): config/denylist.txt seeded with 19 canonical phrases. setup.sh extended with Step 5b (Silero VAD download, idempotent, size-sanity-check ≥ 800,000 bytes) + Step 6b (denylist always-overwrite copy). 7 manual walkthrough .md files (clipboard_restore, transient_marker, menubar, audio_cues, tcc_notification, reentrancy, accessibility_prompt) — all self-contained, ~30-50 lines each, with sign-off checklists. Ran setup.sh: Silero downloaded (885,098 bytes) + denylist installed. Idempotent on second run.
+  - Suite final state: 4 PASS / 2 RED-and-expected. RED tests (test_wav_cleanup, test_sigint_cleanup) fast-fail with explicit "Plan 02-01 not yet implemented" message.
+  - Pattern 2 boundary preserved (voice-cc-record unchanged in Wave 0).
+  - 02-00-SUMMARY.md authored at .planning/phases/02-hardening/02-00-SUMMARY.md with full file inventory, RED test inventory, setup.sh diff summary, host state table, deviations (none), readiness signals for Plans 02-01/02-02/02-03.
+  - Self-check PASSED (all 18 expected files exist, all 3 commits exist).
+
+#### Prior session
 
 - Plan 01-03 executed: voice-cc-lua/init.lua (82 lines, Lua) created in repo root; symlinked from ~/.hammerspoon/voice-cc/ → repo `voice-cc-lua/`; ~/.hammerspoon/init.lua written fresh (3 lines, contains `require("voice-cc")`) — D-02 verified no prior content existed. Hammerspoon launched and module loaded (`voice-cc loaded (cmd+shift+e)` alert observed). Committed by prior executor at `0fbbcc0`.
 - End-to-end walkthrough (Task 2, `checkpoint:human-verify`): user approved verbatim ("approved") after a two-stage diagnostic walkthrough.
@@ -128,7 +147,7 @@ User intent stated: proceed to Phase 2 (Hardening) next.
 - Three Phase 2 candidates surfaced: (a) `hs.accessibilityState(true)` to deterministically surface Accessibility prompt on first run, (b) `require("hs.ipc")` to enable scripted reload + the `hs` CLI tool (currently errors "can't access Hammerspoon message port"), (c) suppress whisper-cli's sibling `.txt` output (`/tmp/voice-cc/recording.txt` left after every run). All logged in Open TODOs.
 - Continuation agent authored 01-03-SUMMARY.md with full walkthrough evidence + quirks captured. STATE.md, ROADMAP.md (per-plan checkbox), REQUIREMENTS.md (CAP-01, INJ-01, ROB-05) updated. Phase 1 awaiting orchestrator-side verifier.
 
-#### Prior session
+#### Older session
 
 - Plan 01-02 executed: voice-cc-record (79 lines, bash strict mode, executable) created in repo root; symlinked into ~/.local/bin/voice-cc-record (committed in `b6dbf74`).
 - transcribe() function isolates the SOLE whisper-cli invocation (Pattern 2 / v1.1 swap site). Absolute /opt/homebrew/bin/* paths used (Pitfall 2 / ROB-03). --language en + --prompt vocab.txt passed (Pitfall 4 + TRA-03). SIGTERM/SIGINT trap forwards to sox PID for clean WAV finalisation (CAP-04).
@@ -136,7 +155,7 @@ User intent stated: proceed to Phase 2 (Hardening) next.
 - User directive: Plan 01-02 Task 2 (manual `~/.local/bin/voice-cc-record` invocation + reference-utterance transcript test) deferred (not skipped) to Plan 01-03 end-to-end walkthrough — same precedent as Plan 01-01 Task 3.
 - 01-02-SUMMARY.md authored with full deviation audit trail and Pattern 2 boundary confirmation.
 
-#### Earlier session
+#### Earliest session
 
 - Plan 01-01 executed: setup.sh + vocab seed + .gitignore + README stub created and committed (`ccf34c2`); MODEL_SHA256 corrected mid-execution (`8b7e4d0`); setup.sh proven idempotent on re-run; VAD audit completed (flags present, model weights absent — Phase 2 follow-up logged).
 - User directive: hotkey changed from the original three-key combo to `cmd+shift+e`; updated across README + REQUIREMENTS + ROADMAP + CONTEXT + 01-01-PLAN + 01-03-PLAN + all 4 research docs (`7030eee`).
