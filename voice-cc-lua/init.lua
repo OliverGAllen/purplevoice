@@ -105,12 +105,16 @@ end
 -- x-apple.systempreferences scheme (verified working on macOS Sequoia 15.7.5
 -- per RESEARCH §4).
 -- ----------------------------------------------------------------
+-- NOTE: Hammerspoon's hs.urlevent.openURL() requires "://" in the URL —
+-- the bare-colon form ("x-apple.systempreferences:...") that macOS `open`
+-- accepts is rejected by Hammerspoon with "lacks '://'". Both forms route
+-- to the same System Settings pane on Sequoia 15.7.5.
 hs.notify.register("voiceccOpenMicSettings", function(notification)
-  hs.urlevent.openURL("x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_Microphone")
+  hs.urlevent.openURL("x-apple.systempreferences://com.apple.settings.PrivacySecurity.extension?Privacy_Microphone")
 end)
 
 hs.notify.register("voiceccOpenAccessibilitySettings", function(notification)
-  hs.urlevent.openURL("x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_Accessibility")
+  hs.urlevent.openURL("x-apple.systempreferences://com.apple.settings.PrivacySecurity.extension?Privacy_Accessibility")
 end)
 
 -- ----------------------------------------------------------------

@@ -95,7 +95,13 @@ if [ "${VOICE_CC_TEST_SKIP_SOX:-0}" != "1" ]; then
   : > "$SOX_ERR_LOG"   # initialise empty (so grep doesn't error)
   "$SOX_BIN" -d -r 16000 -c 1 -b 16 "$WAV" >/dev/null 2>"$SOX_ERR_LOG" &
   SOX_PID=$!
-  trap 'kill -TERM "$SOX_PID" 2>/dev/null || true' TERM INT
+  # SOX_SIGNALED flags the trap-induced termination path (hotkey release).
+  # That path produces a non-zero SOX_EXIT but is NOT a failure — sox
+  # finalizes the WAV via its own SIGTERM handler. Distinguishing it from
+  # a real sox failure is what stops the TCC-grep + exit-12 fall-through
+  # from firing on every normal press-and-hold release.
+  SOX_SIGNALED=0
+  trap 'SOX_SIGNALED=1; kill -TERM "$SOX_PID" 2>/dev/null || true' TERM INT
   # CRITICAL: capture wait's exit status correctly. The naive masking pattern
   # (wait piped through "or-true" then $?) reads $? as 0 always because the
   # mask succeeded — making SOX_EXIT a dead variable and the TCC fingerprint
@@ -106,11 +112,35 @@ if [ "${VOICE_CC_TEST_SKIP_SOX:-0}" != "1" ]; then
   trap - TERM INT
 
   # --- TCC silent-deny detection (ROB-02) ------------------------------
-  if [ "$SOX_EXIT" -ne 0 ]; then
+  # Two failure modes on Apple Silicon, depending on macOS version:
+  #
+  #  (a) Legacy / edge case: sox exits non-zero with a CoreAudio error in
+  #      stderr (Permission denied / AudioObject*PropertyData / kAudio.*).
+  #      The grep below catches it.
+  #
+  #  (b) Sequoia 15.7.5+ (verified live 2026-04-28): macOS feeds sox a
+  #      SILENT stream when TCC denies the mic — sox runs to completion,
+  #      exits 0, no stderr error, but the WAV is at the 16-bit dither
+  #      floor (~0.000031 max amplitude = 1 LSB). The amplitude check
+  #      AFTER this block catches that path.
+  #
+  # Sox-died-for-real path:
+  if [ "$SOX_EXIT" -ne 0 ] && [ "$SOX_SIGNALED" -ne 1 ]; then
     if grep -qE 'Permission denied|AudioObject(GetPropertyData|SetPropertyData)|kAudio.*Error' "$SOX_ERR_LOG" 2>/dev/null; then
       exit 10
     fi
     exit 12
+  fi
+
+  # Sequoia silent-stream path: inspect captured WAV amplitude. Real
+  # microphones have a noise floor ~256× the dither floor; threshold
+  # 0.0001 is 3× the dither floor, comfortably between the two regimes.
+  # If sox stat fails to parse for any reason, skip the check (don't
+  # false-positive on parse error — let downstream duration/empty gates
+  # handle it).
+  MAX_AMP=$("$SOX_BIN" "$WAV" -n stat 2>&1 | awk '/^Maximum amplitude:/ { print $3 }')
+  if [ -n "$MAX_AMP" ] && awk -v m="$MAX_AMP" 'BEGIN { exit !(m+0 <= 0.0001) }'; then
+    exit 10
   fi
 fi
 
