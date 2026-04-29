@@ -51,6 +51,12 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **DST-03**: README documents permission grants required (Microphone + Accessibility for Hammerspoon), how to disable conflicting macOS Dictation shortcut, and `tccutil reset` recovery procedure
 - [ ] **DST-04**: `hyperfine` benchmark on the install machine produces p50 / p95 latency numbers for short, medium, and long utterances — gates the v1.1 warm-process upgrade decision
 
+### Branding
+
+- [x] **BRD-01**: Product name `PurpleVoice` is recorded in `.planning/PROJECT.md` as the authoritative public-facing name with a rationale paragraph that anchors the privacy-first positioning across the broadened audience: privacy-conscious individuals, government / defence / intelligence personnel, healthcare professionals (HIPAA), legal professionals (attorney-client privilege), finance / compliance roles (MNPI / regulated PII), journalists handling sensitive sources, and air-gapped / restricted-network operators. The positioning forward-references Phase 2.7 `SECURITY.md` as the document that substantiates the institutional claims with a threat model, auditable zero-egress verification methodology, SBOM, and gap analysis. The positioning uses "auditable" / "verifiable" language rather than over-claiming.
+- [x] **BRD-02**: All user-visible strings (README, Hammerspoon alerts and notification titles, setup.sh banner, install snippet, error messages, manual walkthroughs) use `PurpleVoice` (PascalCase) or `purplevoice` (lowercase paths/modules/binaries) consistently. The original working name `voice-cc` is preserved verbatim ONLY in: the repo working directory path on disk, the git history, all `.planning/` artifacts (historical record), the `migrate_xdg_dir` FROM-arg literals in `setup.sh` (intentional — needed for the migration logic), and the GSD-auto-managed CLAUDE.md block (deferred to Phase 3 STACK.md update — see STATE.md Open TODOs). The canonical tagline `Local voice dictation. Nothing leaves your Mac.` is placed in the README header, the setup.sh banner, and the Hammerspoon module load alert.
+- [x] **BRD-03**: Minimal visual identity — a 256×256 PNG icon at `assets/icon-256.png` (lavender `#B388EB` background, centred white lips silhouette, flat-design) derived deterministically from a hand-authored `assets/icon.svg` source via `sips`; AND a Hammerspoon menubar glyph styled with the same lavender `#B388EB` for both idle and recording states (recording-state differentiation via glyph shape — outline circle U+25CB for idle, filled circle U+25CF for recording).
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -123,6 +129,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DST-02 | Phase 3: Distribution & Benchmarking | Pending |
 | DST-03 | Phase 3: Distribution & Benchmarking | Pending |
 | DST-04 | Phase 3: Distribution & Benchmarking | Pending |
+| BRD-01 | Phase 2.5: Branding | Complete |
+| BRD-02 | Phase 2.5: Branding | Complete |
+| BRD-03 | Phase 2.5: Branding | Complete |
 | QOL-01 | Phase 4 (v1.x): Quality of Life | Deferred |
 | QOL-02 | Phase 4 (v1.x): Quality of Life | Deferred |
 | QOL-03 | Phase 4 (v1.x): Quality of Life | Deferred |
@@ -132,16 +141,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERF-02 | Phase 5 (v1.1, conditional): Warm-Process Upgrade | Conditional |
 
 **Coverage:**
-- v1 requirements: 26 total
-- Mapped to phases: 26 / 26 (100%)
+- v1 requirements: 29 total (26 original + BRD-01..03 added 2026-04-29)
+- Mapped to phases: 29 / 29 (100%)
 - Unmapped: 0
 - v2 requirements: 7 total (5 QOL → Phase 4, 2 PERF → Phase 5 conditional)
 
 **Per-phase counts (v1 only):**
 - Phase 1: Spike — 10 requirements (CAP-01..04, TRA-01..03, INJ-01, ROB-03, ROB-05)
 - Phase 2: Hardening — 12 requirements (TRA-04..06, INJ-02..04, FBK-01..03, ROB-01, ROB-02, ROB-04)
+- Phase 2.5: Branding — 3 requirements (BRD-01..03) — Complete 2026-04-29
 - Phase 3: Distribution & Benchmarking — 4 requirements (DST-01..04)
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-23 — traceability table populated by roadmapper*
+*Last updated: 2026-04-29 — three Branding requirements added for Phase 2.5 (Complete); traceability table extended.*
