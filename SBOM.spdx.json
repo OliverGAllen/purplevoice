@@ -1,0 +1,15 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "PurpleVoice-SBOM-placeholder",
+  "documentNamespace": "https://github.com/oliverallen/PurpleVoice/sbom/placeholder",
+  "creationInfo": {
+    "created": "2026-04-29T00:00:00Z",
+    "creators": ["Tool: PurpleVoice-setup.sh-skeleton-2.7-00"],
+    "comment": "PLACEHOLDER — replaced by real Syft scan output in Plan 02.7-02. Do not consume as authoritative SBOM."
+  },
+  "packages": [],
+  "relationships": [],
+  "annotations": []
+}
