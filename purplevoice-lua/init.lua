@@ -1,10 +1,10 @@
--- voice-cc — Phase 2 hardened Hammerspoon module
--- Wires cmd+shift+e (push-and-hold) to ~/.local/bin/voice-cc-record.
+-- purplevoice — Phase 2 hardened Hammerspoon module (PurpleVoice)
+-- Wires cmd+shift+e (push-and-hold) to ~/.local/bin/purplevoice-record.
 --
 -- Phase 2 additions over Phase 1:
 --   - hs.accessibilityState(true) on load (Phase-1 TODO a — surface prompt)
 --   - Menubar indicator: grey ● idle, red ● recording (FBK-01)
---   - Audio cues: Pop on press, Tink on release; VOICE_CC_NO_SOUNDS=1 silences (FBK-02)
+--   - Audio cues: Pop on press, Tink on release; PURPLEVOICE_NO_SOUNDS=1 silences (FBK-02)
 --   - Clipboard preserve/restore via hs.pasteboard.readAllData/writeAllData (INJ-02)
 --   - Transient UTI marker so clipboard managers skip transcripts (INJ-03)
 --   - Re-entrancy guard via isRecording boolean + pcall-wrapped resetState (ROB-01)
@@ -14,6 +14,26 @@
 --   - hs.notify with action button + System Settings deep links (FBK-03)
 --   - notifyOnce dedup cooldown
 --   - Exit-code 10/11/12 dispatch to user-visible toasts (currently logged only)
+
+-- ----------------------------------------------------------------
+-- hs.notify orphaned-tag cleanup (Phase 2.5 rebrand — RESEARCH §"Pattern 4")
+-- ----------------------------------------------------------------
+-- The Phase 2 init.lua registered callbacks under the old voicecc tag names.
+-- Notification Center may still hold notifications referencing those tags;
+-- clicking them after rebrand would raise the Hammerspoon console (default
+-- orphaned-tag behaviour) instead of opening Settings. Unregistering the old
+-- tags is a safe no-op if they don't exist and protective if they do.
+pcall(hs.notify.unregister, "voiceccOpenMicSettings")
+pcall(hs.notify.unregister, "voiceccOpenAccessibilitySettings")
+
+-- ----------------------------------------------------------------
+-- Brand constants (exposed for future Phase 3.5 HUD consumption)
+-- ----------------------------------------------------------------
+local BRAND = {
+  NAME = "PurpleVoice",
+  TAGLINE = "Local voice dictation. Nothing leaves your Mac.",
+  COLOUR_LAVENDER = "#B388EB",
+}
 
 local M = {}
 
@@ -26,7 +46,7 @@ local M = {}
 --
 -- Plan 02-03 extension: capture return value so we can surface a notification
 -- if the user dismissed the prompt without granting (defence-in-depth per
--- RESEARCH §11). The notification uses voiceccOpenAccessibilitySettings
+-- RESEARCH §11). The notification uses purplevoiceOpenAccessibilitySettings
 -- (registered below) and is sent AFTER the hs.notify.register block so the
 -- callback is wired before we fire. See "Defence-in-depth Accessibility deny"
 -- block near the end of this file.
@@ -35,7 +55,7 @@ local accessibilityOk = hs.accessibilityState(true)
 -- ----------------------------------------------------------------
 -- Constants
 -- ----------------------------------------------------------------
-local SCRIPT_PATH = os.getenv("HOME") .. "/.local/bin/voice-cc-record"
+local SCRIPT_PATH = os.getenv("HOME") .. "/.local/bin/purplevoice-record"
 local MENUBAR_IDLE_COLOR = "#888888"
 local MENUBAR_RECORDING_COLOR = "#FF3B30"
 
@@ -66,11 +86,11 @@ end
 
 -- ----------------------------------------------------------------
 -- Audio cues (FBK-02)
--- VOICE_CC_NO_SOUNDS read once at module load; reload Hammerspoon to change.
+-- PURPLEVOICE_NO_SOUNDS read once at module load; reload Hammerspoon to change.
 -- ----------------------------------------------------------------
 local startSound = hs.sound.getByName("Pop")
 local stopSound = hs.sound.getByName("Tink")
-local soundsEnabled = (os.getenv("VOICE_CC_NO_SOUNDS") ~= "1")
+local soundsEnabled = (os.getenv("PURPLEVOICE_NO_SOUNDS") ~= "1")
 
 local function playStartCue()
   if soundsEnabled and startSound then
@@ -109,11 +129,11 @@ end
 -- the bare-colon form ("x-apple.systempreferences:...") that macOS `open`
 -- accepts is rejected by Hammerspoon with "lacks '://'". Both forms route
 -- to the same System Settings pane on Sequoia 15.7.5.
-hs.notify.register("voiceccOpenMicSettings", function(notification)
+hs.notify.register("purplevoiceOpenMicSettings", function(notification)
   hs.urlevent.openURL("x-apple.systempreferences://com.apple.settings.PrivacySecurity.extension?Privacy_Microphone")
 end)
 
-hs.notify.register("voiceccOpenAccessibilitySettings", function(notification)
+hs.notify.register("purplevoiceOpenAccessibilitySettings", function(notification)
   hs.urlevent.openURL("x-apple.systempreferences://com.apple.settings.PrivacySecurity.extension?Privacy_Accessibility")
 end)
 
@@ -196,8 +216,8 @@ local function handleExit(exitCode, stdOut, stdErr)
     -- fingerprint emitted by Plan 02-01). Surface an actionable
     -- notification with a deep link to Privacy & Security → Microphone.
     notifyOnce(10, function()
-      hs.notify.new("voiceccOpenMicSettings", {
-        title = "voice-cc: microphone blocked",
+      hs.notify.new("purplevoiceOpenMicSettings", {
+        title = "PurpleVoice: microphone blocked",
         informativeText = "Grant Hammerspoon access in Privacy & Security → Microphone",
         actionButtonTitle = "Open Settings",
         hasActionButton = true,
@@ -209,25 +229,25 @@ local function handleExit(exitCode, stdOut, stdErr)
     -- Binary or model missing. No deep link — user needs to re-run setup.sh.
     notifyOnce(11, function()
       hs.notify.new({
-        title = "voice-cc: install incomplete",
+        title = "PurpleVoice: install incomplete",
         informativeText = "Run setup.sh — model or binary missing",
         autoWithdraw = false,
       }):send()
     end)
   elseif exitCode == 12 then
-    -- Generic sox / whisper-cli failure (non-TCC). Log + notify.
+    -- Generic sox / transcription failure (non-TCC). Log + notify.
     notifyOnce(12, function()
       hs.notify.new({
-        title = "voice-cc: transcription failed",
-        informativeText = "Check ~/.cache/voice-cc/error.log for details",
+        title = "PurpleVoice: transcription failed",
+        informativeText = "Check ~/.cache/purplevoice/error.log for details",
       }):send()
     end)
   else
     -- Truly unknown exit code — log + generic toast (still dedup'd by code).
-    hs.console.printStyledtext("voice-cc unknown exit " .. tostring(exitCode))
+    hs.console.printStyledtext("PurpleVoice unknown exit " .. tostring(exitCode))
     notifyOnce(exitCode, function()
       hs.notify.new({
-        title = "voice-cc: unexpected exit " .. tostring(exitCode),
+        title = "PurpleVoice: unexpected exit " .. tostring(exitCode),
         informativeText = "Check Hammerspoon console for details",
       }):send()
     end)
@@ -251,13 +271,13 @@ local function onPress()
       handleExit(exitCode, stdOut or "", stdErr or "")
     end)
     if not ok then
-      hs.console.printStyledtext("voice-cc onExit error: " .. tostring(err))
+      hs.console.printStyledtext("PurpleVoice onExit error: " .. tostring(err))
     end
     resetState()
   end)
 
   if currentTask == nil then
-    hs.alert.show("voice-cc: script not found at " .. SCRIPT_PATH, 4)
+    hs.alert.show("PurpleVoice: script not found at " .. SCRIPT_PATH, 4)
     resetState()
     return
   end
@@ -279,7 +299,7 @@ end
 -- ----------------------------------------------------------------
 local hk = hs.hotkey.bind({"cmd", "shift"}, "e", onPress, onRelease)
 if not hk then
-  hs.alert.show("voice-cc: cmd+shift+e binding failed (in use?)", 4)
+  hs.alert.show("PurpleVoice: cmd+shift+e binding failed (in use?)", 4)
 end
 
 -- Initialise menubar to idle BEFORE returning so idle dot is visible immediately.
@@ -298,8 +318,8 @@ setMenubarIdle()
 -- ----------------------------------------------------------------
 if not accessibilityOk then
   notifyOnce("accessibility", function()
-    hs.notify.new("voiceccOpenAccessibilitySettings", {
-      title = "voice-cc: accessibility required",
+    hs.notify.new("purplevoiceOpenAccessibilitySettings", {
+      title = "PurpleVoice: accessibility required",
       informativeText = "Grant Hammerspoon access in Privacy & Security → Accessibility",
       actionButtonTitle = "Open Settings",
       hasActionButton = true,
@@ -310,6 +330,7 @@ if not accessibilityOk then
 end
 
 -- Confirmation message on load
-hs.alert.show("voice-cc loaded (cmd+shift+e)", 1.5)
+hs.alert.show("PurpleVoice loaded — local dictation, cmd+shift+e", 1.5)
 
+M.BRAND = BRAND
 return M
