@@ -3,43 +3,44 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-29T09:30:00.000Z"
+last_updated: "2026-04-29T06:40:11Z"
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 2
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 12
+  completed_plans: 8
 ---
 
 # State: voice-cc
 
-**Last updated:** 2026-04-29 (Phase 2.5 context gathered — name `PurpleVoice` locked, privacy-first positioning established as load-bearing differentiator vs Koe/cloud dictation)
+**Last updated:** 2026-04-29 (Plan 02.5-01 complete — voice-cc → PurpleVoice rebrand of bash glue + Lua module + snippet + 6 tests + 7 walkthroughs; cache-path edit consolidated from Plan 02 per checker iter 1; Pattern 2 invariant intact; all 6 bash tests still GREEN)
 
 ## Project Reference
 
 - **Name:** voice-cc *(working name; new product brand TBD in Phase 2.5)*
 - **Core value:** Speak → text appears in Claude Code, instantly and reliably, with no recurring cost or external dependency.
-- **Current focus:** Phase 02 — hardening
+- **Current focus:** Phase 02.5 — branding
 - **Mode:** yolo
 - **Granularity:** standard
 - **Parallelization:** enabled
 
 ## Current Position
 
-Phase: 02.5 (branding) — DISCUSSION COMPLETE, ready for `/gsd:plan-phase 2.5`
-Next: Plan Phase 2.5 with the captured context
+Phase: 02.5 (branding) — EXECUTING
+Plan: 2 of 4
+Next: Plan 02.5-02 (XDG path rename + setup.sh idempotent migration block) and Plan 02.5-03 (visual identity — menubar lavender + 256×256 PNG icon) — both Wave 2, no longer racing on init.lua now that the cache-path edit consolidated into Plan 02.5-01 Task 2.
 
 - **Milestone:** v1
-- **Phase:** 02.5 (branding) — context gathered 2026-04-29
-- **Plan:** 0/N (not yet planned; CONTEXT.md captures decisions)
-- **Status:** Name = `PurpleVoice` (PascalCase brand, lowercase `purplevoice` for module/binary/paths). Privacy-first positioning is the load-bearing differentiator vs Koe (cloud default) / Wispr Flow (subscription) / market broadly. Visual identity locked: lavender `#B388EB` menubar + purple-bg-white-lips 256×256 icon. Tagline: "Local voice dictation. Nothing leaves your Mac." Resumed from 2026-04-28 strategic-decision pause — user chose path A (keep building, position against Koe's cloud default).
+- **Phase:** 02.5 (branding) — Plan 01 complete 2026-04-29 (8m 6s, 2 tasks autonomous)
+- **Plan:** 1/4 complete
+- **Status:** Executing Phase 02.5 — Wave 1 complete, Wave 2 unblocked
 
 ### Progress
 
 ```
 Phase 1: Spike                            ██████████  100% [3/3 plans; user-validated end-to-end 2026-04-27]
 Phase 2: Hardening                        ██████████  100% [4/4 plans — Plan 02-03 walkthroughs signed off 2026-04-28]
-Phase 2.5: Branding                       ░░░░░░░░░░  0%   [Added 2026-04-27 — needs planning]
+Phase 2.5: Branding                       ██░░░░░░░░  25%  [1/4 plans — Plan 02.5-01 (string propagation in code surfaces) complete 2026-04-29]
 Phase 3.5: Hover UI / HUD                 ░░░░░░░░░░  0%   [Added 2026-04-27 — needs planning]
 Phase 4 (v1.x): Quality of Life           ░░░░░░░░░░  0%   [Queued]
 Phase 3: Distribution + Public Install    ░░░░░░░░░░  0%   [Reordered to end 2026-04-28 per user direction]
@@ -61,6 +62,7 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 | Plan 01-03 executor + walkthrough wall-clock | n/a | ~30 min (Task 1 write + Hammerspoon launch + Task 2 5-criterion walkthrough including mid-test Accessibility diagnosis and re-test) | this session |
 | Plan 02-00 executor wall-clock | n/a | ~9 min (3 tasks autonomous; setup.sh Silero download + denylist seed; 17 files created) | this session |
 | Phase 02 P00 | 9 min | 3 tasks | 18 files |
+| Plan 02.5-01 executor wall-clock | n/a | ~8 min (2 tasks autonomous; voice-cc → PurpleVoice rebrand of bash glue + Lua module + snippet + 6 tests + 7 manual walkthroughs; Pattern 2 invariant preserved; cache-path edit consolidated from Plan 02 per checker iter 1; 4 Rule 1 deviations auto-fixed) | this session |
 
 ## Accumulated Context
 
@@ -81,6 +83,9 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 | Phase 1 spike loop demonstrably works end-to-end (cmd+shift+e push-and-hold → bash glue → whisper-cli → clipboard → cmd+v paste, well under 2s); user approved walkthrough; Criterion #4 vocab A/B explicitly skipped by user (not gating per D-07) | Plan 01-03 walkthrough | 2026-04-27 |
 | Hammerspoon Accessibility does NOT auto-prompt on first hs.eventtap.keyStroke (silent no-op instead). Phase 2 candidate: add `hs.accessibilityState(true)` on module load to surface the prompt deterministically. Microphone DOES auto-prompt on first sox spawn (different TCC code path) | Plan 01-03 walkthrough mid-test diagnosis | 2026-04-27 |
 | Reference utterance for Criterion #1 not captured verbatim — D-07 spike-level verification only requires observational pass; user said "yes, that works" after granting Accessibility | Plan 01-03 walkthrough; Phase 3 hyperfine will produce verbatim per-utterance numbers | 2026-04-27 |
+| Hard env-var rename (VOICE_CC_* → PURPLEVOICE_*) with no fallback shim — personal-tool ethos, single user, no shell-rc references observed; documented as breaking change in 02.5-01-SUMMARY.md | Plan 02.5-01 execution per RESEARCH §State of the Art Q1 | 2026-04-29 |
+| Cache-path edit (~/.cache/voice-cc → ~/.cache/purplevoice in init.lua exit-12 informativeText) consolidated from Plan 02.5-02 into Plan 02.5-01 Task 2 — eliminates Wave 2 init.lua file-write race with Plan 02.5-03; Plan 02.5-02 NO LONGER touches init.lua at all | Checker revision iter 1 (commit 5667503), executed by Plan 02.5-01 Task 2 | 2026-04-29 |
+| OLD voicecc* tag strings preserved verbatim inside `pcall(hs.notify.unregister, ...)` calls per RESEARCH Pitfall 4 — protects against orphaned-tag console-raise on stale notifications in macOS Notification Center | Plan 02.5-01 Task 2 | 2026-04-29 |
 
 ### Open TODOs (cross-phase)
 
@@ -105,6 +110,7 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 
 ### Recently Validated
 
+- Plan 02.5-01 (2026-04-29): voice-cc → PurpleVoice rebrand of bash glue + Lua module + user-paste snippet + 6 unit tests + 7 manual walkthroughs. File renames: `voice-cc-record` → `purplevoice-record`, `voice-cc-lua/` → `purplevoice-lua/`. 5 hs.notify titles use `PurpleVoice:` prefix; module load alert uses `PurpleVoice loaded — local dictation, cmd+shift+e` (D-12 form factor); hs.notify orphan-tag cleanup (`pcall(hs.notify.unregister, "voiceccOpen{Mic,Accessibility}Settings")`) inserted at module top per RESEARCH Pattern 4; new `purplevoice*` tag namespace in register + send call sites; `M.BRAND` constants table (NAME / TAGLINE / COLOUR_LAVENDER) exported for Phase 3.5 HUD. Cache-path edit consolidated from Plan 02.5-02 per checker iter 1: exit-12 informativeText now references `~/.cache/purplevoice/error.log` — eliminates Wave 2 init.lua file-write race with Plan 02.5-03. 6 env vars renamed (`VOICE_CC_*` → `PURPLEVOICE_*`) — hard rename, no fallback shim per personal-tool ethos. Pattern 2 invariant verified post-edit (`grep -c WHISPER_BIN purplevoice-record == 2`); Pattern 2 corollary verified (`! grep -q "whisper-cli" purplevoice-lua/init.lua`). 4 Rule 1 deviations auto-fixed inline (stale comments referring to old `voiceccOpenAccessibilitySettings`, `VOICE_CC_NO_SOUNDS`, `whisper-cli`, and `voice-cc` strings). All 6 bash unit tests still GREEN. BRD-02 closed for code surfaces (runtime XDG paths intentionally preserved for Plan 02.5-02 ownership). Commits: 2c9a7f2 (Task 1 — file/dir renames + bash glue + tests + manual walkthroughs), 090c1dd (Task 2 — Lua module strings + orphan-tag cleanup + cache-path edit). See 02.5-01-SUMMARY.md.
 - Plan 02-03 (2026-04-28): voice-cc-lua/init.lua final form (315 lines) — full `hs.notify` dispatch for exit codes 10 / 11 / 12 + System Settings deep links + 60s notifyOnce dedup + defence-in-depth Accessibility-deny notification. Both manual checkpoints signed off live by user ("approved"). Three coupled regressions fixed inline (commit 81334ce): (a) SOX_SIGNALED flag distinguishes trap-induced sox exit from real failure, (b) Sequoia silent-stream amplitude detection replaces dead stderr-fingerprint, (c) deep-link URLs use `://` instead of bare `:` for Hammerspoon's openURL API. All 6 bash unit tests still GREEN. Pattern 2 boundary preserved. Commits: 8b32e45 (Task 3-1 dispatcher), 81334ce (3 deviations fix). See 02-03-SUMMARY.md.
 - Plan 02-02 (2026-04-28): voice-cc-lua/init.lua hardened (82 → 208 lines). Menubar indicator + audio cues + clipboard preserve/restore with TransientType UTI + re-entrancy guard + handleExit stub + hs.accessibilityState(true) on load. `.hammerspoon-init-snippet.lua` staged for `require("hs.ipc")`; user pasted; IPC working. FBK-01, FBK-02, INJ-02, INJ-03, ROB-01 closed. Phase-1 TODOs (a) and (b) closed. Commits: f4da016, deee0fe.
 - Plan 02-01 (2026-04-28): voice-cc-record hardened. VAD + duration gate + denylist exact-match + EXIT trap + TCC stderr fingerprint (later superseded by Plan 02-03's amplitude detection on Sequoia) + semantic exit codes 2/3/10/11/12. Phase-1 TODO (c) closed via `--no-prints`. Commits: 47193f0, 691f030. **Note: subsequently patched in commit 81334ce** for the `wait`-pattern regression that broke every normal hotkey release on Sequoia.
@@ -117,19 +123,27 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 
 ### Next Action
 
-Phase 2.5 context captured. Run `/gsd:plan-phase 2.5` to break the rebrand into atomic plans (likely shape: Plan 02.5-01 string propagation in `voice-cc-record` + `voice-cc-lua/init.lua` + `setup.sh` + `.hammerspoon-init-snippet.lua`; Plan 02.5-02 XDG path rename + setup.sh idempotent migration; Plan 02.5-03 visual identity — menubar lavender colour + 256×256 PNG icon asset; Plan 02.5-04 README header + tagline placement + REQUIREMENTS.md BRD-01..03 elaboration).
+Phase 2.5 Plan 01 complete. Execute Wave 2 next — Plan 02.5-02 (XDG path rename + setup.sh idempotent migration; SOLE owner of setup.sh + symlink hygiene; no longer touches init.lua per checker iter 1 consolidation) and Plan 02.5-03 (visual identity — menubar lavender `#B388EB` + 256×256 PNG icon via sips; SOLE Wave 2 writer of init.lua). The Wave 2 race on init.lua is now fully eliminated.
+
+After Wave 2: Plan 02.5-04 (README header + tagline placement + REQUIREMENTS.md BRD-01..03 elaboration + brand-consistency test).
 
 After 2.5: Phase 3.5 (HUD), Phase 4 (QoL), Phase 3 (Distribution + hyperfine + public install), Phase 5 (Warm-Process, conditional).
 
 ### Stopped At
 
-Phase 2.5 discuss-phase complete. CONTEXT.md + DISCUSSION-LOG.md committed at `a34dcdb`. No code changes yet — implementation begins with `/gsd:plan-phase 2.5`.
+Plan 02.5-01 complete (2 tasks autonomous, 8m 6s wall-clock). 02.5-01-SUMMARY.md authored at `.planning/phases/02.5-branding/02.5-01-SUMMARY.md`. Code surfaces fully rebranded except for runtime XDG paths intentionally preserved for Plan 02.5-02. Pattern 2 boundary intact. All 6 bash unit tests GREEN.
 
-Local environment: Hammerspoon restored (~/.hammerspoon/init.lua requires uncommented; Hammerspoon launched; Accessibility = true; cmd+shift+e bound). voice-cc dictation loop is functional under the placeholder name; rename ships in Plan 02.5-* execution.
+Local environment: `~/.hammerspoon/init.lua` still references `require("voice-cc")` — symlink at `~/.hammerspoon/voice-cc` and `~/.local/bin/voice-cc-record` still point at the OLD names (Plan 02.5-02 owns symlink rewiring). Live PurpleVoice dictation loop is currently broken until Plan 02.5-02 ships symlink hygiene + `~/.hammerspoon/purplevoice` recreation OR until the user manually edits `~/.hammerspoon/init.lua` to `require("purplevoice")` post-symlink-rewire. Acceptable transitional state — Plan 02.5-02 closes it.
 
-User intent stated: proceed to plan 2.5 next.
+User intent stated: proceed through Phase 2.5 plan-by-plan.
 
 ### Last Session Summary
+
+- Plan 02.5-01 executed (autonomous, Wave 1, no checkpoints, ~8 min wall-clock):
+  - Task 1 (commit `2c9a7f2`): `git mv voice-cc-record purplevoice-record` + `git mv voice-cc-lua purplevoice-lua`. Rewrote bash glue's brand strings: stderr messages (whisper-cli missing, Whisper model missing, Silero VAD weights missing) now use `PurpleVoice:` prefix; env vars `VOICE_CC_MODEL/SILERO_MODEL/VAD_THRESHOLD/TEST_SKIP_SOX` renamed to `PURPLEVOICE_*`. Pattern 2 invariant verified: `grep -c WHISPER_BIN purplevoice-record == 2`. Header comment + test-hook comments updated. Rebranded 6 unit tests (test_duration_gate / test_denylist / test_wav_cleanup / test_sigint_cleanup / test_tcc_grep / test_vad_silence) — all env-var refs and script-name refs updated together; runtime XDG paths intentionally preserved for Plan 02.5-02. Rebranded 7 manual walkthroughs (test_clipboard_restore / test_transient_marker / test_menubar / test_audio_cues / test_tcc_notification / test_reentrancy / test_accessibility_prompt) — voice-cc-record / voice-cc-lua refs replaced with PurpleVoice equivalents. tests/run_all.sh log path renamed.
+  - Task 2 (commit `090c1dd`): Inserted `pcall(hs.notify.unregister, "voiceccOpen{Mic,Accessibility}Settings")` cleanup at module top per RESEARCH Pattern 4 (uses OLD tag strings — protects against orphaned-tag console-raise on stale notifications in macOS Notification Center). Inserted `local BRAND = { NAME, TAGLINE, COLOUR_LAVENDER }` constants block + `M.BRAND = BRAND` export for Phase 3.5 HUD. Replaced 5 hs.notify titles with `PurpleVoice:` prefix (microphone blocked, install incomplete, transcription failed, accessibility required, unexpected exit N). Module load alert: `PurpleVoice loaded — local dictation, cmd+shift+e` (D-12 form factor). Two hs.notify.register tags + 2 hs.notify.new call sites use new `purplevoiceOpen*Settings` namespace. SCRIPT_PATH points to `~/.local/bin/purplevoice-record`. `os.getenv("PURPLEVOICE_NO_SOUNDS")` replaces VOICE_CC_NO_SOUNDS. Cache-path edit consolidated from Plan 02.5-02 per checker iter 1: exit-12 `informativeText` now references `~/.cache/purplevoice/error.log` (eliminates Wave 2 init.lua file-write race with Plan 02.5-03). Two alert texts rebranded (script-not-found, cmd+shift+e binding failed). `.hammerspoon-init-snippet.lua` rewritten to recommend `require("purplevoice")` + brand-explanation comment per D-08. **4 Rule 1 deviations auto-fixed inline:** (a) stale comment referencing old `voiceccOpenAccessibilitySettings` tag → `purplevoiceOpenAccessibilitySettings`; (b) stale comment referencing old `VOICE_CC_NO_SOUNDS` env var → `PURPLEVOICE_NO_SOUNDS`; (c) pre-existing comment violating Pattern 2 corollary "whisper-cli" → "transcription"; (d) plan-required ZERO `voice-cc` strings violated by my own initial cleanup-comment insertion ("old voice-cc tag names" → "old voicecc tag names").
+  - All 6 bash unit tests still GREEN post-rebrand. Pattern 2 boundary preserved (grep -c WHISPER_BIN purplevoice-record == 2). Pattern 2 corollary preserved (! grep -q whisper-cli purplevoice-lua/init.lua).
+  - 02.5-01-SUMMARY.md authored at `.planning/phases/02.5-branding/02.5-01-SUMMARY.md` with full deviation audit trail (4 Rule 1 fixes), self-check results, and Wave 2 readiness signals.
 
 - Plan 02-00 executed (autonomous, Wave 1, no checkpoints, ~9 min wall-clock):
   - Task 0-1 (commit `b899c28`): tests/run_all.sh (39 lines, exec) iterates tests/test_*.sh, captures pass/fail, exits 0 only if all pass; tests/lib/sample_audio.sh (44 lines, sourced) exposes silence_wav / tone_wav / short_tap_wav / medium_wav helpers. Empty suite handled cleanly (exit 0).
