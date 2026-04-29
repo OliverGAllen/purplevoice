@@ -5,12 +5,13 @@
 # after the PurpleVoice rebrand, except in approved exemptions.
 #
 # Approved exemptions (preserved per Phase 2.5 decisions):
-#   - .planning/                       - historical record (D-07)
-#   - .git/                            - git history
-#   - setup.sh                         - migrate_xdg_dir FROM-arg literals + stale-symlink cleanup; required for migration to work
-#   - CLAUDE.md                        - GSD-auto-managed block; deferred to Phase 3 STACK.md update
-#   - README.md                        - legitimate historical mention of working name 'voice-cc'
-#   - tests/test_brand_consistency.sh  - this file (mentions the string in comments and grep patterns)
+#   - .planning/                              - historical record (D-07)
+#   - .git/                                   - git history
+#   - setup.sh                                - migrate_xdg_dir FROM-arg literals + stale-symlink cleanup; required for migration to work
+#   - CLAUDE.md                               - GSD-auto-managed block; deferred to Phase 3 STACK.md update
+#   - README.md                               - legitimate historical mention of working name 'voice-cc'
+#   - tests/test_brand_consistency.sh         - this file (mentions the string in comments and grep patterns)
+#   - tests/test_security_md_framing.sh       - Phase 2.7 D-17 lint that grep -q "voice-cc" to detect drift (Plan 02.7-01)
 #
 # Exit 0 = brand is consistent; exit 1 = drift detected.
 set -uo pipefail
@@ -31,6 +32,7 @@ HITS=$(grep -rln "voice-cc" \
   | grep -v "^\./CLAUDE\.md$" \
   | grep -v "^\./README\.md$" \
   | grep -v "^\./tests/test_brand_consistency\.sh$" \
+  | grep -v "^\./tests/test_security_md_framing\.sh$" \
   || true)
 
 if [ -n "$HITS" ]; then
