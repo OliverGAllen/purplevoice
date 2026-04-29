@@ -1,7 +1,7 @@
 # Roadmap: voice-cc
 
 **Created:** 2026-04-23
-**Updated:** 2026-04-28 (Phase 2 closed; phase order changed — Phase 3 Distribution moved to come after all other v1 phases per user direction)
+**Updated:** 2026-04-29 (Phase 2.7 Security Posture & Government Readiness added per user direction; positioning broadened to include institutional / government audiences)
 **Granularity:** standard
 **Coverage:** 26/26 original v1 requirements mapped; new branding/HUD/public-install requirements TBD during planning
 **Build-order constraint:** manual pipeline → bash glue → Hammerspoon wiring (non-negotiable per ARCHITECTURE.md)
@@ -14,13 +14,14 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
 
 - [x] **Phase 1: Spike** — Prove the end-to-end loop works on Oliver's machine. Thin slice, no polish. *(completed 2026-04-27)*
 - [x] **Phase 2: Hardening** — Make the loop robust against TCC silent-deny, hallucinations, re-entrancy, clipboard manager leakage, and AirPods surprises. *(completed 2026-04-28)*
-- [ ] **Phase 2.5: Branding** — Pick a public-facing product name and apply it across user-visible surfaces. Pre-requisite for HUD and Distribution because both reference the brand.
+- [ ] **Phase 2.5: Branding** — Pick a public-facing product name and apply it across user-visible surfaces. Pre-requisite for HUD, Security, and Distribution because all three reference the brand.
+- [ ] **Phase 2.7: Security Posture & Government Readiness** — Threat model + verifiable security claims for institutional / government / high-privacy audiences. Produces SECURITY.md as authoritative document; implements quick-win verification mechanisms (no-egress proof, SBOM generation, code signing setup). Research + verification depth, not formal certification.
 - [ ] **Phase 3.5: Hover UI / HUD** — Small floating recording-state indicator that complements the menu-bar indicator. Hideable. Branded per Phase 2.5.
 - [ ] **Phase 4 (v1.x): Quality of Life** — Address first real-use frustrations once the polished loop is stable.
-- [ ] **Phase 3: Distribution & Benchmarking + Public Install** — Reproducible local install, public one-line installer, README, and `hyperfine` measurements that gate the v1.1 decision. **Reordered to end of v1 (2026-04-28) per user direction** — distribute the *finished* product, not a half-polished one.
+- [ ] **Phase 3: Distribution & Benchmarking + Public Install** — Reproducible local install, public one-line installer, README, and `hyperfine` measurements that gate the v1.1 decision. **Reordered to end of v1 (2026-04-28) per user direction** — distribute the *finished, security-audited* product, not a half-polished one. Inherits SECURITY.md claims from Phase 2.7.
 - [ ] **Phase 5 (v1.1, conditional): Warm-Process Upgrade** — Gated on Phase 3 hyperfine results.
 
-> **Note on phase numbering:** Phase numbers are *identifiers*, not execution order. The list above shows the current execution order; Phase 3 (Distribution) is numerically third but executes sixth in v1 because it's the final polish step before the v1 release.
+> **Note on phase numbering:** Phase numbers are *identifiers*, not execution order. The list above shows the current execution order; Phase 3 (Distribution) is numerically third but executes seventh in v1 because it's the final polish step before the v1 release. Execution order: 1 → 2 → 2.5 → 2.7 → 3.5 → 4 → 3 → 5 (conditional).
 
 ## Phase Details
 
@@ -78,6 +79,30 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
   - [ ] 02.5-03-PLAN.md — Visual identity (assets/icon.svg + sips → assets/icon-256.png, menubar lavender via BRAND.COLOUR_LAVENDER + outline/filled glyph differentiation); BRD-03
   - [ ] 02.5-04-PLAN.md — Documentation closure (PROJECT.md name + positioning, formal BRD-01..03 in REQUIREMENTS.md, expanded README, CLAUDE.md updates, tests/test_brand_consistency.sh regression catch); BRD-01, BRD-02, BRD-03
 **UI hint**: light (naming + minor visual polish, no full design system)
+
+### Phase 2.7: Security Posture & Government Readiness
+**Goal**: Establish PurpleVoice as auditable, verifiably-private dictation suitable for institutional and government audiences with strict privacy requirements (defence, healthcare, legal, finance, journalists). Produces `SECURITY.md` as the authoritative security document — threat model, current posture audit, gap analysis vs government-grade frameworks (NIST SP 800-53, FIPS 140-3, FedRAMP, Common Criteria), and verification mechanisms a third party can independently confirm. Implements quick-win verification: zero-egress proof (Little Snitch / pf rules), SBOM generation, code signing + notarisation pipeline. **Research + verification depth — does NOT pursue formal certifications** (those are 6–18 month, $50k+ commitments and disproportionate for a free personal/team tool).
+**Depends on**: Phase 2.5 (the brand + positioning the security claims attach to). The SECURITY.md document references PurpleVoice by name; the README claims (Phase 3) inherit this work.
+**Requirements**: TBD — defined during `/gsd:discuss-phase 2.7`. Likely shape:
+  - **SEC-01** — Authoritative `SECURITY.md` covering threat model (assets, adversaries, trust boundaries), current posture audit, gap analysis vs NIST SP 800-53 / FIPS 140-3 / FedRAMP / Common Criteria, and a roadmap for any pursued mitigations
+  - **SEC-02** — Zero network egress demonstrably true: documented test methodology (Little Snitch / pf rules / packet capture during a recording session) with reproducible verification steps
+  - **SEC-03** — Software Bill of Materials (SBOM) generated for runtime dependencies (sox, whisper.cpp, ggml model, Hammerspoon, Silero VAD); committed to repo; updated by setup.sh on dependency change
+  - **SEC-04** — Code signing + notarisation infrastructure documented and applied to any binary distribution artifacts (relevant once Phase 3 ships an installer)
+  - **SEC-05** — Reproducible build verification — anyone can clone repo + run setup.sh + arrive at byte-identical artifacts (or documented why not, with mitigation)
+  - **SEC-06** *(stretch)* — Air-gapped operation supported and documented (machine never connects to internet — voice-cc still functions)
+**Success Criteria** (what must be TRUE):
+  1. `SECURITY.md` is published in repo root with all sections per SEC-01.
+  2. A reader (journalist, sysadmin, government IT auditor) can independently verify the zero-egress claim by following the documented steps in SECURITY.md.
+  3. SBOM file (`SBOM.spdx.json` or similar) exists in repo, lists all runtime dependencies with versions and licenses.
+  4. Code signing + notarisation (or explicit "not yet — applies in Phase 3") status is documented honestly.
+  5. PROJECT.md positioning paragraph includes governments / institutions in the audience description (this lands in Phase 2.5 BRD-01 but Phase 2.7 verifies the claims are substantiated).
+**Plans**: TBD — produced during `/gsd:plan-phase 2.7`. Likely shape: 4 plans
+  - 02.7-01 — Threat model authoring (SECURITY.md skeleton + STRIDE-style threat enumeration + assets/adversaries/boundaries)
+  - 02.7-02 — Verification mechanism implementation (Little Snitch / pf egress test + SBOM tooling + reproducibility check)
+  - 02.7-03 — Government-framework gap analysis (SP 800-53 / FIPS 140-3 / FedRAMP-tailored / Common Criteria — what we meet, what we don't, what's reasonable to pursue)
+  - 02.7-04 — Documentation finalisation (SECURITY.md complete with cross-references to README + PROJECT.md; SBOM committed; egress-test script in `tests/` for ongoing CI-style verification)
+**UI hint**: none (research + documentation + verification scripts; no user-visible UI surface)
+**Research flag**: yes — needs `/gsd:research-phase 2.7` before planning. Government-grade software claims are subtle; researcher should investigate Apple notarisation tradeoffs, current SBOM tool ecosystem (Syft, CycloneDX), and the actual auditability gap between "claims" vs "verifiable claims" for an open-source local-only tool.
 
 ### Phase 3.5: Hover UI / HUD
 **Goal**: A small floating HUD that surfaces voice-cc state at-a-glance — visible "● recording" indicator while the hotkey is held, fading or hideable when idle. Complements (does not replace) Phase 2's menu-bar indicator. Optimised for low CPU when idle and zero distraction when not actively recording.
@@ -157,17 +182,19 @@ Listed in **execution order** (Phase 3 reordered to come last in v1; phase numbe
 | 1 | Phase 1: Spike | 3/3 | Complete | 2026-04-27 |
 | 2 | Phase 2: Hardening | 4/4 | Complete | 2026-04-28 |
 | 3 | Phase 2.5: Branding | 0/4 | Planned — ready for `/gsd:execute-phase 2.5` | - |
-| 4 | Phase 3.5: Hover UI / HUD | 0/0 | Queued | - |
-| 5 | Phase 4 (v1.x): Quality of Life | 0/0 | Queued | - |
-| 6 | Phase 3: Distribution & Benchmarking + Public Install | 0/0 | Queued (final v1 phase) | - |
-| 7 | Phase 5 (v1.1, conditional): Warm-Process Upgrade | 0/0 | Conditional on Phase 3 hyperfine | - |
+| 4 | Phase 2.7: Security Posture & Government Readiness | 0/0 | Queued — needs `/gsd:discuss-phase 2.7` then `/gsd:research-phase 2.7` | - |
+| 5 | Phase 3.5: Hover UI / HUD | 0/0 | Queued | - |
+| 6 | Phase 4 (v1.x): Quality of Life | 0/0 | Queued | - |
+| 7 | Phase 3: Distribution & Benchmarking + Public Install | 0/0 | Queued (final v1 phase) | - |
+| 8 | Phase 5 (v1.1, conditional): Warm-Process Upgrade | 0/0 | Conditional on Phase 3 hyperfine | - |
 
 ## Coverage Summary
 
 - **Original v1 requirements:** 26 total (CAP-01..04, TRA-01..06, INJ-01..04, FBK-01..03, ROB-01..05, DST-01..04)
 - **Mapped to v1 phases (1–3):** 26
 - **Unmapped v1:** 0
-- **New requirements added 2026-04-27 (TBD elaboration):** BRD-01..03 (Phase 2.5), DST-05 (Phase 3 extension), HUD-01..04 (Phase 3.5)
+- **New requirements added 2026-04-27 (TBD elaboration):** BRD-01..03 (Phase 2.5 — formalised 2026-04-29), DST-05 (Phase 3 extension), HUD-01..04 (Phase 3.5)
+- **New requirements added 2026-04-29 (TBD elaboration):** SEC-01..06 (Phase 2.7 — formalised during `/gsd:discuss-phase 2.7`)
 - **v2 requirements (deferred):** QOL-01..05, PERF-01..02 — assigned to Phase 4 (QoL) and Phase 5 (conditional warm process)
 
 | Phase | v1 Requirements | Count |
