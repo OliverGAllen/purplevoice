@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-29T14:38:56.000Z"
+last_updated: "2026-04-29T14:50:17.423Z"
 progress:
   total_phases: 6
   completed_phases: 3
@@ -13,7 +13,7 @@ progress:
 
 # State: voice-cc
 
-**Last updated:** 2026-04-29 (Plan 02.7-00 Wave 0 complete — tests/security/ aggregator + helpers + 7 verify/test skeletons + SECURITY.md skeleton (18 H2 sections, framing-clean) + SBOM.spdx.json placeholder + setup.sh extended with 5 PURPLEVOICE_OFFLINE guards + unconditional Syft 1.43.0 install (M-3 Option A); Pattern 2 invariant intact; 7 originals GREEN + 1 framing skeleton RED-and-expected; setup.sh idempotent online + offline; brand consistency hook GREEN)
+**Last updated:** 2026-04-29 (Plan 02.7-01 Wave 1 complete (parallel with 02.7-02) — SECURITY.md §Scope + §Threat Model populated with STRIDE 12-row matrix + LINDDUN 7-row privacy overlay + 4 assets + 5 trust boundaries + methodology notes + cross-reference index; tests/test_security_md_framing.sh full lint replaces RED skeleton (5 checks: tagline / required sections / banned-phrase prose / table-cell vocab / brand consistency); 1 Rule 1 deviation auto-fixed (tests/test_brand_consistency.sh exemption add); Pattern 2 invariant intact; functional suite 8 GREEN / 0 FAIL; D-17 framing-clean baseline maintained)
 
 ## Project Reference
 
@@ -27,12 +27,12 @@ progress:
 ## Current Position
 
 Phase: 02.7 (security-posture) — EXECUTING
-Plan: 2 of 6 (Wave 0 done; Wave 1 ready)
-Next: Wave 1 — Plans 02.7-01 (threat model + framing lint, owns tests/test_security_md_framing.sh body + SECURITY.md ## Scope/## Threat Model fills) and 02.7-02 (verify scripts + SBOM regen, owns tests/security/verify_*.sh real bodies + setup.sh Step 8 SBOM regen + SECURITY.md ## Egress/## SBOM/## Air-Gapped/## Code Signing fills) can run in parallel — infrastructure surface is clean and Syft is installed locally.
+Plan: 3 of 6 (Wave 0 + Wave 1 partial done — 02.7-01 complete; 02.7-02 was running in parallel)
+Next: After Wave 1 fully completes (02.7-02 verifier sign-off), proceed to Wave 2 — Plan 02.7-03a (NIST SP 800-53 Rev 5 mapping; owns SECURITY.md ## NIST section) and Plan 02.7-03b (FIPS / FedRAMP / Common Criteria / HIPAA / SOC 2 / ISO 27001 framed sections; owns SECURITY.md ## FIPS / ## FedRAMP-tailored / ## Common Criteria / ## HIPAA / ## SOC 2 / ## ISO 27001 sections). The framing lint at tests/test_security_md_framing.sh now polices every commit going forward — Plans 03a and 03b's edits are protected from D-17 drift.
 
 - **Milestone:** v1
 - **Phase:** 2.7
-- **Plan:** 02.7-00 complete; 02.7-01 + 02.7-02 next (Wave 1, parallelisable)
+- **Plan:** 02.7-00 + 02.7-01 complete; 02.7-02 Wave 1 parallel partner; Wave 2 (02.7-03a + 02.7-03b) next
 - **Status:** Executing Phase 02.7
 
 ### Progress
@@ -41,7 +41,7 @@ Next: Wave 1 — Plans 02.7-01 (threat model + framing lint, owns tests/test_sec
 Phase 1: Spike                            ██████████  100% [3/3 plans; user-validated end-to-end 2026-04-27]
 Phase 2: Hardening                        ██████████  100% [4/4 plans — Plan 02-03 walkthroughs signed off 2026-04-28]
 Phase 2.5: Branding                       ██████████  100% [4/4 plans complete 2026-04-29]
-Phase 2.7: Security Posture & Gov Ready   █░░░░░░░░░  17%  [1/6 plans — Wave 0 (Plan 02.7-00 — tests/security/ skeleton + SECURITY.md skeleton + SBOM placeholder + setup.sh OFFLINE guards + Syft install) complete 2026-04-29; Wave 1 (02.7-01 + 02.7-02 parallel) ready]
+Phase 2.7: Security Posture & Gov Ready   ███░░░░░░░  33%  [2/6 plans — Wave 0 (02.7-00) complete 2026-04-29; Wave 1 (02.7-01 threat model + framing lint) complete 2026-04-29; 02.7-02 parallel partner; Wave 2 (02.7-03a + 02.7-03b) next]
 Phase 3.5: Hover UI / HUD                 ░░░░░░░░░░  0%   [Added 2026-04-27 — needs planning]
 Phase 4 (v1.x): Quality of Life           ░░░░░░░░░░  0%   [Queued]
 Phase 3: Distribution + Public Install    ░░░░░░░░░░  0%   [Reordered to end 2026-04-28 per user direction]
@@ -67,6 +67,7 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 | Phase 02.5 P03 | 3min | 2 tasks | 5 files |
 | Phase 02.5 P02 | 5m 47s | 2 tasks | 9 files |
 | Phase 02.7-security-posture P00 | 6m 14s | 3 tasks | 11 files |
+| Phase 02.7-security-posture P01 | 14min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,10 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 | `tests/security/lib/process_tree.sh` DESIGN NOTE block (per checker M-6) documents why the helper writes the test WAV to the production path `/tmp/purplevoice/recording.wav`: (1) Lua isRecording single-instance guard prevents concurrent invocations; (2) `PURPLEVOICE_TEST_SKIP_SOX=1` is set unconditionally so sox does NOT spawn (no overwrite risk); (3) purplevoice-record exposes no path-override env var, and adding one would breach the Pattern 2 boundary file. If a future revision exposes such an env var, the helper switches to `/tmp/purplevoice/test-recording.wav`. | Plan 02.7-00 Task 0-1 | 2026-04-29 |
 | `purplevoice_pid_tree()` intentionally EXCLUDES Hammerspoon's main process PID (Pitfall 5 / D-06 scoping). Hammerspoon may hold long-lived TCP keepalives unrelated to PurpleVoice; including its PID would muddy the egress claim. The egress test scope is `purplevoice-record` + its sox + transcription children only. | Plan 02.7-00 Task 0-1 | 2026-04-29 |
 | `tests/security/run_all.sh` uses distinguishable prefix `[security]` and distinguishable log path `/tmp/purplevoice-security-test.log` (Pitfall 9) so concurrent runs of the functional and security suites do not clobber each other's logs. Otherwise byte-for-byte structural mirror of `tests/run_all.sh`. | Plan 02.7-00 Task 0-1 | 2026-04-29 |
+| SECURITY.md threat model uses STRIDE primary (12 rows) + LINDDUN privacy overlay (7 rows) per RESEARCH Priority 1 — STRIDE for federal-auditor recognition, LINDDUN for the privacy claims STRIDE alone glosses (voice content is the central asset). 4 assets + 5 trust boundaries + 6 out-of-scope items. Status vocabulary locked to Met / Partial / Not Pursued / N/A. | Plan 02.7-01 Task 1-1 | 2026-04-29 |
+| D-17 framing lint at `tests/test_security_md_framing.sh` is a functional-suite gate (per commit, not per release-gate). 5 checks: canonical tagline, required H2 sections, banned-phrase prose (compliant/certified/guarantees outside qualified contexts via inverted-grep idiom), table-cell status vocabulary (Pitfall 15), brand consistency. SECURITY_MD env-var override hook for negative-control self-tests. All 4 plan-required negative controls detected. Functional suite 8 GREEN / 0 FAIL. | Plan 02.7-01 Task 1-2 | 2026-04-29 |
+| Plan 02.7-01 Pattern 2 corollary applied to SECURITY.md prose: 'transcription binary' framing instead of literal 'whisper-cli' so v1.1 warm-server swap remains a one-file-change event in `purplevoice-record` (Pitfall 6 discipline; the boundary file is the bash glue, not the documentation). Tracked as Rule 1 deviation in 02.7-01-SUMMARY.md. | Plan 02.7-01 Task 1-1 | 2026-04-29 |
+| Plan 02.7-01 Rule 1 deviation: added `tests/test_security_md_framing.sh` to `tests/test_brand_consistency.sh` exemption list because the new framing lint legitimately greps for `voice-cc` to detect drift. Same root cause / same fix pattern as the brand-consistency test's own self-exemption. +4 lines net to the brand-consistency test. | Plan 02.7-01 Task 1-2 | 2026-04-29 |
 
 ### Open TODOs (cross-phase)
 
@@ -141,26 +146,41 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 
 ### Next Action
 
-Phase 2.7 Wave 0 complete. Plan 02.7-00 done — `tests/security/` skeleton + `SECURITY.md` skeleton + `SBOM.spdx.json` placeholder + `setup.sh` PURPLEVOICE_OFFLINE guards + unconditional Syft install all stable. Execute Wave 1 (parallel) next:
+Phase 2.7 Wave 1 partial: Plan 02.7-01 (threat model + framing lint) complete; Plan 02.7-02 (verify scripts + SBOM regen) ran in parallel and committed `cbba76c` (verify_egress.sh body) — awaiting full Plan 02 sign-off and orchestrator-side verifier on both Wave 1 plans. After Wave 1 verifier passes, proceed to Wave 2:
 
-- **Plan 02.7-01** (threat model + framing lint): Owns `tests/test_security_md_framing.sh` body (D-17 lint: ban `compliant` / `certified` / `guarantees` outside qualified contexts + Pitfall 15 Met/Partial/Not Pursued/N/A vocabulary in framework tables) + `SECURITY.md` content fills for `## Scope` + `## Threat Model` (STRIDE 6×N + LINDDUN 7×N matrices per RESEARCH Priority 1).
-- **Plan 02.7-02** (verify scripts + SBOM regen): Owns the bodies of `tests/security/verify_egress.sh` (3-layer evidence chain: lsof + nettop + pf+tcpdump per D-05), `verify_sbom.sh` (Syft regen + SPDX 2.3 schema check + drift detection — Syft is now a hard dep so no skip path needed), `verify_air_gap.sh` (sideload simulation), `verify_signing.sh` (SECURITY.md cross-ref assertion) + `setup.sh` Step 8 SBOM regeneration block + `SECURITY.md` content fills for `## Egress Verification` / `## Software Bill of Materials (SBOM)` / `## Air-Gapped Installation` / `## Code Signing & Notarisation`.
+- **Plan 02.7-03a** (NIST SP 800-53 Rev 5 mapping): Owns SECURITY.md `## NIST SP 800-53 Rev 5 / Low-baseline Mapping` section. Per-control table for AC, AU, IA, SC, SI, PT + LIMITED families using the Met / Partial / Not Pursued / N/A vocabulary now policed by the functional-suite framing lint. Rev 5 IDs only (Pitfall 13).
+- **Plan 02.7-03b** (6 framed framework sections): Owns SECURITY.md `## FIPS 140-3` / `## FedRAMP-tailored` / `## Common Criteria` / `## HIPAA Security Rule §164.312` / `## SOC 2 Type II Trust Services Criteria` / `## ISO/IEC 27001:2022 Annex A` sections. All framed at "compatible with" depth; "issued to organisations" disclaimer first per Pitfall 11.
 
-After Wave 1: Wave 2 = 02.7-03a (NIST 800-53 deep mapping) + 02.7-03b (6 framed frameworks). Wave 3 = 02.7-04 (closure: TL;DR + Audience Entry-Points + Reproducible Build + Vulnerability Disclosure + How to Verify These Claims).
+After Wave 2: Wave 3 = 02.7-04 (closure: TL;DR + Audience Entry-Points + Reproducible Build + Vulnerability Disclosure + How to Verify These Claims).
 
 After 2.7: Phase 3.5 (HUD), Phase 4 (QoL), Phase 3 (Distribution + hyperfine + public install), Phase 5 (Warm-Process, conditional).
 
 ### Stopped At
 
-Plan 02.7-00 complete (3 tasks autonomous, 6m 14s wall-clock, 1 Rule 1 deviation auto-fixed). 02.7-00-SUMMARY.md authored at `.planning/phases/02.7-security-posture/02.7-00-SUMMARY.md`. Self-check PASSED (all 12 claimed artefacts found on disk; all 3 commits found in git log).
+Plan 02.7-01 complete (2 tasks autonomous, ~14 min wall-clock, 1 Rule 1 deviation auto-fixed: `tests/test_brand_consistency.sh` exemption add for the new framing lint). 02.7-01-SUMMARY.md authored at `.planning/phases/02.7-security-posture/02.7-01-SUMMARY.md`. Self-check PASSED (all claimed artefacts found on disk; both my commits found in git log).
 
-Local environment: Syft 1.43.0 now installed on Oliver's machine (Phase 2.7 hard-dep precondition for `verify_sbom.sh`). All 7 functional bash unit tests GREEN. Security-suite RED-and-expected baseline established (`bash tests/security/run_all.sh` produces "Results: 0 passed, 5 failed"). Functional suite shows 7 PASS + 1 FAIL (`test_security_md_framing.sh` RED-and-expected — Plan 02.7-01 implements it). Brand consistency hook GREEN. Pattern 2 invariant intact (purplevoice-record SHA256 unchanged: `d189b68b...`).
+**Plan 02.7-01 deliverables:**
+- `SECURITY.md` 89→203 lines: §Scope (8-step process lifecycle + 4 assets + 5 trust boundaries + 5 out-of-scope items) + §Threat Model (STRIDE 12-row matrix + LINDDUN 7-row privacy overlay + methodology notes + cross-reference index + 6 out-of-scope items).
+- `tests/test_security_md_framing.sh` 7-line RED skeleton → 118-line full lint (5 checks: tagline / required H2 sections / banned-phrase prose via inverted-grep / table-cell vocabulary / brand consistency; SECURITY_MD env-override hook for negative-control self-tests).
+- `tests/test_brand_consistency.sh` +4 lines: exemption for the framing lint (mirrors the test's own self-exemption pattern; same root cause / same fix).
+
+**Local environment:** Functional suite 8 GREEN / 0 FAIL (was 7 GREEN + 1 RED skeleton). All 4 plan-required negative-control tests detected (compliant / certified / guarantees / table-cell-Compliant). Pattern 2 invariant intact (`grep -c WHISPER_BIN purplevoice-record == 2`). Pattern 2 corollary intact (no `whisper-cli` in `purplevoice-lua/init.lua`). D-17 framing-clean baseline maintained (zero `\bcompliant\b` / `\bcertified\b` / `\bguarantees\b` in SECURITY.md prose).
+
+**Plan 02.7-02 parallel-execution state:** Plan 02 committed `cbba76c` (verify_egress.sh body) during my Wave 1 window. Other Plan 02 deliverables (verify_sbom.sh, verify_air_gap.sh, verify_signing.sh, setup.sh Step 8 SBOM regen, SBOM.spdx.json regen, SECURITY.md sections for Egress / SBOM / Air-Gapped / Code Signing) may still be in flight from the parallel agent — orchestrator-side verifier will determine completion. My commits used `--no-verify` per parallel-execution guidance to avoid pre-commit hook contention; orchestrator validates hooks once after all Wave 1 agents complete.
 
 Reminder still applies from prior plan: `~/.hammerspoon/init.lua` may still reference `require("voice-cc")` if the user has not yet run setup.sh on a freshly-rebooted Hammerspoon — the dictation loop requires `require("purplevoice")`. Setup.sh banner (Step 7) reminds the user. This is a Phase 2.5 follow-up, not a Phase 2.7 concern.
 
 User intent stated: proceed through Phase 2.7 plan-by-plan.
 
 ### Last Session Summary
+
+- Plan 02.7-01 executed (autonomous, Wave 1 parallel with Plan 02.7-02, no checkpoints, ~14 min wall-clock):
+  - Task 1-1 (commit `eaac716`): Authored SECURITY.md §Scope (`### What PurpleVoice IS` 8-step lifecycle + `### What PurpleVoice IS NOT` 5-item negation list + `### Assets` 4-row table + `### Trust Boundaries` 5-item numbered list + `### Out of Scope (with rationale)` 5 items) and §Threat Model (methodology preamble with STRIDE/LINDDUN rationale + status vocabulary definition + process-tree scoping reference; `### STRIDE Analysis` 12-row matrix; `### LINDDUN Privacy Overlay` 7-row matrix; `### Threat Model — Methodology Notes` subsection covering Why STRIDE primary / Why LINDDUN overlay / How to read the matrices / Update cadence / Cross-reference index for the matrices; `### Threat Model — Out of Scope` 6 items with rationale). Updated footer date to 2026-04-29. SECURITY.md grew 89→203 lines. Verify clause: STRIDE rows = 12 (>= 10 required); LINDDUN rows = 7 (== 7); banned-phrase hits = 0 (D-17); voice-cc hits = 0 (brand); WHISPER_BIN count in purplevoice-record = 2 (Pattern 2).
+  - Task 1-2 (commit `0a0a58e`): Replaced the Plan 02.7-00 RED skeleton at `tests/test_security_md_framing.sh` (7 lines) with a full 118-line D-17 framing lint. 5 checks: (1) canonical tagline present (`Local voice dictation. Nothing leaves your Mac.`); (2) required H2 sections present (12-section representative sample of the 18); (3) banned-phrase prose check using inverted-grep idiom for `\bcompliant\b` / `\bcertified\b` / `\bguarantees\b` outside qualified contexts (`not compliant`, `non-compliant`, `compliant with applicable`, quoted forms, `not certified`, `certifying authority`, `does not guarantee`, `no guarantees`); (4) table-cell status vocabulary (Pitfall 15) — bans `Compliant` / `Certified` / `Compliance` inside markdown table cells; (5) brand consistency (no `voice-cc` strings). Honours `SECURITY_MD=<path>` env override for negative-control self-tests. Lives in functional suite (`tests/run_all.sh`) — runs per commit per Pitfall 4. Verified with all 4 plan-required negative controls: insert "compliant with HIPAA" / "FedRAMP-certified" / "guarantees zero egress" / table-row "| AC-3 | Access | Compliant | Done |" → all exit 1 as expected. Functional suite 8 PASS / 0 FAIL.
+  - **One Rule 1 deviation auto-fixed in Task 1-2**: After implementing the framing lint, `tests/test_brand_consistency.sh` started failing with `voice-cc strings found in non-exempt source files: ./tests/test_security_md_framing.sh`. The new lint legitimately contains literal `voice-cc` because Check 5's `grep -q "voice-cc"` is the load-bearing detection pattern. Fix: added `tests/test_security_md_framing.sh` to the brand-consistency test's exemption list — same exemption pattern the test uses for itself. +4 lines net to `tests/test_brand_consistency.sh`. Bundled into commit `0a0a58e` (the framing-lint commit) since the exemption is a direct consequence of introducing the lint.
+  - **Pattern 2 corollary applied to SECURITY.md prose** (tracked as a separate framing observation in 02.7-01-SUMMARY.md): plan content originally contained literal `whisper-cli` strings inside §Scope process lifecycle, §Trust Boundaries, STRIDE Information Disclosure (e), and §Out-of-Scope brew bullet. Rephrased to "transcription binary" / "transcription children" / "sox / transcription binary" framing throughout (Pitfall 6 discipline). The boundary file is `purplevoice-record`; SECURITY.md is a long-lived audit document that should not bake the current binary name into prose so v1.1 warm-server swap remains a one-file-change event.
+  - **Wave 1 parallel-execution boundary held cleanly**: my commits touched only `SECURITY.md`, `tests/test_security_md_framing.sh`, and `tests/test_brand_consistency.sh` (the Rule 1 deviation). Plan 02.7-02 committed `cbba76c` (verify_egress.sh body) during my Wave 1 window — visible in `git log` between my two commits but not part of my plan's deliverables. Used `--no-verify` on both my commits per parallel-execution guidance to avoid pre-commit hook contention; orchestrator validates hooks once after all Wave 1 agents complete. Touched ZERO Plan 02 files (`tests/security/verify_*.sh`, `setup.sh` Step 8, `SBOM.spdx.json`).
+  - 02.7-01-SUMMARY.md authored at `.planning/phases/02.7-security-posture/02.7-01-SUMMARY.md` with full deviation audit trail (1 Rule 1 fix + 1 framing observation), file inventory, threat-model content inventory, framing-lint inventory, functional-suite results, invariant audit, Wave 1 sister-plan coordination notes, Wave 2 readiness signals.
 
 - Plan 02.5-02 executed (autonomous, Wave 2 parallel with Plan 02.5-03, no checkpoints, ~5m 47s wall-clock):
   - Task 1 (commit `ca231e4`): rewrote setup.sh — inserted Step 3b `migrate_xdg_dir` 4-state guard function + 3 calls (config/data/cache) + symlink hygiene block; renamed all XDG paths in mkdir block, MODEL constant (Step 5), SILERO_MODEL constant (Step 5b), VOCAB_DEST (Step 6), DENYLIST_DEST (Step 6b); inserted Step 6c `ln -sfn` symlink installer; rewrote Step 7 banner with `PurpleVoice setup complete.` + canonical tagline `Local voice dictation. Nothing leaves your Mac.` (D-12) + literal `require("purplevoice")` line for user paste (D-08 + Anti-Pattern 4). Header (line 2), Step 6 comment (line 12), Step 1 stderr (line 25), and 2 `repo root` strings updated to PurpleVoice. Verified: `bash -n setup.sh` exits 0; `grep -c migrate_xdg_dir` returns 4; tagline + require line present; old voice-cc paths each appear exactly once (only as `migrate_xdg_dir` FROM args — RESEARCH Pitfall 1 sed-protection).
