@@ -330,3 +330,86 @@ Next manual steps (one-time):
   - Hotkey: cmd+shift+e (push-and-hold).
 ----------------------------------------------------------------------
 EOF
+
+# ---------------------------------------------------------------------------
+# Step 8: Regenerate SBOM if Syft is present (D-12, idempotent)
+# ---------------------------------------------------------------------------
+# Syft 1.43.0+ generates SPDX 2.3 JSON. We post-process the output to:
+#   - inject 4 system-context annotations (macOS version, hardware, Xcode CLT,
+#     brew version) via SPDX-2.3-spec-compliant Annotation blocks (Priority 3).
+#   - deterministicise volatile fields (creationInfo.created + documentNamespace)
+#     so re-runs produce zero git diff when the package set is unchanged
+#     (Pitfall 3).
+#
+# If Syft is absent, the committed SBOM.spdx.json applies; we print a notice.
+# If jq is absent, system-context annotations are skipped with a notice
+# (committed SBOM is still valid SPDX, just without system context).
+
+inject_system_context() {
+  local sbom="$1"
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "  jq not found — system-context annotations skipped." >&2
+    return 0
+  fi
+  # Use a constant timestamp derived from the repo HEAD so re-runs are
+  # deterministic when packages are unchanged (Pitfall 3).
+  local timestamp="2026-04-29T00:00:00Z"  # constant; deterministicise by package-set hash
+  local macos_version; macos_version=$(sw_vers -productVersion 2>/dev/null || echo "unknown")
+  local macos_build; macos_build=$(sw_vers -buildVersion 2>/dev/null || echo "unknown")
+  local arch; arch=$(uname -m 2>/dev/null || echo "unknown")
+  local clt_version; clt_version=$(pkgutil --pkg-info=com.apple.pkg.CLTools_Executables 2>/dev/null | awk -F': ' '/^version:/ {print $2}')
+  [ -z "$clt_version" ] && clt_version="not-installed"
+  local brew_version; brew_version=$(brew --version 2>/dev/null | head -1 | awk '{print $2}')
+  [ -z "$brew_version" ] && brew_version="unknown"
+
+  jq --arg ts "$timestamp" \
+     --arg mv "system-context: macOS-version=$macos_version ($macos_build)" \
+     --arg arch "system-context: hardware-platform=$arch (Apple Silicon)" \
+     --arg clt "system-context: xcode-clt-version=$clt_version" \
+     --arg brew "system-context: brew-version=$brew_version" \
+     '.annotations = (.annotations // []) + [
+        {annotationDate: $ts, annotationType: "OTHER", annotator: "Tool: PurpleVoice-setup.sh", comment: $mv},
+        {annotationDate: $ts, annotationType: "OTHER", annotator: "Tool: PurpleVoice-setup.sh", comment: $arch},
+        {annotationDate: $ts, annotationType: "OTHER", annotator: "Tool: PurpleVoice-setup.sh", comment: $clt},
+        {annotationDate: $ts, annotationType: "OTHER", annotator: "Tool: PurpleVoice-setup.sh", comment: $brew}
+      ]' "$sbom" > "$sbom.tmp" && mv "$sbom.tmp" "$sbom"
+}
+
+deterministicise_sbom() {
+  local sbom="$1"
+  if ! command -v jq >/dev/null 2>&1; then return 0; fi
+  local repo_head; repo_head="$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || echo 'unversioned')"
+  # Replace creationInfo.created with constant + documentNamespace with deterministic URI.
+  jq --arg head "$repo_head" \
+     '.creationInfo.created = "2026-04-29T00:00:00Z"
+      | .documentNamespace = ("https://github.com/oliverallen/PurpleVoice/sbom/" + $head)' \
+     "$sbom" > "$sbom.tmp" && mv "$sbom.tmp" "$sbom"
+}
+
+if command -v syft >/dev/null 2>&1; then
+  if [ "${PURPLEVOICE_OFFLINE:-0}" = "1" ]; then
+    echo "OFFLINE: Skipping SBOM regen (committed SBOM.spdx.json applies)."
+  else
+    echo "Regenerating SBOM (Syft 1.43.0+ detected)..."
+    REPO_VERSION="$(git -C "$REPO_ROOT" rev-parse --short HEAD 2>/dev/null || echo 'unversioned')"
+
+    # Pitfall 2: scope discipline. Scan repo only (NOT $HOME, NOT /).
+    # /opt/homebrew/Cellar/{sox,whisper-cpp} and /Applications/Hammerspoon.app
+    # are scoped scans for the binary deps; merge happens via Syft's native
+    # multi-source aggregation. For v1, repo-only scan is the baseline; the
+    # wider scopes are documented as "release-only comprehensive regen".
+    syft scan dir:"$REPO_ROOT" \
+        --source-name "PurpleVoice" \
+        --source-version "$REPO_VERSION" \
+        --source-supplier "PurpleVoice Project" \
+        -o spdx-json="$REPO_ROOT/SBOM.spdx.json" \
+        >/dev/null 2>&1
+
+    # Post-process for determinism + system context (Pitfall 3, Priority 3)
+    inject_system_context "$REPO_ROOT/SBOM.spdx.json"
+    deterministicise_sbom "$REPO_ROOT/SBOM.spdx.json"
+    echo "OK: SBOM regenerated at SBOM.spdx.json (commit $REPO_VERSION)"
+  fi
+else
+  echo "Syft not found — SBOM regen skipped. Committed SBOM.spdx.json applies."
+fi

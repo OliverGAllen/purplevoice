@@ -2,14 +2,61 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "PurpleVoice-SBOM-placeholder",
-  "documentNamespace": "https://github.com/oliverallen/PurpleVoice/sbom/placeholder",
+  "name": "PurpleVoice",
+  "documentNamespace": "https://github.com/oliverallen/PurpleVoice/sbom/0a0a58ea1b95d1abd0410939ab82b4944326848f",
   "creationInfo": {
-    "created": "2026-04-29T00:00:00Z",
-    "creators": ["Tool: PurpleVoice-setup.sh-skeleton-2.7-00"],
-    "comment": "PLACEHOLDER — replaced by real Syft scan output in Plan 02.7-02. Do not consume as authoritative SBOM."
+    "licenseListVersion": "3.28",
+    "creators": [
+      "Organization: Anchore, Inc",
+      "Tool: syft-1.43.0"
+    ],
+    "created": "2026-04-29T00:00:00Z"
   },
-  "packages": [],
-  "relationships": [],
-  "annotations": []
+  "packages": [
+    {
+      "name": "PurpleVoice",
+      "SPDXID": "SPDXRef-DocumentRoot-Directory-PurpleVoice",
+      "versionInfo": "0a0a58e",
+      "supplier": "Organization: PurpleVoice Project",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "primaryPackagePurpose": "FILE"
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relatedSpdxElement": "SPDXRef-DocumentRoot-Directory-PurpleVoice",
+      "relationshipType": "DESCRIBES"
+    }
+  ],
+  "annotations": [
+    {
+      "annotationDate": "2026-04-29T00:00:00Z",
+      "annotationType": "OTHER",
+      "annotator": "Tool: PurpleVoice-setup.sh",
+      "comment": "system-context: macOS-version=15.7.5 (24G624)"
+    },
+    {
+      "annotationDate": "2026-04-29T00:00:00Z",
+      "annotationType": "OTHER",
+      "annotator": "Tool: PurpleVoice-setup.sh",
+      "comment": "system-context: hardware-platform=arm64 (Apple Silicon)"
+    },
+    {
+      "annotationDate": "2026-04-29T00:00:00Z",
+      "annotationType": "OTHER",
+      "annotator": "Tool: PurpleVoice-setup.sh",
+      "comment": "system-context: xcode-clt-version=26.2.0.0.1.1764812424"
+    },
+    {
+      "annotationDate": "2026-04-29T00:00:00Z",
+      "annotationType": "OTHER",
+      "annotator": "Tool: PurpleVoice-setup.sh",
+      "comment": "system-context: brew-version=5.1.8"
+    }
+  ]
 }
