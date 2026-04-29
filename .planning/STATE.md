@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-28T21:30:00.000Z"
+last_updated: "2026-04-29T09:30:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 2
@@ -13,7 +13,7 @@ progress:
 
 # State: voice-cc
 
-**Last updated:** 2026-04-28 (Phase 2 complete — Plan 02-03 live walkthroughs signed off; three coupled Sequoia-15.7.5 regressions discovered + fixed in commit `81334ce`)
+**Last updated:** 2026-04-29 (Phase 2.5 context gathered — name `PurpleVoice` locked, privacy-first positioning established as load-bearing differentiator vs Koe/cloud dictation)
 
 ## Project Reference
 
@@ -26,13 +26,13 @@ progress:
 
 ## Current Position
 
-Phase: 02 (hardening) — COMPLETE
-Next: Phase 2.5 (Branding) — needs `/gsd:discuss-phase 2.5`
+Phase: 02.5 (branding) — DISCUSSION COMPLETE, ready for `/gsd:plan-phase 2.5`
+Next: Plan Phase 2.5 with the captured context
 
 - **Milestone:** v1
-- **Phase:** 02 (hardening) — closed 2026-04-28
-- **Plan:** 4/4 complete (02-00, 02-01, 02-02, 02-03 all signed off)
-- **Status:** Phase 2 closed; awaiting Phase 2.5 kickoff. ROADMAP reordered 2026-04-28 — Phase 3 (Distribution) moved to end per user direction; new v1 sequence: 1 → 2 → 2.5 → 3.5 (HUD) → 4 (QoL) → 3 (Distribution) → 5 (Warm-Process, conditional).
+- **Phase:** 02.5 (branding) — context gathered 2026-04-29
+- **Plan:** 0/N (not yet planned; CONTEXT.md captures decisions)
+- **Status:** Name = `PurpleVoice` (PascalCase brand, lowercase `purplevoice` for module/binary/paths). Privacy-first positioning is the load-bearing differentiator vs Koe (cloud default) / Wispr Flow (subscription) / market broadly. Visual identity locked: lavender `#B388EB` menubar + purple-bg-white-lips 256×256 icon. Tagline: "Local voice dictation. Nothing leaves your Mac." Resumed from 2026-04-28 strategic-decision pause — user chose path A (keep building, position against Koe's cloud default).
 
 ### Progress
 
@@ -117,17 +117,17 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 
 ### Next Action
 
-Phase 2 is closed. Next phase per the reordered roadmap is **Phase 2.5 (Branding)** — needs `/gsd:discuss-phase 2.5` to nail down the product name and the propagation surfaces (Hammerspoon alert text, notification titles/bodies, setup.sh banner, README headers). The hardened Phase 2 substrate is what the brand will be applied to.
+Phase 2.5 context captured. Run `/gsd:plan-phase 2.5` to break the rebrand into atomic plans (likely shape: Plan 02.5-01 string propagation in `voice-cc-record` + `voice-cc-lua/init.lua` + `setup.sh` + `.hammerspoon-init-snippet.lua`; Plan 02.5-02 XDG path rename + setup.sh idempotent migration; Plan 02.5-03 visual identity — menubar lavender colour + 256×256 PNG icon asset; Plan 02.5-04 README header + tagline placement + REQUIREMENTS.md BRD-01..03 elaboration).
 
-After 2.5: Phase 3.5 (HUD), then Phase 4 (QoL), then Phase 3 (Distribution + Public Install + hyperfine), then Phase 5 (Warm-Process, conditional on hyperfine).
-
-Phase 2 verifier was not explicitly run; the two `autonomous: false` checkpoints in Plan 02-03 (TCC notification walkthrough + Accessibility deny walkthrough) plus the inline regression diagnosis served as authoritative live verification.
+After 2.5: Phase 3.5 (HUD), Phase 4 (QoL), Phase 3 (Distribution + hyperfine + public install), Phase 5 (Warm-Process, conditional).
 
 ### Stopped At
 
-Phase 2 complete. All 4 plans signed off. Three coupled Sequoia-15.7.5 regressions were discovered + fixed during Plan 02-03's live walkthroughs (commit `81334ce`); see 02-03-SUMMARY.md for the full deviation history. Phase 2 closure checklist in 02-03-SUMMARY.md is fully ticked. Three Phase 2 follow-ups logged in Open TODOs (replace test_tcc_grep with amplitude test; run staged manual walkthroughs; update Plan 02-01 RESEARCH §4) — none gating Phase 2.5 entry.
+Phase 2.5 discuss-phase complete. CONTEXT.md + DISCUSSION-LOG.md committed at `a34dcdb`. No code changes yet — implementation begins with `/gsd:plan-phase 2.5`.
 
-User intent stated: proceed to Phase 2.5 next; Phase 3 reordered to come after all other v1 phases.
+Local environment: Hammerspoon restored (~/.hammerspoon/init.lua requires uncommented; Hammerspoon launched; Accessibility = true; cmd+shift+e bound). voice-cc dictation loop is functional under the placeholder name; rename ships in Plan 02.5-* execution.
+
+User intent stated: proceed to plan 2.5 next.
 
 ### Last Session Summary
 
