@@ -29,25 +29,81 @@ fi
 # ---------------------------------------------------------------------------
 # Step 2: Homebrew dependencies (D-01, STACK.md "Installation")
 # ---------------------------------------------------------------------------
-if [ ! -d /Applications/Hammerspoon.app ]; then
+if [ "${PURPLEVOICE_OFFLINE:-0}" = "1" ]; then
+  if [ ! -d /Applications/Hammerspoon.app ]; then
+    cat >&2 <<'EOF'
+PurpleVoice: PURPLEVOICE_OFFLINE=1 set but Hammerspoon.app not present at /Applications/Hammerspoon.app.
+
+  Air-gap install: download Hammerspoon-1.1.1.zip from https://www.hammerspoon.org/
+  on a connected machine, USB-transfer, drag Hammerspoon.app to /Applications/,
+  then re-run: PURPLEVOICE_OFFLINE=1 bash setup.sh
+
+  (Homebrew cask install requires network access — see SECURITY.md "Air-Gapped Installation".)
+EOF
+    exit 1
+  fi
+  echo "OFFLINE: Hammerspoon.app present at /Applications/, skipping brew install."
+elif [ ! -d /Applications/Hammerspoon.app ]; then
   echo "Installing Hammerspoon (cask)..."
   brew install --cask hammerspoon
 else
   echo "Hammerspoon.app already present, skipping."
 fi
 
-if brew list sox &>/dev/null; then
+if [ "${PURPLEVOICE_OFFLINE:-0}" = "1" ]; then
+  if [ ! -x /opt/homebrew/bin/sox ]; then
+    cat >&2 <<'EOF'
+PurpleVoice: PURPLEVOICE_OFFLINE=1 set but sox not present at /opt/homebrew/bin/sox.
+
+  Air-gap install: on a connected reference machine run
+    brew fetch sox --bottle
+  (produces tarball at ~/Library/Caches/Homebrew/downloads/), USB-transfer,
+  then on this machine: brew install <local-bottle>.tar.gz
+  OR sneakernet /opt/homebrew/bin/sox + /opt/homebrew/bin/soxi from the
+  reference machine. See SECURITY.md "Air-Gapped Installation".
+EOF
+    exit 1
+  fi
+  echo "OFFLINE: sox present at /opt/homebrew/bin/, skipping brew install."
+elif brew list sox &>/dev/null; then
   echo "sox already installed, skipping."
 else
   echo "Installing sox..."
   brew install sox
 fi
 
-if brew list whisper-cpp &>/dev/null; then
+if [ "${PURPLEVOICE_OFFLINE:-0}" = "1" ]; then
+  if [ ! -x /opt/homebrew/bin/whisper-cli ]; then
+    cat >&2 <<'EOF'
+PurpleVoice: PURPLEVOICE_OFFLINE=1 set but whisper-cli not present at /opt/homebrew/bin/whisper-cli.
+
+  Air-gap install: on a connected reference machine run
+    brew fetch whisper-cpp --bottle
+  (produces tarball at ~/Library/Caches/Homebrew/downloads/), USB-transfer,
+  then on this machine: brew install <local-bottle>.tar.gz
+  OR sneakernet /opt/homebrew/bin/whisper-cli (and any required dylibs)
+  from the reference machine. See SECURITY.md "Air-Gapped Installation".
+EOF
+    exit 1
+  fi
+  echo "OFFLINE: whisper-cli present at /opt/homebrew/bin/, skipping brew install."
+elif brew list whisper-cpp &>/dev/null; then
   echo "whisper-cpp already installed, skipping."
 else
   echo "Installing whisper-cpp..."
   brew install whisper-cpp
+fi
+
+# Phase 2.7 / D-09 (revised): Syft for SBOM regeneration. Syft is a HARD DEP
+# for Phase 2.7 setup (per checker M-3 Option A). SEC-03 substantiation
+# requires a real Syft scan; verify_sbom.sh asserts name=="PurpleVoice".
+# Idempotent install via standard `command -v` check. NOT under
+# PURPLEVOICE_OFFLINE branching — Syft is a precondition for verify_sbom.sh.
+if command -v syft >/dev/null 2>&1; then
+  echo "syft already installed, skipping."
+else
+  echo "Installing syft (Anchore SBOM generator)..."
+  brew install syft
 fi
 
 # ---------------------------------------------------------------------------
@@ -143,6 +199,19 @@ verify_model_checksum() {
 
 if [ -f "$MODEL" ] && verify_model_checksum; then
   echo "Model present at $MODEL, checksum OK, skipping."
+elif [ "${PURPLEVOICE_OFFLINE:-0}" = "1" ]; then
+  cat >&2 <<EOF
+PurpleVoice: PURPLEVOICE_OFFLINE=1 set but Whisper model not sideloaded (or SHA256 mismatch).
+
+  Required path: $MODEL
+  Required SHA256: $MODEL_SHA256
+
+  To obtain on a connected machine:
+    curl -L -o ggml-small.en.bin "$MODEL_URL"
+    shasum -a 256 ggml-small.en.bin   # verify matches above
+    # USB-transfer to this machine and place at the required path.
+EOF
+  exit 1
 else
   if [ -f "$MODEL" ]; then
     echo "Model file exists but checksum mismatched or absent — will resume/redownload."
@@ -172,6 +241,18 @@ SILERO_SIZE_MIN=800000
 
 if [ -f "$SILERO_MODEL" ] && [ "$(stat -f%z "$SILERO_MODEL" 2>/dev/null || echo 0)" -ge "$SILERO_SIZE_MIN" ]; then
   echo "Silero VAD weights present at $SILERO_MODEL, skipping."
+elif [ "${PURPLEVOICE_OFFLINE:-0}" = "1" ]; then
+  cat >&2 <<EOF
+PurpleVoice: PURPLEVOICE_OFFLINE=1 set but Silero VAD weights not sideloaded.
+
+  Required path: $SILERO_MODEL
+  Minimum size: $SILERO_SIZE_MIN bytes
+
+  To obtain on a connected machine:
+    curl -L -o ggml-silero-v6.2.0.bin "$SILERO_URL"
+    # USB-transfer to this machine and place at the required path.
+EOF
+  exit 1
 else
   echo "Downloading Silero VAD weights (~885 KB) from huggingface.co/ggml-org/whisper-vad ..."
   curl -L -C - --fail -o "$SILERO_MODEL" "$SILERO_URL"
