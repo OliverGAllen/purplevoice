@@ -60,18 +60,23 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
 **Verification**: Both `autonomous: false` checkpoints in Plan 02-03 (TCC notification walkthrough + Accessibility deny walkthrough) executed live on macOS Sequoia 15.7.5 and signed off ("approved"). Surfaced + fixed three coupled regressions (commit `81334ce`) — see 02-03-SUMMARY.md "Three Coupled Deviations".
 
 ### Phase 2.5: Branding
-**Goal**: Pick a public-facing product name (replacing the working name "voice-cc") and apply it consistently across all user-visible surfaces. Establish enough brand presence that the public install (Phase 3) and HUD (Phase 3.5) can reference a stable identity. Small phase — naming and propagation, not a full design system.
+**Goal**: Apply the public-facing product name `PurpleVoice` consistently across all user-visible surfaces (replacing the working name "voice-cc"). Stage the brand assets (icon + lavender menubar) so Phase 3.5 HUD and Phase 3 Distribution inherit a stable identity. Small phase — naming and propagation, not a full design system.
 **Depends on**: Phase 2 (brand the production behavior, not the spike). Could technically be done in parallel with Phase 2; sequencing it after keeps the brand decision informed by what users actually experience.
-**Requirements**: TBD — defined during `/gsd:discuss-phase 2.5`. Likely shape:
-  - **BRD-01** — Product name chosen and recorded as authoritative in PROJECT.md with brief rationale
-  - **BRD-02** — All user-visible strings (README, Hammerspoon alerts, install messages, error messages) use the new name; "voice-cc" survives only in repo path, git history, and historical .planning/ artifacts
-  - **BRD-03** *(optional)* — Minimal app icon or menu-bar glyph
+**Requirements**: BRD-01, BRD-02, BRD-03 (formalised during planning 2026-04-29 — name = `PurpleVoice`, privacy-first positioning, lavender #B388EB visual identity)
+  - **BRD-01** — Product name `PurpleVoice` recorded in PROJECT.md as authoritative public-facing name with privacy-first positioning paragraph (load-bearing differentiator vs Koe / Wispr Flow / cloud dictation broadly)
+  - **BRD-02** — All user-visible strings (README, Hammerspoon alerts + 5 notification titles, setup.sh banner, install snippet, error messages, manual walkthroughs) use `PurpleVoice` consistently. `voice-cc` is preserved only in repo path on disk, git history, .planning/ artifacts, and the setup.sh `migrate_xdg_dir` FROM-arg literals (intentional). Tagline `Local voice dictation. Nothing leaves your Mac.` placed in README header, setup.sh banner, and Hammerspoon load alert.
+  - **BRD-03** — Minimal visual identity: 256×256 PNG icon at `assets/icon-256.png` (lavender #B388EB background, white lips silhouette) derived deterministically from `assets/icon.svg` via sips; lavender menubar glyph (#B388EB for both idle and recording, glyph-shape differentiation).
 **Success Criteria** (what must be TRUE):
-  1. A name is chosen and documented in PROJECT.md as the official product name with a one-paragraph rationale (what it suggests, what it avoids).
-  2. README.md, the Hammerspoon Lua module name (or alert strings if module name is preserved for backwards-compat), the `setup.sh` banner, and any other user-visible text use the new name consistently.
-  3. The install process and any future public-facing artifacts (Phase 3) inherit the brand without rework.
-  4. Optional: a minimal icon (Hammerspoon menu-bar glyph override or 256×256 PNG) — punted to Phase 4 QoL if not trivially achievable.
-**Plans**: 4 plans
+  1. `PurpleVoice` is recorded in `.planning/PROJECT.md` as the official product name with a one-paragraph privacy-first rationale.
+  2. `README.md`, the Hammerspoon load alert + 5 notification titles, the `setup.sh` banner, the user-paste snippet, and all manual walkthroughs use `PurpleVoice` consistently. The `require("purplevoice")` line replaces the prior `require("voice-cc")`.
+  3. `assets/icon-256.png` exists at 256×256 with lavender background; menubar is wired into `BRAND.COLOUR_LAVENDER` via hs.styledtext.
+  4. `bash tests/run_all.sh` reports 7 passed / 0 failed (6 existing + new `tests/test_brand_consistency.sh` regression catch).
+  5. Phase 2 hardening invariants survive: Pattern 2 boundary intact (`grep -c WHISPER_BIN purplevoice-record == 2`), all 6 prior unit tests still GREEN.
+**Plans:** 4 plans
+  - [ ] 02.5-01-PLAN.md — String propagation in code surfaces (rename voice-cc-record → purplevoice-record, voice-cc-lua/ → purplevoice-lua/, env vars VOICE_CC_* → PURPLEVOICE_*, 5 notification titles, load alert, hs.notify orphan-tag cleanup); BRD-02
+  - [ ] 02.5-02-PLAN.md — XDG path rename + idempotent setup.sh migration (4-state guard for ~/.config|.local/share|.cache/voice-cc/ → purplevoice/, symlink hygiene, banner tagline + new require line); BRD-02
+  - [ ] 02.5-03-PLAN.md — Visual identity (assets/icon.svg + sips → assets/icon-256.png, menubar lavender via BRAND.COLOUR_LAVENDER + outline/filled glyph differentiation); BRD-03
+  - [ ] 02.5-04-PLAN.md — Documentation closure (PROJECT.md name + positioning, formal BRD-01..03 in REQUIREMENTS.md, expanded README, CLAUDE.md updates, tests/test_brand_consistency.sh regression catch); BRD-01, BRD-02, BRD-03
 **UI hint**: light (naming + minor visual polish, no full design system)
 
 ### Phase 3.5: Hover UI / HUD
@@ -151,7 +156,7 @@ Listed in **execution order** (Phase 3 reordered to come last in v1; phase numbe
 |---|-------|----------------|--------|-----------|
 | 1 | Phase 1: Spike | 3/3 | Complete | 2026-04-27 |
 | 2 | Phase 2: Hardening | 4/4 | Complete | 2026-04-28 |
-| 3 | Phase 2.5: Branding | 0/0 | Next — needs `/gsd:discuss-phase 2.5` | - |
+| 3 | Phase 2.5: Branding | 0/4 | Planned — ready for `/gsd:execute-phase 2.5` | - |
 | 4 | Phase 3.5: Hover UI / HUD | 0/0 | Queued | - |
 | 5 | Phase 4 (v1.x): Quality of Life | 0/0 | Queued | - |
 | 6 | Phase 3: Distribution & Benchmarking + Public Install | 0/0 | Queued (final v1 phase) | - |
