@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PurpleVoice icon - Phase 2.5 visual identity (BRD-03, D-10).
+     Lavender background #B388EB, centred white lips silhouette, flat-design.
+     Source-of-truth for assets/icon-256.png (regenerate with sips per assets/README.md).
+     Explicit width/height/viewBox required for reliable sips conversion (RESEARCH Pitfall 6). -->
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="256" height="256" viewBox="0 0 256 256">
+  <!-- Lavender background -->
+  <rect width="256" height="256" fill="#B388EB"/>
+  <!-- Stylised lips silhouette: two arcs forming an upper and lower lip.
+       Centred at (128, 128). Width ~128px (~50% canvas), height ~64px (~25% canvas).
+       Path geometry: cubic-bezier-style curves approximating a closed lips shape. -->
+  <path d="M 64 128
+           Q 96 96  128 112
+           Q 160 96  192 128
+           Q 160 168 128 152
+           Q 96 168  64 128 Z"
+        fill="white"/>
+</svg>
