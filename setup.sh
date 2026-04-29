@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# voice-cc Phase 1 setup — idempotent installer.
+# PurpleVoice setup — idempotent installer (Phase 2.5 rebrand of voice-cc).
 #
 # What this does (each step is safe to re-run):
 #   1. Sanity-check that we are on Apple Silicon Homebrew (/opt/homebrew).
@@ -9,7 +9,7 @@
 #   4. Create the XDG directory tree from day one (D-03).
 #   5. Download the Whisper small.en GGML model with resumable curl and
 #      verify SHA256 (D-05, D-06). Skip if file is already present and valid.
-#   6. Seed ~/.config/voice-cc/vocab.txt from vocab.txt.default ONLY if absent
+#   6. Seed ~/.config/purplevoice/vocab.txt from vocab.txt.default ONLY if absent
 #      (D-08 — never clobber user edits).
 #   7. Print next-step reminders for the user (Hammerspoon perms, macOS
 #      Dictation hotkey conflict). Does NOT auto-edit any user config.
@@ -22,7 +22,7 @@ set -euo pipefail
 # Step 1: Apple Silicon Homebrew sanity check
 # ---------------------------------------------------------------------------
 if [ ! -d /opt/homebrew ]; then
-  echo "voice-cc requires Apple Silicon Homebrew at /opt/homebrew (not detected). Aborting." >&2
+  echo "PurpleVoice requires Apple Silicon Homebrew at /opt/homebrew (not detected). Aborting." >&2
   exit 1
 fi
 
@@ -62,20 +62,65 @@ done
 echo "OK: sox, soxi, whisper-cli present at /opt/homebrew/bin/"
 
 # ---------------------------------------------------------------------------
+# Step 3b: One-time migration from voice-cc → purplevoice (Phase 2.5)
+# ---------------------------------------------------------------------------
+# Idempotent migration of XDG dirs and symlinks created by older voice-cc
+# installs. Per RESEARCH.md "Pattern 2", four-state guard:
+#   only-old → mv          (one-shot migration of this user's data)
+#   both     → warn+skip   (do not clobber either side; user resolves)
+#   only-new → no-op       (already migrated, or fresh install)
+#   neither  → no-op       (fresh install, nothing to do)
+#
+# Models (~190 MB) are MOVED, not copied — same APFS volume, atomic at
+# directory inode level. mv preserves any user-managed symlinks inside the
+# old dir.
+migrate_xdg_dir() {
+  local old="$1"
+  local new="$2"
+  local label="$3"
+  if [ ! -d "$old" ] && [ ! -d "$new" ]; then return 0; fi
+  if [ ! -d "$old" ] && [ -d "$new" ]; then return 0; fi
+  if [ -d "$old" ] && [ -d "$new" ]; then
+    echo "WARN: both $old AND $new exist — leaving both. Resolve manually." >&2
+    return 0
+  fi
+  echo "Migrating $label: $old → $new"
+  mkdir -p "$(dirname "$new")"
+  mv "$old" "$new"
+}
+
+migrate_xdg_dir "$HOME/.config/voice-cc"      "$HOME/.config/purplevoice"      "config"
+migrate_xdg_dir "$HOME/.local/share/voice-cc" "$HOME/.local/share/purplevoice" "data (~190 MB models)"
+migrate_xdg_dir "$HOME/.cache/voice-cc"       "$HOME/.cache/purplevoice"       "cache"
+
+# Symlink hygiene — old symlinks point at filenames that no longer exist
+# (Plan 02.5-01 renamed voice-cc-record → purplevoice-record and
+# voice-cc-lua/ → purplevoice-lua/). Remove stale symlinks before Step 4
+# creates the new XDG dirs and Step 6c (below) recreates the symlinks.
+if [ -L "$HOME/.local/bin/voice-cc-record" ]; then
+  rm "$HOME/.local/bin/voice-cc-record"
+  echo "Removed stale symlink: ~/.local/bin/voice-cc-record"
+fi
+if [ -L "$HOME/.hammerspoon/voice-cc" ]; then
+  rm "$HOME/.hammerspoon/voice-cc"
+  echo "Removed stale symlink: ~/.hammerspoon/voice-cc"
+fi
+
+# ---------------------------------------------------------------------------
 # Step 4: Create XDG directory tree (D-03)
 # ---------------------------------------------------------------------------
 mkdir -p \
-  "$HOME/.config/voice-cc" \
-  "$HOME/.local/share/voice-cc/models" \
-  "$HOME/.cache/voice-cc" \
+  "$HOME/.config/purplevoice" \
+  "$HOME/.local/share/purplevoice/models" \
+  "$HOME/.cache/purplevoice" \
   "$HOME/.local/bin" \
-  "$HOME/.hammerspoon/voice-cc"
-echo "OK: XDG directories ensured (~/.config/voice-cc, ~/.local/share/voice-cc/models, ~/.cache/voice-cc, ~/.local/bin, ~/.hammerspoon/voice-cc)"
+  "$HOME/.hammerspoon/purplevoice"
+echo "OK: XDG directories ensured (~/.config/purplevoice, ~/.local/share/purplevoice/models, ~/.cache/purplevoice, ~/.local/bin, ~/.hammerspoon/purplevoice)"
 
 # ---------------------------------------------------------------------------
 # Step 5: Download Whisper model with resume + checksum verify (D-05, D-06)
 # ---------------------------------------------------------------------------
-MODEL="$HOME/.local/share/voice-cc/models/ggml-small.en.bin"
+MODEL="$HOME/.local/share/purplevoice/models/ggml-small.en.bin"
 MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin"
 # SHA256 for ggml-small.en.bin from the HuggingFace ggerganov/whisper.cpp mirror.
 # Verified 2026-04-27 against the upstream `x-linked-etag` HTTP header on
@@ -117,7 +162,7 @@ fi
 # Silero VAD ggml weights for whisper.cpp's --vad flag. Without this file,
 # --vad is a silent no-op. Sourced from the official ggml-org Hugging Face
 # repo (see 02-RESEARCH.md §2). 885 KB; size sanity check >= 800000 bytes.
-SILERO_MODEL="$HOME/.local/share/voice-cc/models/ggml-silero-v6.2.0.bin"
+SILERO_MODEL="$HOME/.local/share/purplevoice/models/ggml-silero-v6.2.0.bin"
 SILERO_URL="https://huggingface.co/ggml-org/whisper-vad/resolve/main/ggml-silero-v6.2.0.bin"
 SILERO_SIZE_MIN=800000
 
@@ -135,13 +180,13 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 6: Seed vocab.txt.default -> ~/.config/voice-cc/vocab.txt (D-08, no-clobber)
+# Step 6: Seed vocab.txt.default -> ~/.config/purplevoice/vocab.txt (D-08, no-clobber)
 # ---------------------------------------------------------------------------
-VOCAB_DEST="$HOME/.config/voice-cc/vocab.txt"
+VOCAB_DEST="$HOME/.config/purplevoice/vocab.txt"
 VOCAB_SRC="$(dirname "$0")/vocab.txt.default"
 if [ ! -f "$VOCAB_DEST" ]; then
   if [ ! -f "$VOCAB_SRC" ]; then
-    echo "Missing source: $VOCAB_SRC (run setup.sh from the voice-cc repo root)." >&2
+    echo "Missing source: $VOCAB_SRC (run setup.sh from the PurpleVoice repo root)." >&2
     exit 1
   fi
   cp "$VOCAB_SRC" "$VOCAB_DEST"
@@ -154,16 +199,30 @@ fi
 # Step 6b: Install denylist.txt (Phase 2 / TRA-06) — project-owned, always-overwrite
 # ---------------------------------------------------------------------------
 # Hallucination denylist is project-owned (we add new known-hallucinations as
-# the community reports them). Always overwrites ~/.config/voice-cc/denylist.txt.
+# the community reports them). Always overwrites ~/.config/purplevoice/denylist.txt.
 # If a user wants to pin a custom version, they can `chmod -w` the destination.
-DENYLIST_DEST="$HOME/.config/voice-cc/denylist.txt"
+DENYLIST_DEST="$HOME/.config/purplevoice/denylist.txt"
 DENYLIST_SRC="$(dirname "$0")/config/denylist.txt"
 if [ ! -f "$DENYLIST_SRC" ]; then
-  echo "Missing source: $DENYLIST_SRC (run setup.sh from the voice-cc repo root)." >&2
+  echo "Missing source: $DENYLIST_SRC (run setup.sh from the PurpleVoice repo root)." >&2
   exit 1
 fi
 cp "$DENYLIST_SRC" "$DENYLIST_DEST"
 echo "OK: denylist.txt installed at $DENYLIST_DEST (project-owned, overwritten on every setup.sh run)."
+
+# ---------------------------------------------------------------------------
+# Step 6c: Install symlinks (D-03, D-04 — purplevoice-record + purplevoice-lua)
+# ---------------------------------------------------------------------------
+# Idempotent. Recreate even if the source target was renamed (Plan 02.5-01).
+# Uses absolute paths via $(pwd) which is the repo root because Step 0 hasn't
+# changed directory; setup.sh is invoked as `bash setup.sh` from repo root.
+REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+
+ln -sfn "$REPO_ROOT/purplevoice-record" "$HOME/.local/bin/purplevoice-record"
+echo "OK: symlink ~/.local/bin/purplevoice-record → $REPO_ROOT/purplevoice-record"
+
+ln -sfn "$REPO_ROOT/purplevoice-lua" "$HOME/.hammerspoon/purplevoice"
+echo "OK: symlink ~/.hammerspoon/purplevoice → $REPO_ROOT/purplevoice-lua"
 
 # ---------------------------------------------------------------------------
 # Step 7: Next-step reminders (do NOT auto-edit anything)
@@ -171,13 +230,18 @@ echo "OK: denylist.txt installed at $DENYLIST_DEST (project-owned, overwritten o
 cat <<'EOF'
 
 ----------------------------------------------------------------------
-Phase 1 setup complete.
+PurpleVoice setup complete.
+
+Local voice dictation. Nothing leaves your Mac.
 
 Next manual steps (one-time):
-  - Hotkey will be cmd+option+space (push-and-hold) once Plan 03 wires Hammerspoon.
+  - Add to ~/.hammerspoon/init.lua (paste this exact line):
+      require("purplevoice")
+    (If you previously had `require("voice-cc")`, replace it with the line above.)
   - On first Hammerspoon launch, grant Microphone + Accessibility permissions
     (System Settings -> Privacy & Security -> Microphone / Accessibility).
   - Disable the macOS Dictation hotkey to avoid conflicts
     (System Settings -> Keyboard -> Dictation -> Shortcut -> Off).
+  - Hotkey: cmd+shift+e (push-and-hold).
 ----------------------------------------------------------------------
 EOF
