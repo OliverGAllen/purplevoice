@@ -1,6 +1,84 @@
 #!/usr/bin/env bash
-# tests/security/verify_air_gap.sh — SEC-06 PURPLEVOICE_OFFLINE=1 sideload simulation.
-# Skeleton: Plan 02.7-02 implements 2 invariants (sideload populated → exit 0; missing → exit 1).
+# tests/security/verify_air_gap.sh — PurpleVoice Phase 2.7 air-gap verification.
+# Asserts: PURPLEVOICE_OFFLINE=1 mode in setup.sh is honoured.
+#   Invariant 1: with PURPLEVOICE_OFFLINE=1 + all sideload artefacts present,
+#                setup.sh exits 0 (no network calls).
+#   Invariant 2: with PURPLEVOICE_OFFLINE=1 + Whisper model missing,
+#                setup.sh exits 1 with actionable error message containing
+#                'PURPLEVOICE_OFFLINE=1 set but Whisper model not sideloaded'.
+# Source of claim: SECURITY.md §"Air-Gapped Installation".
+# Sudo: not required. Disk: ~488 MB temp space (Pitfall 12).
 set -uo pipefail
-echo "verify_air_gap.sh: Plan 02.7-02 not yet implemented" >&2
-exit 1
+cd "$(dirname "$0")/../.."
+REPO_ROOT="$(pwd)"
+
+MODEL="$HOME/.local/share/purplevoice/models/ggml-small.en.bin"
+SAVED_MODEL="/tmp/purplevoice-air-gap-saved-model.bin"
+LOG_OFFLINE_OK="/tmp/purplevoice-offline-ok.log"
+LOG_OFFLINE_MISSING="/tmp/purplevoice-offline-missing.log"
+
+fail() {
+  echo "FAIL [verify_air_gap.sh]: $1" >&2
+  exit 1
+}
+
+# Pitfall 12: trap-restore the model on EXIT to guarantee restoration even
+# if the test crashes mid-run.
+cleanup() {
+  if [ -f "$SAVED_MODEL" ] && [ ! -f "$MODEL" ]; then
+    mv "$SAVED_MODEL" "$MODEL" 2>/dev/null || true
+  fi
+  rm -f "$LOG_OFFLINE_OK" "$LOG_OFFLINE_MISSING"
+}
+trap cleanup EXIT INT TERM
+
+# -------------------------------------------------------------------------
+# Pre-flight: model must currently exist (we're testing an installed system).
+# -------------------------------------------------------------------------
+if [ ! -f "$MODEL" ]; then
+  fail "pre-flight: $MODEL not present — run setup.sh (online) before verify_air_gap.sh"
+fi
+
+# -------------------------------------------------------------------------
+# Invariant 1: PURPLEVOICE_OFFLINE=1 + sideload populated → setup.sh exits 0
+# -------------------------------------------------------------------------
+echo "  verify_air_gap.sh: testing Invariant 1 (sideload populated)..."
+if PURPLEVOICE_OFFLINE=1 bash setup.sh > "$LOG_OFFLINE_OK" 2>&1; then
+  if ! grep -q "OFFLINE:" "$LOG_OFFLINE_OK"; then
+    fail "Invariant 1: setup.sh ran but produced no OFFLINE log lines (guards may not be wired)"
+  fi
+  echo "  Invariant 1 PASS"
+else
+  fail "Invariant 1: PURPLEVOICE_OFFLINE=1 setup.sh exited non-zero with sideload populated. Log: $LOG_OFFLINE_OK"
+fi
+
+# -------------------------------------------------------------------------
+# Invariant 2: PURPLEVOICE_OFFLINE=1 + missing model → setup.sh exits 1 with
+#              actionable error containing the expected error message.
+# -------------------------------------------------------------------------
+echo "  verify_air_gap.sh: testing Invariant 2 (model missing — atomic mv per Pitfall 12)..."
+mv "$MODEL" "$SAVED_MODEL"   # atomic same-fs mv
+set +e
+PURPLEVOICE_OFFLINE=1 bash setup.sh > "$LOG_OFFLINE_MISSING" 2>&1
+EXIT_CODE=$?
+set -e
+mv "$SAVED_MODEL" "$MODEL"   # restore immediately
+
+if [ "$EXIT_CODE" -eq 0 ]; then
+  fail "Invariant 2: PURPLEVOICE_OFFLINE=1 setup.sh exited 0 with model missing (should exit 1)"
+fi
+
+if ! grep -q "PURPLEVOICE_OFFLINE=1 set but Whisper model not sideloaded" "$LOG_OFFLINE_MISSING"; then
+  fail "Invariant 2: actionable error message missing from setup.sh stderr. Log: $LOG_OFFLINE_MISSING"
+fi
+echo "  Invariant 2 PASS"
+
+# -------------------------------------------------------------------------
+# Verify the actionable message contains the sideload guidance
+# -------------------------------------------------------------------------
+if ! grep -q "$MODEL" "$LOG_OFFLINE_MISSING"; then
+  fail "Invariant 2: error message does not reference required path $MODEL"
+fi
+
+echo "PASS [verify_air_gap.sh]: PURPLEVOICE_OFFLINE=1 mode honoured (2 invariants verified)"
+exit 0
