@@ -96,12 +96,13 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
   3. SBOM file (`SBOM.spdx.json` or similar) exists in repo, lists all runtime dependencies with versions and licenses.
   4. Code signing + notarisation (or explicit "not yet — applies in Phase 3") status is documented honestly.
   5. PROJECT.md positioning paragraph includes governments / institutions in the audience description (this lands in Phase 2.5 BRD-01 but Phase 2.7 verifies the claims are substantiated).
-**Plans:** 5 plans
+**Plans:** 6 plans
   - [ ] 02.7-00-PLAN.md — Wave 0: test infrastructure (tests/security/) + Syft conditional install + setup.sh PURPLEVOICE_OFFLINE=1 guards + SECURITY.md skeleton + SBOM.spdx.json placeholder
   - [ ] 02.7-01-PLAN.md — Threat model (STRIDE + LINDDUN) + Scope (assets/trust boundaries) + tests/test_security_md_framing.sh D-17 lint (Wave 1, parallel with 02.7-02)
   - [ ] 02.7-02-PLAN.md — Verification scripts (verify_egress 3-layer chain, verify_sbom, verify_air_gap, verify_signing) + setup.sh Step 8 SBOM regen with deterministic post-process (Wave 1, parallel with 02.7-01)
-  - [ ] 02.7-03-PLAN.md — Gap analysis: NIST SP 800-53 Rev 5 / Low-baseline (deep per-control) + 6 framed framework sections (FIPS 140-3 / FedRAMP / Common Criteria / HIPAA / SOC 2 / ISO 27001) (Wave 2)
-  - [ ] 02.7-04-PLAN.md — Documentation finalisation: SECURITY.md complete (TL;DR + Audience Entry-Points + Code Signing + Reproducible Build + Vuln Disclosure + How to Verify) + verify_reproducibility.sh impl + REQUIREMENTS.md SEC-01..06 formalisation + README.md expansion (Wave 3)
+  - [ ] 02.7-03a-PLAN.md — Gap analysis: NIST SP 800-53 Rev 5 / Low-baseline (deep per-control mapping; ≥15 control rows from AC, AU, IA, SC, SI, PT, CM, MP, SA, SR families) (Wave 2 — split from old 03 per checker M-5)
+  - [ ] 02.7-03b-PLAN.md — Gap analysis: 6 framed framework sections (FIPS 140-3 / FedRAMP-tailored / Common Criteria / HIPAA / SOC 2 / ISO 27001) with disclaimer-first Pitfall-11 framing (Wave 3 — split from old 03 per checker M-5; sequential with 03a to avoid SECURITY.md merge conflicts)
+  - [ ] 02.7-04-PLAN.md — Documentation finalisation: SECURITY.md complete (Tasks 4-1a navigation + 4-1b verification cross-refs + 4-1c deferral framing — TL;DR + Audience Entry-Points + How to Verify + Egress Verification + SBOM + Air-Gap + Code Signing + Reproducible Build + Vuln Disclosure) + verify_reproducibility.sh impl + REQUIREMENTS.md SEC-01..06 formalisation + README.md expansion (Wave 4)
 **UI hint**: none (research + documentation + verification scripts; no user-visible UI surface)
 **Research flag**: yes — needs `/gsd:research-phase 2.7` before planning. Government-grade software claims are subtle; researcher should investigate Apple notarisation tradeoffs, current SBOM tool ecosystem (Syft, CycloneDX), and the actual auditability gap between "claims" vs "verifiable claims" for an open-source local-only tool.
 
@@ -183,7 +184,7 @@ Listed in **execution order** (Phase 3 reordered to come last in v1; phase numbe
 | 1 | Phase 1: Spike | 3/3 | Complete | 2026-04-27 |
 | 2 | Phase 2: Hardening | 4/4 | Complete | 2026-04-28 |
 | 3 | Phase 2.5: Branding | 3/4 | Wave 2 done — Plan 02.5-01, 02.5-02, 02.5-03 complete 2026-04-29; Wave 3 (02.5-04 docs closure) unblocked | 2026-04-29 |
-| 4 | Phase 2.7: Security Posture & Government Readiness | 0/5 | Planned — 5 plans across 4 waves; ready for /gsd:execute-phase 2.7 | - |
+| 4 | Phase 2.7: Security Posture & Government Readiness | 0/6 | Planned — 6 plans across 5 waves (00 → 01,02 parallel → 03a → 03b → 04); ready for /gsd:execute-phase 2.7 | - |
 | 5 | Phase 3.5: Hover UI / HUD | 0/0 | Queued | - |
 | 6 | Phase 4 (v1.x): Quality of Life | 0/0 | Queued | - |
 | 7 | Phase 3: Distribution & Benchmarking + Public Install | 0/0 | Queued (final v1 phase) | - |
