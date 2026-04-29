@@ -114,8 +114,12 @@ mkdir -p \
   "$HOME/.local/share/purplevoice/models" \
   "$HOME/.cache/purplevoice" \
   "$HOME/.local/bin" \
-  "$HOME/.hammerspoon/purplevoice"
-echo "OK: XDG directories ensured (~/.config/purplevoice, ~/.local/share/purplevoice/models, ~/.cache/purplevoice, ~/.local/bin, ~/.hammerspoon/purplevoice)"
+  "$HOME/.hammerspoon"
+# NOTE: ~/.hammerspoon/purplevoice is intentionally NOT created here —
+# Step 6c (below) creates it as a symlink via `ln -sfn`, which cannot
+# overwrite an existing directory. Creating the dir here would race
+# with the symlink install step.
+echo "OK: XDG directories ensured (~/.config/purplevoice, ~/.local/share/purplevoice/models, ~/.cache/purplevoice, ~/.local/bin)"
 
 # ---------------------------------------------------------------------------
 # Step 5: Download Whisper model with resume + checksum verify (D-05, D-06)

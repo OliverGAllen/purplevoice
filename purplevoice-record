@@ -29,12 +29,12 @@ SOXI_BIN="${SOXI_BIN:-/opt/homebrew/bin/soxi}"
 WHISPER_BIN="${WHISPER_BIN:-/opt/homebrew/bin/whisper-cli}"; [ -x "$WHISPER_BIN" ] || { echo "PurpleVoice: whisper-cli missing — run setup.sh" >&2; exit 11; }
 
 # --- Paths (D-03 XDG layout) -------------------------------------------
-MODEL="${PURPLEVOICE_MODEL:-$HOME/.local/share/voice-cc/models/ggml-small.en.bin}"
-SILERO_MODEL="${PURPLEVOICE_SILERO_MODEL:-$HOME/.local/share/voice-cc/models/ggml-silero-v6.2.0.bin}"
-VOCAB_FILE="$HOME/.config/voice-cc/vocab.txt"
-DENYLIST="$HOME/.config/voice-cc/denylist.txt"
+MODEL="${PURPLEVOICE_MODEL:-$HOME/.local/share/purplevoice/models/ggml-small.en.bin}"
+SILERO_MODEL="${PURPLEVOICE_SILERO_MODEL:-$HOME/.local/share/purplevoice/models/ggml-silero-v6.2.0.bin}"
+VOCAB_FILE="$HOME/.config/purplevoice/vocab.txt"
+DENYLIST="$HOME/.config/purplevoice/denylist.txt"
 VAD_THRESHOLD="${PURPLEVOICE_VAD_THRESHOLD:-0.50}"
-WAV_DIR="/tmp/voice-cc"
+WAV_DIR="/tmp/purplevoice"
 WAV="$WAV_DIR/recording.wav"
 SOX_ERR_LOG="$WAV_DIR/sox.stderr"
 

@@ -37,8 +37,8 @@ fi
 # this test can pre-stage a WAV and assert exit code 2 directly. Until then,
 # the unit predicate above is the minimum acceptance.
 if [ "${PURPLEVOICE_INTEGRATION:-0}" = "1" ]; then
-  mkdir -p /tmp/voice-cc
-  short_tap_wav /tmp/voice-cc/recording.wav
+  mkdir -p /tmp/purplevoice
+  short_tap_wav /tmp/purplevoice/recording.wav
   if PURPLEVOICE_TEST_SKIP_SOX=1 ./purplevoice-record >/dev/null 2>&1; then
     EXIT_CODE=0
   else

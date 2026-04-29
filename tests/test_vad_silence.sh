@@ -13,8 +13,8 @@ cd "$(dirname "$0")/.."
 
 source tests/lib/sample_audio.sh
 WHISPER_BIN="${WHISPER_BIN:-/opt/homebrew/bin/whisper-cli}"
-MODEL="${MODEL:-$HOME/.local/share/voice-cc/models/ggml-small.en.bin}"
-SILERO="${SILERO_MODEL:-$HOME/.local/share/voice-cc/models/ggml-silero-v6.2.0.bin}"
+MODEL="${MODEL:-$HOME/.local/share/purplevoice/models/ggml-small.en.bin}"
+SILERO="${SILERO_MODEL:-$HOME/.local/share/purplevoice/models/ggml-silero-v6.2.0.bin}"
 
 if [ ! -f "$SILERO" ]; then
   echo "FAIL: Silero VAD weights not at $SILERO (run setup.sh)"

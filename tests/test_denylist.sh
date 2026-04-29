@@ -12,7 +12,7 @@
 # behind PURPLEVOICE_INTEGRATION=1. Logic-only test is sufficient for Wave 0.
 set -uo pipefail
 
-DENYLIST="$HOME/.config/voice-cc/denylist.txt"
+DENYLIST="$HOME/.config/purplevoice/denylist.txt"
 
 if [ ! -r "$DENYLIST" ]; then
   echo "FAIL: denylist not present at $DENYLIST (run setup.sh first)"

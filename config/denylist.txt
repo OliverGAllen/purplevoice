@@ -1,10 +1,10 @@
-# ~/.config/voice-cc/denylist.txt — Whisper hallucination denylist
+# ~/.config/purplevoice/denylist.txt — Whisper hallucination denylist
 # Compiled from whisper.cpp #1592, #1724 and openai/whisper #1873.
 # Each line is a complete hallucinated transcript that MUST be dropped silently.
 # Substring matching is FORBIDDEN — only whole-transcript exact matches drop.
 # Comparison is case-insensitive after collapsing all whitespace.
 # This file is project-owned: setup.sh always overwrites it on re-run.
-# To pin a custom version, chmod -w ~/.config/voice-cc/denylist.txt after install.
+# To pin a custom version, chmod -w ~/.config/purplevoice/denylist.txt after install.
 
 thank you
 thank you.

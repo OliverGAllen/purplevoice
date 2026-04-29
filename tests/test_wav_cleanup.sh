@@ -2,7 +2,7 @@
 # tests/test_wav_cleanup.sh — ROB-04 + Phase-1 TODO (c)
 #
 # Asserts that after a purplevoice-record invocation (any exit path), the
-# /tmp/voice-cc/ directory contains no leftover *.wav, *.txt, or sox.stderr
+# /tmp/purplevoice/ directory contains no leftover *.wav, *.txt, or sox.stderr
 # files. Tests the EXIT trap that Plan 02-01 must add.
 #
 # RED until Plan 02-01 adds the PURPLEVOICE_TEST_SKIP_SOX hook AND the EXIT
@@ -18,24 +18,24 @@ if ! grep -q 'PURPLEVOICE_TEST_SKIP_SOX' purplevoice-record 2>/dev/null; then
 fi
 
 source tests/lib/sample_audio.sh
-mkdir -p /tmp/voice-cc
-rm -f /tmp/voice-cc/* 2>/dev/null
+mkdir -p /tmp/purplevoice
+rm -f /tmp/purplevoice/* 2>/dev/null
 
 # Pre-stage a real (silent, 100ms) WAV so the duration gate aborts at exit 2
 # — quickest path that exercises the EXIT trap without requiring a microphone
 # or a slow whisper-cli invocation.
-silence_wav /tmp/voice-cc/recording.wav 0.1
+silence_wav /tmp/purplevoice/recording.wav 0.1
 
 # Invoke purplevoice-record with the test hook; expect non-zero exit (gate aborts)
 PURPLEVOICE_TEST_SKIP_SOX=1 ./purplevoice-record >/dev/null 2>&1 || true
 
-# Now assert /tmp/voice-cc/ is empty (or contains no leftover *.wav, *.txt,
+# Now assert /tmp/purplevoice/ is empty (or contains no leftover *.wav, *.txt,
 # sox.stderr — the three artifact types Plan 02-01 must clean up).
-LEFTOVERS=$(find /tmp/voice-cc -maxdepth 1 \( -name "*.wav" -o -name "*.txt" -o -name "sox.stderr" \) 2>/dev/null)
+LEFTOVERS=$(find /tmp/purplevoice -maxdepth 1 \( -name "*.wav" -o -name "*.txt" -o -name "sox.stderr" \) 2>/dev/null)
 if [ -z "$LEFTOVERS" ]; then
-  echo "PASS: /tmp/voice-cc/ contains no *.wav, *.txt, or sox.stderr after invocation"
+  echo "PASS: /tmp/purplevoice/ contains no *.wav, *.txt, or sox.stderr after invocation"
   exit 0
 else
-  echo "FAIL: /tmp/voice-cc/ has leftovers after invocation: $LEFTOVERS"
+  echo "FAIL: /tmp/purplevoice/ has leftovers after invocation: $LEFTOVERS"
   exit 1
 fi

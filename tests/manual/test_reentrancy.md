@@ -17,19 +17,19 @@
 
 - At any instant, `pgrep -fa sox | wc -l` returns 0 or 1 (never 2+).
 - Menubar dot reliably returns to grey after every release.
-- No accumulation of WAV files in /tmp/voice-cc/ (cross-check with ROB-04 cleanup).
+- No accumulation of WAV files in /tmp/purplevoice/ (cross-check with ROB-04 cleanup).
 
 ## Failure modes
 
 - Two sox processes visible simultaneously → `isRecording` guard not honoured. Check `if isRecording then return end` at top of onPress.
 - Dot stuck red after burst → state not reset; check pcall-wrapped finally block calls `resetState()` AND `setMenubarIdle()`.
-- Multiple WAVs left in /tmp/voice-cc/ after burst → ROB-04 cleanup is broken, not ROB-01. Run `tests/test_wav_cleanup.sh` to confirm.
+- Multiple WAVs left in /tmp/purplevoice/ after burst → ROB-04 cleanup is broken, not ROB-01. Run `tests/test_wav_cleanup.sh` to confirm.
 - pgrep shows TWO sox processes → re-entrancy guard is being bypassed. Likely cause: the guard is set inside the `hs.task` callback (async), so back-to-back press events fire before the guard is set. Move `isRecording = true` to the synchronous head of the press handler.
 
 ## Sign-off
 
 - [ ] At most ONE sox process during burst
 - [ ] Menubar returns to grey after every release
-- [ ] No accumulation of WAV files in /tmp/voice-cc/
+- [ ] No accumulation of WAV files in /tmp/purplevoice/
 
 **Tester:** _____________  **Date:** _____________
