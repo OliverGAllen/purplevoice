@@ -156,7 +156,87 @@ The following threats are explicitly out of scope, with rationale:
 
 ## NIST SP 800-53 Rev 5 / Low-baseline Mapping
 
-<!-- TODO: Plan 02.7-03a fills this section (per-control table for AC, AU, IA, SC, SI, PT + LIMITED families; Met/Partial/Not Pursued/N/A vocabulary per Pitfall 15; Rev 5 IDs only per Pitfall 13). -->
+### Framing
+
+PurpleVoice's NIST 800-53 mapping targets the **Rev 5 Low-baseline** (per SP 800-53B). Moderate and High baselines invoke continuous monitoring (SC-5(2)), incident response procedures (IR family), and audit-record retention (AU-11) — all organisational controls that don't apply to a single-binary local tool. Claiming Low-baseline alignment is honest engineering; claiming Moderate would over-reach.
+
+All control IDs reference NIST SP 800-53 Rev 5 (csrc.nist.gov/pubs/sp/800/53/r5/upd1/final). No Rev 4-only artefacts are used here — specifically, no AC-3 sub-letter subdivisions and no Rev-4-style SC-12 enhancement numbers that don't exist in Rev 5 in the same form.
+
+Status vocabulary:
+
+- **Met** — mitigation in place + verifiable (cross-referenced to a verification script or codebase reference).
+- **Partial** — mitigation exists with documented residual risk.
+- **Not Pursued** — engineering choice, with rationale (privacy > accountability for a personal tool).
+- **N/A** — does not apply, with rationale.
+
+### Applicability Matrix (Family-level)
+
+NIST 800-53 Rev 5 has 20 control families. For a single-binary local-only personal tool, the following families apply; all others are **N/A by tool-class** (organisational concerns):
+
+| Family | Code | Applies? | Rationale |
+|---|---|---|---|
+| Access Control | AC | Yes | TCC permission model, hotkey scoping, who-can-invoke-PurpleVoice |
+| Audit and Accountability | AU | Limited | No logging by design (privacy > accountability); documented explicitly |
+| Awareness and Training | AT | N/A | Organisational; single-developer tool |
+| Assessment, Authorization, and Monitoring | CA | N/A | Organisational process |
+| Configuration Management | CM | Limited | Model file SHA256, idempotent setup.sh, config dotfiles — partial application |
+| Contingency Planning | CP | N/A | Organisational; PurpleVoice is stateless |
+| Identification and Authentication | IA | Yes | TCC binds permissions to bundle-id; explicit grant model |
+| Incident Response | IR | N/A | Organisational |
+| Maintenance | MA | N/A | Organisational |
+| Media Protection | MP | Limited | Ephemeral WAV cleanup is the closest analogue; partial |
+| Physical and Environmental Protection | PE | N/A | OS-level / facility-level |
+| Planning | PL | N/A | Organisational |
+| Program Management | PM | N/A | Organisational |
+| Personnel Security | PS | N/A | Organisational |
+| PII Processing and Transparency | PT | Yes | Tool processes voice (PII per most interpretations); transparency = this document |
+| Risk Assessment | RA | N/A | Organisational |
+| System and Services Acquisition | SA | Limited | SBOM (D-11) is the SA-equivalent for a tool |
+| System and Communications Protection | SC | Yes | Zero-egress claim; clipboard transient marker; process-tree silence — central to PurpleVoice |
+| System and Information Integrity | SI | Yes | Model SHA256, denylist filter, hallucination suppression |
+| Supply Chain Risk Management | SR | Limited | SBOM + brew + HuggingFace mirror = supply-chain surface |
+
+### Per-Control Mapping (Yes / Limited families)
+
+| Control ID | Title (abbreviated) | Status | Rationale + Substantiation |
+|---|---|---|---|
+| **AC-3** | Access Enforcement | Met | TCC enforces Microphone + Accessibility on the Hammerspoon bundle-id (`org.hammerspoon.Hammerspoon`); hotkey requires user-scoped hardware access. Verified by macOS System Settings → Privacy & Security panel state. |
+| **AC-6** | Least Privilege | Met | `sox` + the transcription binary run as the user UID; no SUID bits; no privileged operations. Verified by `ls -l /opt/homebrew/bin/sox /opt/homebrew/bin/whisper-cli`. |
+| **AC-14** | Permitted Actions w/o Identification | Met | No anonymous usage path; user must hold a physical hotkey on their own keyboard; recording is bound to the macOS user session. |
+| **AU-2** | Event Logging | Not Pursued | By design. Privacy > accountability for a personal tool. Cross-reference STRIDE §Repudiation row in the [Threat Model](#threat-model). v1.x QOL-04 (10 MB rolling history log) is the opt-in mitigation if a user opts in. |
+| **AU-12** | Audit Record Generation | Not Pursued | Same rationale as AU-2. |
+| **IA-2** | User Identification & Authentication | Met (via OS) | macOS user session = identification; PurpleVoice inherits. No PurpleVoice-issued credentials. |
+| **IA-5** | Authenticator Management | N/A | PurpleVoice does not issue authenticators. |
+| **SC-7** | Boundary Protection | Met | Zero outbound network egress at runtime. Verified by `tests/security/verify_egress.sh` (3-layer evidence: lsof + nettop + pf+tcpdump). See [Egress Verification](#egress-verification) for methodology + Sequoia 15.7.5 caveat. |
+| **SC-8** | Transmission Confidentiality & Integrity | N/A | No transmission to protect — PurpleVoice is local-only at runtime. |
+| **SC-12** | Cryptographic Key Establishment & Management | N/A | No keys; PurpleVoice performs no cryptographic operations on user data. The only cryptographic primitive is SHA-256 for model file integrity (install-time) — see SI-7. |
+| **SC-28** | Protection of Information at Rest | Partial | WAV files are ephemeral (`EXIT` trap cleanup including SIGINT per ROB-04); no transcript persistence beyond opt-in v1.x history; user's `~/.config/purplevoice/` is at-rest-protected by macOS FileVault if the user has enabled it (organisation's responsibility). |
+| **SI-2** | Flaw Remediation | Partial | Brew-tracked dependencies update via `brew upgrade`; PurpleVoice itself is git-tracked and update-visible. No vulnerability disclosure programme yet — see [Vulnerability Disclosure](#vulnerability-disclosure). |
+| **SI-7** | Software, Firmware, and Information Integrity | Met | `setup.sh` Step 5 SHA256-verifies the Whisper model against the pinned constant `MODEL_SHA256`; mismatch aborts the install with non-zero exit. Silero VAD model is size-sanity-checked. |
+| **SI-10** | Information Input Validation | Met | `vocab.txt` cap (~150 words for `--prompt`); denylist exact-match filter (Phase 2 TRA-06); duration gate (Phase 2 TRA-05) drops <0.4s clips. |
+| **PT-3** | PII Processing Purposes | Met | Voice content processed solely for transcription; ephemeral; no telemetry — substantiated by this document + `tests/security/verify_egress.sh`. |
+| **PT-4** | Consent | Met | User-initiated hotkey; explicit TCC grants required (Microphone + Accessibility); no implicit consent path. |
+| **CM-7** | Least Functionality | Met | One-shot CLI per utterance; no persistent daemon; no extra features beyond the documented loop. |
+| **MP-6** | Media Sanitization | Partial | Ephemeral WAV cleanup via `EXIT` trap is the closest analogue. Full cryptographic erasure is out of scope (relies on macOS APFS journal handling). |
+| **SA-15** | Development Process, Standards, and Tools | Limited | SBOM (`SBOM.spdx.json`, SPDX 2.3, regenerated by `setup.sh` Step 8 with Syft) is the SA-equivalent. See [Software Bill of Materials](#software-bill-of-materials-sbom). |
+| **SR-3** | Supply Chain Controls and Processes | Limited | Model file SHA256-pinned; brew bottle SHA256s verified by Homebrew; HuggingFace mirror is the upstream source for the Whisper + Silero models; supply chain trust inherited from these upstreams. |
+
+### Out of Scope (Family-level, with rationale)
+
+The following families are out-of-scope for a single-developer personal tool. Each is N/A by tool-class:
+
+- **AT** (Awareness and Training) — Organisational training programme; not a tool concern.
+- **CA** (Assessment, Authorization, and Monitoring) — Organisational process (continuous monitoring, ATO).
+- **CP** (Contingency Planning) — Organisational; PurpleVoice is stateless and per-utterance.
+- **IR** (Incident Response) — Organisational; PurpleVoice has no organisational incident-response programme.
+- **MA** (Maintenance) — Organisational; not relevant to a personal tool.
+- **PE** (Physical and Environmental Protection) — OS-level / facility-level.
+- **PL** (Planning) — Organisational planning concern.
+- **PM** (Program Management) — Organisational.
+- **PS** (Personnel Security) — Organisational.
+- **RA** (Risk Assessment) — Organisational.
+
+Marking these "Out of Scope" with rationale (rather than "Failed" or "Not Applicable") is the auditor-honest framing — these families contain controls that simply don't have a tool-level analogue.
 
 ## FIPS 140-3
 
