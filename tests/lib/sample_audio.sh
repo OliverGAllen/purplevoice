@@ -3,7 +3,7 @@
 # Source this from tests/test_*.sh; do not invoke directly.
 #
 # All helpers produce 16 kHz mono 16-bit PCM WAVs (the format whisper.cpp
-# wants, identical to what voice-cc-record's sox capture produces).
+# wants, identical to what purplevoice-record's sox capture produces).
 SOX_BIN="${SOX_BIN:-/opt/homebrew/bin/sox}"
 
 # silence_wav PATH DURATION_SECONDS
@@ -36,7 +36,7 @@ short_tap_wav() {
 
 # medium_wav PATH
 # Produces a 1.0-second tone WAV — long enough to clear the 0.4s duration gate
-# in voice-cc-record. Used by tests that need to drive the script PAST the
+# in purplevoice-record. Used by tests that need to drive the script PAST the
 # gate (e.g., test_sigint_cleanup.sh, which needs the script to reach a
 # wait-able state where SIGINT can land — if the gate fires first, the script
 # exits 2 in milliseconds and the SIGINT path is never exercised).

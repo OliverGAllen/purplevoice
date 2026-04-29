@@ -2,11 +2,11 @@
 
 **Requirement:** FBK-01 — Menu-bar indicator changes colour while recording is active (visual confirmation that hotkey registered).
 
-**Prerequisites:** Phase 2 voice-cc loop deployed (Plan 02-02 complete).
+**Prerequisites:** Phase 2 PurpleVoice loop deployed (Plan 02-02 complete).
 
 ## Steps
 
-1. Look at the macOS menubar (top-right). The voice-cc indicator (`●`) should be visible in **grey** (#888888).
+1. Look at the macOS menubar (top-right). The PurpleVoice indicator (`●`) should be visible in **grey** (#888888).
 2. Press and HOLD cmd+shift+e. The `●` should turn **red** (#FF3B30) within ~50 ms.
 3. While still holding, observe the dot stays red.
 4. Release the hotkey. The `●` should return to **grey** within ~500 ms (after the bash glue exits and the Lua callback fires).

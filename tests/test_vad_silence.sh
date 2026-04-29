@@ -25,7 +25,7 @@ if [ ! -f "$MODEL" ]; then
   exit 1
 fi
 
-WAV=$(mktemp -t voice-cc-test-vad-XXXXXX.wav)
+WAV=$(mktemp -t purplevoice-test-vad-XXXXXX.wav)
 trap 'rm -f "$WAV"' EXIT
 silence_wav "$WAV" 2.0   # 2 seconds of digital silence
 

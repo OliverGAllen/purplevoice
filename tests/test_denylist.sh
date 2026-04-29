@@ -7,9 +7,9 @@
 #     dark mode" must NOT match the "thanks for watching" denylist phrase)
 #   - empty/whitespace transcripts canonicalise to empty (INJ-04 path)
 #
-# The integration assertion (voice-cc-record exits 3 when fed a denylist
+# The integration assertion (purplevoice-record exits 3 when fed a denylist
 # phrase as transcript) requires test hooks Plan 02-01 must add — deferred
-# behind VOICE_CC_INTEGRATION=1. Logic-only test is sufficient for Wave 0.
+# behind PURPLEVOICE_INTEGRATION=1. Logic-only test is sufficient for Wave 0.
 set -uo pipefail
 
 DENYLIST="$HOME/.config/voice-cc/denylist.txt"

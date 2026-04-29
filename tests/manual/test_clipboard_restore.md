@@ -3,8 +3,8 @@
 **Requirement:** INJ-02 — User's existing clipboard contents are preserved and restored after paste, with ≥250ms delay.
 
 **Prerequisites:**
-- Phase 2 voice-cc loop deployed (Plans 02-01 and 02-02 complete)
-- Hammerspoon running, voice-cc module loaded
+- Phase 2 PurpleVoice loop deployed (Plans 02-01 and 02-02 complete)
+- Hammerspoon running, PurpleVoice module loaded
 - Microphone + Accessibility granted to Hammerspoon
 
 ## Steps
@@ -24,7 +24,7 @@
 
 ## Failure modes
 
-- Step 7 pastes the voice transcript again → restore failed. Check `hs.timer.doAfter(0.25, ...)` in voice-cc-lua/init.lua, and verify the prior clipboard was captured via `hs.pasteboard.readAllData()` *before* the transcript was written.
+- Step 7 pastes the voice transcript again → restore failed. Check `hs.timer.doAfter(0.25, ...)` in purplevoice-lua/init.lua, and verify the prior clipboard was captured via `hs.pasteboard.readAllData()` *before* the transcript was written.
 - Step 5 fails entirely → that's a different bug (paste path broken); rerun other walkthroughs first.
 - Step 7 pastes empty / whitespace → prior clipboard was non-text (image, file ref) and the restore path didn't preserve all UTIs. Use `writeAllData` (multi-UTI) for restore, not `setContents` (text-only).
 

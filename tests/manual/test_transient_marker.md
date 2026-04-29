@@ -3,9 +3,9 @@
 **Requirement:** INJ-03 — Clipboard set is marked with `org.nspasteboard.TransientType` UTI so clipboard-history managers (1Password, Raycast, Maccy, Alfred) do not retain transcripts permanently.
 
 **Prerequisites:**
-- Phase 2 voice-cc loop deployed (Plan 02-02 complete)
+- Phase 2 PurpleVoice loop deployed (Plan 02-02 complete)
 - **Maccy installed** (`brew install --cask maccy`) — primary verification target because Maccy explicitly honours the spec by default
-- Hammerspoon running, voice-cc module loaded
+- Hammerspoon running, PurpleVoice module loaded
 
 ## Steps
 
@@ -30,7 +30,7 @@
 
 ## Failure modes
 
-- Maccy shows any of the 5 phrases → `hs.pasteboard.writeAllData` is not setting the transient UTI correctly. Check voice-cc-lua/init.lua for `["org.nspasteboard.TransientType"] = ""` in the data table passed to `writeAllData`.
+- Maccy shows any of the 5 phrases → `hs.pasteboard.writeAllData` is not setting the transient UTI correctly. Check purplevoice-lua/init.lua for `["org.nspasteboard.TransientType"] = ""` in the data table passed to `writeAllData`.
 - Some appear, some don't → race between transient marker and Maccy's poll cycle; verify the transcript + marker are written ATOMICALLY in a single `writeAllData` call, not via sequential `setContents` then `writeDataForUTI`.
 
 ## Sign-off

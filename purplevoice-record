@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# voice-cc-record — Phase 2 hardened bash glue
+# purplevoice-record — Phase 2 hardened bash glue (PurpleVoice)
 # Owns sox capture + transcription pipeline. Pattern 2 boundary: the whisper-cli
 # binary reference appears on exactly two lines (assignment + single use inside
 # the transcribe function) — this is the v1.1 swap site for warm-process upgrade.
@@ -13,7 +13,7 @@
 #   - EXIT trap covering ALL exit paths including SIGINT (ROB-04)
 #   - Semantic exit codes 2/3/10/11/12 for Lua dispatch
 #   - --no-prints + removal of file-output flags (Phase-1 TODO c — suppress sibling .txt)
-#   - VOICE_CC_TEST_SKIP_SOX env var hook for tests/test_*.sh
+#   - PURPLEVOICE_TEST_SKIP_SOX env var hook for tests/test_*.sh
 
 set -euo pipefail
 
@@ -26,14 +26,14 @@ SOXI_BIN="${SOXI_BIN:-/opt/homebrew/bin/soxi}"
 # lines — the assignment immediately below (with folded -x existence check)
 # and the invocation inside transcribe() near line 79. This is the v1.1 swap
 # site for the warm-process upgrade.
-WHISPER_BIN="${WHISPER_BIN:-/opt/homebrew/bin/whisper-cli}"; [ -x "$WHISPER_BIN" ] || { echo "voice-cc: whisper-cli missing — run setup.sh" >&2; exit 11; }
+WHISPER_BIN="${WHISPER_BIN:-/opt/homebrew/bin/whisper-cli}"; [ -x "$WHISPER_BIN" ] || { echo "PurpleVoice: whisper-cli missing — run setup.sh" >&2; exit 11; }
 
 # --- Paths (D-03 XDG layout) -------------------------------------------
-MODEL="${VOICE_CC_MODEL:-$HOME/.local/share/voice-cc/models/ggml-small.en.bin}"
-SILERO_MODEL="${VOICE_CC_SILERO_MODEL:-$HOME/.local/share/voice-cc/models/ggml-silero-v6.2.0.bin}"
+MODEL="${PURPLEVOICE_MODEL:-$HOME/.local/share/voice-cc/models/ggml-small.en.bin}"
+SILERO_MODEL="${PURPLEVOICE_SILERO_MODEL:-$HOME/.local/share/voice-cc/models/ggml-silero-v6.2.0.bin}"
 VOCAB_FILE="$HOME/.config/voice-cc/vocab.txt"
 DENYLIST="$HOME/.config/voice-cc/denylist.txt"
-VAD_THRESHOLD="${VOICE_CC_VAD_THRESHOLD:-0.50}"
+VAD_THRESHOLD="${PURPLEVOICE_VAD_THRESHOLD:-0.50}"
 WAV_DIR="/tmp/voice-cc"
 WAV="$WAV_DIR/recording.wav"
 SOX_ERR_LOG="$WAV_DIR/sox.stderr"
@@ -54,11 +54,11 @@ trap 'rm -f "$WAV" "$SOX_ERR_LOG"' EXIT
 # Exit 11 = binary or model missing (whisper-cli existence is folded onto the
 # assignment line above to preserve the Pattern 2 boundary).
 if [ ! -f "$MODEL" ]; then
-  echo "voice-cc: Whisper model missing at $MODEL — run setup.sh" >&2
+  echo "PurpleVoice: Whisper model missing at $MODEL — run setup.sh" >&2
   exit 11
 fi
 if [ ! -f "$SILERO_MODEL" ]; then
-  echo "voice-cc: Silero VAD weights missing at $SILERO_MODEL — run setup.sh" >&2
+  echo "PurpleVoice: Silero VAD weights missing at $SILERO_MODEL — run setup.sh" >&2
   exit 11
 fi
 
@@ -90,8 +90,8 @@ transcribe() {
 }
 
 # --- Capture: sox in background, signals forwarded for clean WAV finalise -
-# VOICE_CC_TEST_SKIP_SOX=1 → skip capture (tests pre-stage the WAV).
-if [ "${VOICE_CC_TEST_SKIP_SOX:-0}" != "1" ]; then
+# PURPLEVOICE_TEST_SKIP_SOX=1 → skip capture (tests pre-stage the WAV).
+if [ "${PURPLEVOICE_TEST_SKIP_SOX:-0}" != "1" ]; then
   : > "$SOX_ERR_LOG"   # initialise empty (so grep doesn't error)
   "$SOX_BIN" -d -r 16000 -c 1 -b 16 "$WAV" >/dev/null 2>"$SOX_ERR_LOG" &
   SOX_PID=$!

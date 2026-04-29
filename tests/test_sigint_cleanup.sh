@@ -5,7 +5,7 @@
 # when the script is interrupted by SIGINT (Ctrl-C / kill -INT).
 #
 # CRITICAL design note: the naive approach of pre-staging a SHORT WAV and
-# backgrounding voice-cc-record fails — the duration gate fires immediately
+# backgrounding purplevoice-record fails — the duration gate fires immediately
 # (DURATION=0.1 < 0.4) and the script exits 2 in milliseconds, long before
 # the test's `sleep 0.5; kill -INT` can land. The SIGINT path is then never
 # exercised. Fix: pre-stage a 1-second WAV via `medium_wav`, which CLEARS
@@ -14,8 +14,8 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
-if ! grep -q 'VOICE_CC_TEST_SKIP_SOX' voice-cc-record 2>/dev/null; then
-  echo "FAIL: voice-cc-record does not support VOICE_CC_TEST_SKIP_SOX hook (Plan 02-01 not yet implemented — expected RED)"
+if ! grep -q 'PURPLEVOICE_TEST_SKIP_SOX' purplevoice-record 2>/dev/null; then
+  echo "FAIL: purplevoice-record does not support PURPLEVOICE_TEST_SKIP_SOX hook (Plan 02-01 not yet implemented — expected RED)"
   exit 1
 fi
 
@@ -24,13 +24,13 @@ mkdir -p /tmp/voice-cc
 rm -f /tmp/voice-cc/* 2>/dev/null
 
 # Pre-stage a 1-second tone WAV — long enough to clear the 0.4s duration
-# gate in voice-cc-record. Without this, the gate fires immediately and the
+# gate in purplevoice-record. Without this, the gate fires immediately and the
 # script exits before SIGINT can land.
 medium_wav /tmp/voice-cc/recording.wav   # 1.0s tone @ 440Hz
 
-# Background voice-cc-record (it will pass the gate and proceed into
+# Background purplevoice-record (it will pass the gate and proceed into
 # transcribe; whisper-cli on a 1s clip takes ~200-500ms even on M-series)
-VOICE_CC_TEST_SKIP_SOX=1 ./voice-cc-record >/dev/null 2>&1 &
+PURPLEVOICE_TEST_SKIP_SOX=1 ./purplevoice-record >/dev/null 2>&1 &
 PID=$!
 
 sleep 0.5

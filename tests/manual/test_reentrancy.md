@@ -2,7 +2,7 @@
 
 **Requirement:** ROB-01 — Rapid repeated hotkey presses do not spawn duplicate recording processes (in-memory re-entrancy guard prevents overlapping captures).
 
-**Prerequisites:** Phase 2 voice-cc loop deployed (Plan 02-02 complete). Terminal open for `pgrep`.
+**Prerequisites:** Phase 2 PurpleVoice loop deployed (Plan 02-02 complete). Terminal open for `pgrep`.
 
 ## Steps
 

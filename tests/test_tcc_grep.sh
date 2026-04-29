@@ -10,7 +10,7 @@
 # match (false-positive guard).
 set -uo pipefail
 
-FAKE_STDERR=$(mktemp -t voice-cc-test-stderr-XXXXXX)
+FAKE_STDERR=$(mktemp -t purplevoice-test-stderr-XXXXXX)
 trap 'rm -f "$FAKE_STDERR"' EXIT
 
 # --- Positive: synthetic stderr that simulates sox on TCC denial ----------

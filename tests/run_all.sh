@@ -18,7 +18,7 @@ FAILED=()
 for f in tests/test_*.sh; do
   [ -f "$f" ] || continue
   printf "  [test] %-40s " "$(basename "$f")"
-  if bash "$f" >/tmp/voice-cc-test.log 2>&1; then
+  if bash "$f" >/tmp/purplevoice-test.log 2>&1; then
     echo "PASS"
     PASS=$((PASS + 1))
   else
