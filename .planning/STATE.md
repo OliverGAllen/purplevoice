@@ -109,6 +109,7 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 - [ ] Phase 2 follow-up: replace `tests/test_tcc_grep.sh` with an amplitude-detection test (current test exercises the fallback regex only; the live path is amplitude-based).
 - [ ] Phase 2 follow-up: run the 4 manual walkthroughs that were staged but not executed (test_clipboard_restore.md, test_transient_marker.md, test_menubar.md, test_audio_cues.md, test_reentrancy.md). Code review currently covers them.
 - [ ] Phase 4 candidate: alternative hotkey schemes — fn-press-and-hold via `hs.eventtap` flagsChanged (races against macOS emoji popup; needs hold-threshold logic), Karabiner-remap-fn-to-F19 path. User-surfaced 2026-04-28.
+- [ ] Phase 3 follow-up: update `.planning/research/STACK.md` (and regenerate the GSD-auto-managed `<!-- GSD:stack-start -->` block in `CLAUDE.md`) to replace remaining `voice-cc` references. Deferred from Plan 02.5-04 because the CLAUDE.md edit is inside an auto-managed block and would silently revert on regeneration. STACK.md is the source-of-truth that the regeneration reads from.
 - [ ] Phase 3: produce hyperfine numbers; explicitly decide go/no-go on Phase 5
 
 ### Blockers
