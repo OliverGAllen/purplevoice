@@ -2,45 +2,46 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
-status: planning
-last_updated: "2026-04-29T08:58:23.828Z"
+status: executing
+last_updated: "2026-04-29T14:38:56.000Z"
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 17
+  completed_plans: 13
 ---
 
 # State: voice-cc
 
-**Last updated:** 2026-04-29 (Plan 02.5-02 complete in parallel with Plan 02.5-03 — XDG path rename + idempotent setup.sh migration block + symlink hygiene; live-migrated Oliver's machine 466 MB models from voice-cc → purplevoice; both stale symlinks removed; both new symlinks resolve; 6 bash tests still GREEN; Pattern 2 invariant intact; touched zero Lua files per Wave 2 race elimination)
+**Last updated:** 2026-04-29 (Plan 02.7-00 Wave 0 complete — tests/security/ aggregator + helpers + 7 verify/test skeletons + SECURITY.md skeleton (18 H2 sections, framing-clean) + SBOM.spdx.json placeholder + setup.sh extended with 5 PURPLEVOICE_OFFLINE guards + unconditional Syft 1.43.0 install (M-3 Option A); Pattern 2 invariant intact; 7 originals GREEN + 1 framing skeleton RED-and-expected; setup.sh idempotent online + offline; brand consistency hook GREEN)
 
 ## Project Reference
 
 - **Name:** voice-cc *(working name; new product brand TBD in Phase 2.5)*
 - **Core value:** Speak → text appears in Claude Code, instantly and reliably, with no recurring cost or external dependency.
-- **Current focus:** Phase 02.5 — branding
+- **Current focus:** Phase 02.7 — security-posture
 - **Mode:** yolo
 - **Granularity:** standard
 - **Parallelization:** enabled
 
 ## Current Position
 
-Phase: 02.5 (branding) — EXECUTING
-Plan: 4 of 4 (Wave 3 — final plan)
-Next: Plan 02.5-04 (PROJECT.md positioning paragraph + REQUIREMENTS.md BRD-01..03 elaboration + README expansion + tests/test_brand_consistency.sh regression catch). All upstream dependencies stabilized: setup.sh + symlinks (Plan 02), assets/* + menubar lavender (Plan 03), bash glue + Lua identifiers (Plan 01).
+Phase: 02.7 (security-posture) — EXECUTING
+Plan: 2 of 6 (Wave 0 done; Wave 1 ready)
+Next: Wave 1 — Plans 02.7-01 (threat model + framing lint, owns tests/test_security_md_framing.sh body + SECURITY.md ## Scope/## Threat Model fills) and 02.7-02 (verify scripts + SBOM regen, owns tests/security/verify_*.sh real bodies + setup.sh Step 8 SBOM regen + SECURITY.md ## Egress/## SBOM/## Air-Gapped/## Code Signing fills) can run in parallel — infrastructure surface is clean and Syft is installed locally.
 
 - **Milestone:** v1
 - **Phase:** 2.7
-- **Plan:** Not started
-- **Status:** Ready to plan
+- **Plan:** 02.7-00 complete; 02.7-01 + 02.7-02 next (Wave 1, parallelisable)
+- **Status:** Executing Phase 02.7
 
 ### Progress
 
 ```
 Phase 1: Spike                            ██████████  100% [3/3 plans; user-validated end-to-end 2026-04-27]
 Phase 2: Hardening                        ██████████  100% [4/4 plans — Plan 02-03 walkthroughs signed off 2026-04-28]
-Phase 2.5: Branding                       ████████░░  75%  [3/4 plans — Plan 02.5-01 (string propagation) + Plan 02.5-02 (XDG migration) + Plan 02.5-03 (visual identity) complete 2026-04-29; Plan 02.5-04 (docs closure) is final Wave 3]
+Phase 2.5: Branding                       ██████████  100% [4/4 plans complete 2026-04-29]
+Phase 2.7: Security Posture & Gov Ready   █░░░░░░░░░  17%  [1/6 plans — Wave 0 (Plan 02.7-00 — tests/security/ skeleton + SECURITY.md skeleton + SBOM placeholder + setup.sh OFFLINE guards + Syft install) complete 2026-04-29; Wave 1 (02.7-01 + 02.7-02 parallel) ready]
 Phase 3.5: Hover UI / HUD                 ░░░░░░░░░░  0%   [Added 2026-04-27 — needs planning]
 Phase 4 (v1.x): Quality of Life           ░░░░░░░░░░  0%   [Queued]
 Phase 3: Distribution + Public Install    ░░░░░░░░░░  0%   [Reordered to end 2026-04-28 per user direction]
@@ -65,6 +66,7 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 | Plan 02.5-01 executor wall-clock | n/a | ~8 min (2 tasks autonomous; voice-cc → PurpleVoice rebrand of bash glue + Lua module + snippet + 6 tests + 7 manual walkthroughs; Pattern 2 invariant preserved; cache-path edit consolidated from Plan 02 per checker iter 1; 4 Rule 1 deviations auto-fixed) | this session |
 | Phase 02.5 P03 | 3min | 2 tasks | 5 files |
 | Phase 02.5 P02 | 5m 47s | 2 tasks | 9 files |
+| Phase 02.7-security-posture P00 | 6m 14s | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -93,6 +95,11 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 | Idempotent 4-state migration block (only-old / both / only-new / neither) in setup.sh closes XDG path rebrand (BRD-02 path half) — live migration on Oliver's machine moved 466 MB models from voice-cc → purplevoice atomically (APFS same-volume mv); both stale symlinks removed; both new symlinks resolve via `ln -sfn`; second run idempotent (no Migrating log lines) | Plan 02.5-02 execution | 2026-04-29 |
 | BSD grep escape form `'$HOME/\\.config/voice-cc'` (escape only the dot, not the dollar) — verified empirically on macOS Sequoia 15.7.5 BSD `/usr/bin/grep` treats `$` as literal in middle of BRE pattern; revision iter 1 corrected from `'\\$HOME/.config/voice-cc'` form which BSD grep would treat as literal-backslash-then-dollar | Plan 02.5-02 verify clauses | 2026-04-29 |
 | Plan 02.5-02 deviation Rule 1: removed `~/.hammerspoon/purplevoice` from setup.sh Step 4 mkdir — `ln -sfn` cannot overwrite a directory; mkdir-then-ln race surfaced on first live run. Fix: mkdir creates only `~/.hammerspoon` parent; Step 6c's `ln -sfn` creates the child as symlink. Verified via second run: `[ -L "$HOME/.hammerspoon/purplevoice" ]` passes | Plan 02.5-02 Task 2 (live verification) | 2026-04-29 |
+| Phase 2.7 makes Syft an UNCONDITIONAL hard dep (per checker M-3 Option A): setup.sh Step 2 installs `brew install syft` outside the PURPLEVOICE_OFFLINE branch. Rationale: SEC-03 substantiation requires a real Syft scan asserting `name == "PurpleVoice"`; verify_sbom.sh would need a Syft-absent skip path otherwise. Cleaner to require Syft. Installed Syft 1.43.0 on Oliver's machine during Plan 02.7-00 execution. | Plan 02.7-00 Task 0-3 | 2026-04-29 |
+| Phase 2.7 SECURITY.md framing baseline clean (D-17): zero hits for `\bcompliant\b` / `\bcertified\b` / `\bguarantees\b` in the skeleton. Plan 02.7-01 implements the lint that enforces this on every commit going forward. Plan 02.7-00 deviation Rule 1: rephrased the framing-explainer paragraph from plan-prose ("NOT certified, audited, or compliant") to verify-clause-aligned ("NOT audited or accredited") because the plan's prose and verify regex were internally inconsistent. | Plan 02.7-00 Task 0-2 | 2026-04-29 |
+| `tests/security/lib/process_tree.sh` DESIGN NOTE block (per checker M-6) documents why the helper writes the test WAV to the production path `/tmp/purplevoice/recording.wav`: (1) Lua isRecording single-instance guard prevents concurrent invocations; (2) `PURPLEVOICE_TEST_SKIP_SOX=1` is set unconditionally so sox does NOT spawn (no overwrite risk); (3) purplevoice-record exposes no path-override env var, and adding one would breach the Pattern 2 boundary file. If a future revision exposes such an env var, the helper switches to `/tmp/purplevoice/test-recording.wav`. | Plan 02.7-00 Task 0-1 | 2026-04-29 |
+| `purplevoice_pid_tree()` intentionally EXCLUDES Hammerspoon's main process PID (Pitfall 5 / D-06 scoping). Hammerspoon may hold long-lived TCP keepalives unrelated to PurpleVoice; including its PID would muddy the egress claim. The egress test scope is `purplevoice-record` + its sox + transcription children only. | Plan 02.7-00 Task 0-1 | 2026-04-29 |
+| `tests/security/run_all.sh` uses distinguishable prefix `[security]` and distinguishable log path `/tmp/purplevoice-security-test.log` (Pitfall 9) so concurrent runs of the functional and security suites do not clobber each other's logs. Otherwise byte-for-byte structural mirror of `tests/run_all.sh`. | Plan 02.7-00 Task 0-1 | 2026-04-29 |
 
 ### Open TODOs (cross-phase)
 
@@ -118,6 +125,7 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 
 ### Recently Validated
 
+- Plan 02.7-00 (2026-04-29): Wave 0 security infrastructure skeleton — 3 tasks autonomous, 6m 14s wall-clock. Created `tests/security/run_all.sh` (41-line aggregator mirroring `tests/run_all.sh`; iterates `verify_*.sh`; uses `[security]` prefix and `/tmp/purplevoice-security-test.log` log path per Pitfall 9 distinguishability), `tests/security/lib/process_tree.sh` (59 lines; exports `purplevoice_pid_tree()` excluding Hammerspoon main PID per Pitfall 5/D-06 + `synthesise_recording()` using `PURPLEVOICE_TEST_SKIP_SOX=1`; contains DESIGN NOTE block per checker M-6 explaining production-path-as-test-path rationale), 5 `verify_*.sh` skeletons (egress / sbom / air_gap / signing / reproducibility — all fast-fail with explicit "Plan 02.7-XX not yet implemented" deferral messages), `tests/test_security_md_framing.sh` skeleton in functional suite (D-17 framing lint; Plan 02.7-01 fills with full lint), `SECURITY.md` skeleton at repo root (89 lines; 18 H2 sections; TODO placeholders correctly reference 02.7-03a for NIST and 02.7-03b for the 6 framed sections per checker M-5; D-17 framing baseline clean — zero hits for `\bcompliant\b` / `\bcertified\b` / `\bguarantees\b`), `SBOM.spdx.json` placeholder (15 lines; SPDX 2.3 valid JSON with all 6 required top-level fields + PLACEHOLDER marker for Plan 02.7-02 to detect). Modified `setup.sh` (+84/-3 lines): 5 PURPLEVOICE_OFFLINE=1 guards (Hammerspoon cask, sox brew, whisper-cpp brew, Step 5 Whisper model curl, Step 5b Silero VAD curl) + unconditional Syft install in Step 2 (per checker M-3 Option A — Phase 2.7 hard dep, NOT under OFFLINE branching). 12 PURPLEVOICE_OFFLINE references total. Idempotency proven in BOTH modes: online second-rerun (after Syft installed) prints zero `Installing` lines; offline rerun prints only `OFFLINE: ... present` lines + `syft already installed, skipping` + exits 0. Syft 1.43.0 installed on Oliver's machine during Task 0-3 execution. **Pattern 2 invariant intact**: `purplevoice-record` SHA256 unchanged (`d189b68b...`); `grep -c WHISPER_BIN purplevoice-record == 2`. **Pattern 2 corollary intact**: zero `whisper-cli` refs in `tests/security/` or `purplevoice-lua/init.lua` (Pitfall 6). 7 ORIGINAL bash tests still GREEN; only `test_security_md_framing.sh` skeleton RED-and-expected (Plan 02.7-01 fills). `tests/test_brand_consistency.sh` GREEN (no new `voice-cc` strings introduced). 1 Rule 1 deviation auto-fixed: rephrased SECURITY.md framing-explainer paragraph from plan-prose ("NOT certified, audited, or compliant with any framework") to verify-clause-aligned ("NOT audited or accredited against any framework") because the plan's prose and the plan's verify regex (`! grep -nE '\bcertified\b'`, `! grep -nE '\bcompliant\b'`) were internally inconsistent. Wave 0 unblocked: Plans 02.7-01 + 02.7-02 can run in parallel as Wave 1 with no infrastructure dependencies. Commits: `48f631f` (Task 0-1 — tests/security/ + framing skeleton), `b5a22fc` (Task 0-2 — SECURITY.md + SBOM placeholder), `866dee5` (Task 0-3 — setup.sh OFFLINE guards + Syft). See 02.7-00-SUMMARY.md.
 - Plan 02.5-02 (2026-04-29): XDG path rename + idempotent setup.sh migration block — Wave 2 parallel execution alongside Plan 02.5-03. Inserted Step 3b `migrate_xdg_dir` 4-state guard function (only-old / both / only-new / neither) + 3 calls (config, data, cache) + symlink hygiene block (`rm` stale `~/.local/bin/voice-cc-record` + `~/.hammerspoon/voice-cc` if symlinks). Renamed all XDG paths in setup.sh: mkdir block, MODEL constant, SILERO_MODEL constant, VOCAB_DEST, DENYLIST_DEST. Inserted Step 6c `ln -sfn` symlink installer for `~/.local/bin/purplevoice-record` + `~/.hammerspoon/purplevoice`. Rewrote Step 7 banner: `PurpleVoice setup complete.` + canonical tagline `Local voice dictation. Nothing leaves your Mac.` (D-12) + literal `require("purplevoice")` line for user paste (D-08 + Anti-Pattern 4). Renamed runtime XDG paths in `purplevoice-record` (MODEL/SILERO_MODEL/VOCAB_FILE/DENYLIST/WAV_DIR), 5 bash test files (test_denylist/test_wav_cleanup/test_sigint_cleanup/test_duration_gate/test_vad_silence), 1 manual walkthrough (test_reentrancy.md), and config/denylist.txt header comments. Live migration on Oliver's machine performed and verified: only-old branch fired for all 3 dirs (config 8K, data 466M models, cache 0B); both stale symlinks removed; both new symlinks resolve correctly. Second run silent (idempotent only-new branch). 6 bash unit tests still GREEN with new `/tmp/purplevoice` + `~/.config/purplevoice` paths. Pattern 2 invariant intact (`grep -c WHISPER_BIN purplevoice-record == 2`). One Rule 1 deviation auto-fixed: removed `~/.hammerspoon/purplevoice` from Step 4 mkdir block (mkdir-then-ln race; `ln -sfn` cannot overwrite a directory). Touched ZERO Lua files (revision iter 1 race elimination held — `git diff --name-only` shows no `purplevoice-lua/` entries). Used `--no-verify` on commits per parallel-execution guidance to avoid hook contention with Plan 02.5-03. BRD-02 path-half closed. Commits: `ca231e4` (Task 1 — setup.sh migration block + XDG rename), `cc27db0` (Task 2 — purplevoice-record + tests + denylist runtime path migration + mkdir/ln-sfn race fix). See 02.5-02-SUMMARY.md.
 - Plan 02.5-03 (2026-04-29): visual identity — Wave 2 parallel execution. Created `assets/` directory with 3 files: `assets/icon.svg` (960 bytes, hand-authored 256×256 lavender bg `#B388EB` + centred white lips silhouette via four-quadratic-curve closed path; explicit width/height/viewBox per RESEARCH Pitfall 6), `assets/icon-256.png` (4079 bytes, sips-derived, verified 256×256 RGBA non-interlaced PNG via `sips -g pixelWidth -g pixelHeight` and `file`), `assets/README.md` (16 lines, single-line sips regenerate command + brand colour note). Visual sanity check passed (clearly recognisable lips on lavender, cupid's bow indent visible, no rendering artifacts — first-pass path geometry accepted, no iteration). Migrated `purplevoice-lua/init.lua` menubar palette from grey/red MENUBAR_IDLE_COLOR (#888888) + MENUBAR_RECORDING_COLOR (#FF3B30) to single `MENUBAR_COLOR = BRAND.COLOUR_LAVENDER` reference (DRY: one source of truth for #B388EB, references M.BRAND constants table set up by Plan 02.5-01). Idle/recording glyphs swapped to filled-vs-outline differentiation (idle = U+25CB white circle outline `○`, recording = U+25CF black circle filled `●`) — both styled lavender per RESEARCH Pattern 3 (visually clearest, no font dependency, single colour constant). Pattern 2 invariant intact (grep -c WHISPER_BIN purplevoice-record == 2; ! grep -q whisper-cli purplevoice-lua/init.lua). All 6 bash unit tests still GREEN. File scope discipline preserved during parallel Wave 2 execution: my commits touched only `assets/*` + `purplevoice-lua/init.lua`; `setup.sh` (parallel Plan 02.5-02 scope) untouched. Used `--no-verify` on both task commits per parallel-execution guidance. BRD-03 closed. No deviations — plan executed exactly as written. Hammerspoon live reload deferred (hs.ipc port returned transport errors; user must paste `require("purplevoice")` into ~/.hammerspoon/init.lua per Plan 02.5-02 follow-up before live menubar visual is observable). Commits: 07b1ac1 (Task 1 — icon assets), 309221a (Task 2 — menubar lavender wiring). See 02.5-03-SUMMARY.md.
 - Plan 02.5-01 (2026-04-29): voice-cc → PurpleVoice rebrand of bash glue + Lua module + user-paste snippet + 6 unit tests + 7 manual walkthroughs. File renames: `voice-cc-record` → `purplevoice-record`, `voice-cc-lua/` → `purplevoice-lua/`. 5 hs.notify titles use `PurpleVoice:` prefix; module load alert uses `PurpleVoice loaded — local dictation, cmd+shift+e` (D-12 form factor); hs.notify orphan-tag cleanup (`pcall(hs.notify.unregister, "voiceccOpen{Mic,Accessibility}Settings")`) inserted at module top per RESEARCH Pattern 4; new `purplevoice*` tag namespace in register + send call sites; `M.BRAND` constants table (NAME / TAGLINE / COLOUR_LAVENDER) exported for Phase 3.5 HUD. Cache-path edit consolidated from Plan 02.5-02 per checker iter 1: exit-12 informativeText now references `~/.cache/purplevoice/error.log` — eliminates Wave 2 init.lua file-write race with Plan 02.5-03. 6 env vars renamed (`VOICE_CC_*` → `PURPLEVOICE_*`) — hard rename, no fallback shim per personal-tool ethos. Pattern 2 invariant verified post-edit (`grep -c WHISPER_BIN purplevoice-record == 2`); Pattern 2 corollary verified (`! grep -q "whisper-cli" purplevoice-lua/init.lua`). 4 Rule 1 deviations auto-fixed inline (stale comments referring to old `voiceccOpenAccessibilitySettings`, `VOICE_CC_NO_SOUNDS`, `whisper-cli`, and `voice-cc` strings). All 6 bash unit tests still GREEN. BRD-02 closed for code surfaces (runtime XDG paths intentionally preserved for Plan 02.5-02 ownership). Commits: 2c9a7f2 (Task 1 — file/dir renames + bash glue + tests + manual walkthroughs), 090c1dd (Task 2 — Lua module strings + orphan-tag cleanup + cache-path edit). See 02.5-01-SUMMARY.md.
@@ -133,19 +141,24 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 
 ### Next Action
 
-Phase 2.5 Wave 2 complete. Plans 02.5-01, 02.5-02, 02.5-03 done — code surfaces, XDG paths, setup.sh migration, and visual identity all stable. Execute Wave 3 next:
+Phase 2.7 Wave 0 complete. Plan 02.7-00 done — `tests/security/` skeleton + `SECURITY.md` skeleton + `SBOM.spdx.json` placeholder + `setup.sh` PURPLEVOICE_OFFLINE guards + unconditional Syft install all stable. Execute Wave 1 (parallel) next:
 
-- **Plan 02.5-04** (PROJECT.md + REQUIREMENTS.md + README + tests/test_brand_consistency.sh): Record `PurpleVoice` in PROJECT.md as authoritative product name with privacy-first positioning paragraph (BRD-01); formalise BRD-01..03 in REQUIREMENTS.md; expand README with H1 + tagline + install instructions referencing the new symlinks/paths/banner; add `tests/test_brand_consistency.sh` regression catch (asserts ZERO `voice-cc` strings outside `.planning/`/`.git/` AND inside the 3 setup.sh `migrate_xdg_dir` FROM args).
+- **Plan 02.7-01** (threat model + framing lint): Owns `tests/test_security_md_framing.sh` body (D-17 lint: ban `compliant` / `certified` / `guarantees` outside qualified contexts + Pitfall 15 Met/Partial/Not Pursued/N/A vocabulary in framework tables) + `SECURITY.md` content fills for `## Scope` + `## Threat Model` (STRIDE 6×N + LINDDUN 7×N matrices per RESEARCH Priority 1).
+- **Plan 02.7-02** (verify scripts + SBOM regen): Owns the bodies of `tests/security/verify_egress.sh` (3-layer evidence chain: lsof + nettop + pf+tcpdump per D-05), `verify_sbom.sh` (Syft regen + SPDX 2.3 schema check + drift detection — Syft is now a hard dep so no skip path needed), `verify_air_gap.sh` (sideload simulation), `verify_signing.sh` (SECURITY.md cross-ref assertion) + `setup.sh` Step 8 SBOM regeneration block + `SECURITY.md` content fills for `## Egress Verification` / `## Software Bill of Materials (SBOM)` / `## Air-Gapped Installation` / `## Code Signing & Notarisation`.
 
-After 2.5: Phase 3.5 (HUD), Phase 4 (QoL), Phase 3 (Distribution + hyperfine + public install), Phase 5 (Warm-Process, conditional).
+After Wave 1: Wave 2 = 02.7-03a (NIST 800-53 deep mapping) + 02.7-03b (6 framed frameworks). Wave 3 = 02.7-04 (closure: TL;DR + Audience Entry-Points + Reproducible Build + Vulnerability Disclosure + How to Verify These Claims).
+
+After 2.7: Phase 3.5 (HUD), Phase 4 (QoL), Phase 3 (Distribution + hyperfine + public install), Phase 5 (Warm-Process, conditional).
 
 ### Stopped At
 
-Plan 02.5-02 complete (2 tasks autonomous, 5m 47s wall-clock, 1 Rule 1 deviation auto-fixed). 02.5-02-SUMMARY.md authored at `.planning/phases/02.5-branding/02.5-02-SUMMARY.md`. Live migration successful on Oliver's machine — all 3 XDG dirs migrated (~466 MB models moved atomically via APFS rename), both stale symlinks removed, both new symlinks resolve. setup.sh idempotent on second run. All 6 bash unit tests GREEN. Pattern 2 boundary intact.
+Plan 02.7-00 complete (3 tasks autonomous, 6m 14s wall-clock, 1 Rule 1 deviation auto-fixed). 02.7-00-SUMMARY.md authored at `.planning/phases/02.7-security-posture/02.7-00-SUMMARY.md`. Self-check PASSED (all 12 claimed artefacts found on disk; all 3 commits found in git log).
 
-Local environment: `~/.hammerspoon/init.lua` still references `require("voice-cc")` — but `~/.hammerspoon/voice-cc` symlink no longer exists (Plan 02.5-02 removed it). Live PurpleVoice dictation loop is currently broken until the user manually edits `~/.hammerspoon/init.lua` from `require("voice-cc")` to `require("purplevoice")`. setup.sh prints the new line at completion (Anti-Pattern 4 boundary — no auto-edit of user dotfiles). Plan 02.5-04's README expansion will document this manual step prominently.
+Local environment: Syft 1.43.0 now installed on Oliver's machine (Phase 2.7 hard-dep precondition for `verify_sbom.sh`). All 7 functional bash unit tests GREEN. Security-suite RED-and-expected baseline established (`bash tests/security/run_all.sh` produces "Results: 0 passed, 5 failed"). Functional suite shows 7 PASS + 1 FAIL (`test_security_md_framing.sh` RED-and-expected — Plan 02.7-01 implements it). Brand consistency hook GREEN. Pattern 2 invariant intact (purplevoice-record SHA256 unchanged: `d189b68b...`).
 
-User intent stated: proceed through Phase 2.5 plan-by-plan.
+Reminder still applies from prior plan: `~/.hammerspoon/init.lua` may still reference `require("voice-cc")` if the user has not yet run setup.sh on a freshly-rebooted Hammerspoon — the dictation loop requires `require("purplevoice")`. Setup.sh banner (Step 7) reminds the user. This is a Phase 2.5 follow-up, not a Phase 2.7 concern.
+
+User intent stated: proceed through Phase 2.7 plan-by-plan.
 
 ### Last Session Summary
 

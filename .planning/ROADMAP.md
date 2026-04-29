@@ -97,7 +97,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
   4. Code signing + notarisation (or explicit "not yet — applies in Phase 3") status is documented honestly.
   5. PROJECT.md positioning paragraph includes governments / institutions in the audience description (this lands in Phase 2.5 BRD-01 but Phase 2.7 verifies the claims are substantiated).
 **Plans:** 6 plans
-  - [ ] 02.7-00-PLAN.md — Wave 0: test infrastructure (tests/security/) + Syft conditional install + setup.sh PURPLEVOICE_OFFLINE=1 guards + SECURITY.md skeleton + SBOM.spdx.json placeholder
+  - [x] 02.7-00-PLAN.md — Wave 0: test infrastructure (tests/security/) + Syft UNCONDITIONAL install (M-3 Option A) + setup.sh PURPLEVOICE_OFFLINE=1 guards (5 total) + SECURITY.md skeleton + SBOM.spdx.json placeholder *(complete 2026-04-29; commits 48f631f, b5a22fc, 866dee5; 02.7-00-SUMMARY.md)*
   - [ ] 02.7-01-PLAN.md — Threat model (STRIDE + LINDDUN) + Scope (assets/trust boundaries) + tests/test_security_md_framing.sh D-17 lint (Wave 1, parallel with 02.7-02)
   - [ ] 02.7-02-PLAN.md — Verification scripts (verify_egress 3-layer chain, verify_sbom, verify_air_gap, verify_signing) + setup.sh Step 8 SBOM regen with deterministic post-process (Wave 1, parallel with 02.7-01)
   - [ ] 02.7-03a-PLAN.md — Gap analysis: NIST SP 800-53 Rev 5 / Low-baseline (deep per-control mapping; ≥15 control rows from AC, AU, IA, SC, SI, PT, CM, MP, SA, SR families) (Wave 2 — split from old 03 per checker M-5)
@@ -184,7 +184,7 @@ Listed in **execution order** (Phase 3 reordered to come last in v1; phase numbe
 | 1 | Phase 1: Spike | 3/3 | Complete | 2026-04-27 |
 | 2 | Phase 2: Hardening | 4/4 | Complete | 2026-04-28 |
 | 3 | Phase 2.5: Branding | 3/4 | Wave 2 done — Plan 02.5-01, 02.5-02, 02.5-03 complete 2026-04-29; Wave 3 (02.5-04 docs closure) unblocked | 2026-04-29 |
-| 4 | Phase 2.7: Security Posture & Government Readiness | 0/6 | Planned — 6 plans across 5 waves (00 → 01,02 parallel → 03a → 03b → 04); ready for /gsd:execute-phase 2.7 | - |
+| 4 | Phase 2.7: Security Posture & Government Readiness | 1/6 | Wave 0 complete 2026-04-29 (Plan 02.7-00 — tests/security/ skeleton, SECURITY.md skeleton, SBOM placeholder, setup.sh OFFLINE guards, Syft installed); Wave 1 ready (Plans 02.7-01 + 02.7-02 parallel) | - |
 | 5 | Phase 3.5: Hover UI / HUD | 0/0 | Queued | - |
 | 6 | Phase 4 (v1.x): Quality of Life | 0/0 | Queued | - |
 | 7 | Phase 3: Distribution & Benchmarking + Public Install | 0/0 | Queued (final v1 phase) | - |
