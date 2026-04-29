@@ -76,7 +76,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
 **Plans:** 4 plans
   - [x] 02.5-01-PLAN.md — String propagation in code surfaces (rename voice-cc-record → purplevoice-record, voice-cc-lua/ → purplevoice-lua/, env vars VOICE_CC_* → PURPLEVOICE_*, 5 notification titles, load alert, hs.notify orphan-tag cleanup); BRD-02 — completed 2026-04-29 (commits 2c9a7f2, 090c1dd; cache-path edit consolidated from Plan 02.5-02 per checker iter 1)
   - [ ] 02.5-02-PLAN.md — XDG path rename + idempotent setup.sh migration (4-state guard for ~/.config|.local/share|.cache/voice-cc/ → purplevoice/, symlink hygiene, banner tagline + new require line); BRD-02
-  - [ ] 02.5-03-PLAN.md — Visual identity (assets/icon.svg + sips → assets/icon-256.png, menubar lavender via BRAND.COLOUR_LAVENDER + outline/filled glyph differentiation); BRD-03
+  - [x] 02.5-03-PLAN.md — Visual identity (assets/icon.svg + sips → assets/icon-256.png, menubar lavender via BRAND.COLOUR_LAVENDER + outline/filled glyph differentiation); BRD-03
   - [ ] 02.5-04-PLAN.md — Documentation closure (PROJECT.md name + positioning, formal BRD-01..03 in REQUIREMENTS.md, expanded README, CLAUDE.md updates, tests/test_brand_consistency.sh regression catch); BRD-01, BRD-02, BRD-03
 **UI hint**: light (naming + minor visual polish, no full design system)
 

@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-29T06:40:11Z"
+last_updated: "2026-04-29T06:52:01.612Z"
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 12
-  completed_plans: 8
+  total_plans: 11
+  completed_plans: 9
 ---
 
 # State: voice-cc
@@ -40,7 +40,7 @@ Next: Plan 02.5-02 (XDG path rename + setup.sh idempotent migration block) and P
 ```
 Phase 1: Spike                            ██████████  100% [3/3 plans; user-validated end-to-end 2026-04-27]
 Phase 2: Hardening                        ██████████  100% [4/4 plans — Plan 02-03 walkthroughs signed off 2026-04-28]
-Phase 2.5: Branding                       ██░░░░░░░░  25%  [1/4 plans — Plan 02.5-01 (string propagation in code surfaces) complete 2026-04-29]
+Phase 2.5: Branding                       █████░░░░░  50%  [2/4 plans — Plan 02.5-01 (string propagation) + Plan 02.5-03 (visual identity) complete 2026-04-29; Plan 02.5-02 may also be complete in parallel — orchestrator reconciles]
 Phase 3.5: Hover UI / HUD                 ░░░░░░░░░░  0%   [Added 2026-04-27 — needs planning]
 Phase 4 (v1.x): Quality of Life           ░░░░░░░░░░  0%   [Queued]
 Phase 3: Distribution + Public Install    ░░░░░░░░░░  0%   [Reordered to end 2026-04-28 per user direction]
@@ -63,6 +63,7 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 | Plan 02-00 executor wall-clock | n/a | ~9 min (3 tasks autonomous; setup.sh Silero download + denylist seed; 17 files created) | this session |
 | Phase 02 P00 | 9 min | 3 tasks | 18 files |
 | Plan 02.5-01 executor wall-clock | n/a | ~8 min (2 tasks autonomous; voice-cc → PurpleVoice rebrand of bash glue + Lua module + snippet + 6 tests + 7 manual walkthroughs; Pattern 2 invariant preserved; cache-path edit consolidated from Plan 02 per checker iter 1; 4 Rule 1 deviations auto-fixed) | this session |
+| Phase 02.5 P03 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,8 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 | Hard env-var rename (VOICE_CC_* → PURPLEVOICE_*) with no fallback shim — personal-tool ethos, single user, no shell-rc references observed; documented as breaking change in 02.5-01-SUMMARY.md | Plan 02.5-01 execution per RESEARCH §State of the Art Q1 | 2026-04-29 |
 | Cache-path edit (~/.cache/voice-cc → ~/.cache/purplevoice in init.lua exit-12 informativeText) consolidated from Plan 02.5-02 into Plan 02.5-01 Task 2 — eliminates Wave 2 init.lua file-write race with Plan 02.5-03; Plan 02.5-02 NO LONGER touches init.lua at all | Checker revision iter 1 (commit 5667503), executed by Plan 02.5-01 Task 2 | 2026-04-29 |
 | OLD voicecc* tag strings preserved verbatim inside `pcall(hs.notify.unregister, ...)` calls per RESEARCH Pitfall 4 — protects against orphaned-tag console-raise on stale notifications in macOS Notification Center | Plan 02.5-01 Task 2 | 2026-04-29 |
+| Visual identity (BRD-03) closed by Plan 02.5-03 — assets/icon.svg (hand-authored 256×256 lavender + white-lips, four-quadratic-curve path) + assets/icon-256.png (sips-derived, verified 256×256 RGBA) + assets/README.md (sips regenerate command); menubar migrated from grey/red MENUBAR_IDLE_COLOR/MENUBAR_RECORDING_COLOR to single `MENUBAR_COLOR = BRAND.COLOUR_LAVENDER` reference (DRY: one source of truth for #B388EB) | Plan 02.5-03 Tasks 1+2 | 2026-04-29 |
+| Filled-vs-outline glyph (U+25CF recording / U+25CB idle) chosen for menubar recording-state differentiation per RESEARCH Pattern 3 — visually clearest within single-lavender palette, no font dependency, single colour constant | Plan 02.5-03 Task 2 | 2026-04-29 |
 
 ### Open TODOs (cross-phase)
 
@@ -110,6 +113,7 @@ Overall v1 (Phases 1, 2, 2.5, 3.5, 4, 3): ████░░░░░░  ~33% (
 
 ### Recently Validated
 
+- Plan 02.5-03 (2026-04-29): visual identity — Wave 2 parallel execution. Created `assets/` directory with 3 files: `assets/icon.svg` (960 bytes, hand-authored 256×256 lavender bg `#B388EB` + centred white lips silhouette via four-quadratic-curve closed path; explicit width/height/viewBox per RESEARCH Pitfall 6), `assets/icon-256.png` (4079 bytes, sips-derived, verified 256×256 RGBA non-interlaced PNG via `sips -g pixelWidth -g pixelHeight` and `file`), `assets/README.md` (16 lines, single-line sips regenerate command + brand colour note). Visual sanity check passed (clearly recognisable lips on lavender, cupid's bow indent visible, no rendering artifacts — first-pass path geometry accepted, no iteration). Migrated `purplevoice-lua/init.lua` menubar palette from grey/red MENUBAR_IDLE_COLOR (#888888) + MENUBAR_RECORDING_COLOR (#FF3B30) to single `MENUBAR_COLOR = BRAND.COLOUR_LAVENDER` reference (DRY: one source of truth for #B388EB, references M.BRAND constants table set up by Plan 02.5-01). Idle/recording glyphs swapped to filled-vs-outline differentiation (idle = U+25CB white circle outline `○`, recording = U+25CF black circle filled `●`) — both styled lavender per RESEARCH Pattern 3 (visually clearest, no font dependency, single colour constant). Pattern 2 invariant intact (grep -c WHISPER_BIN purplevoice-record == 2; ! grep -q whisper-cli purplevoice-lua/init.lua). All 6 bash unit tests still GREEN. File scope discipline preserved during parallel Wave 2 execution: my commits touched only `assets/*` + `purplevoice-lua/init.lua`; `setup.sh` (parallel Plan 02.5-02 scope) untouched. Used `--no-verify` on both task commits per parallel-execution guidance. BRD-03 closed. No deviations — plan executed exactly as written. Hammerspoon live reload deferred (hs.ipc port returned transport errors; user must paste `require("purplevoice")` into ~/.hammerspoon/init.lua per Plan 02.5-02 follow-up before live menubar visual is observable). Commits: 07b1ac1 (Task 1 — icon assets), 309221a (Task 2 — menubar lavender wiring). See 02.5-03-SUMMARY.md.
 - Plan 02.5-01 (2026-04-29): voice-cc → PurpleVoice rebrand of bash glue + Lua module + user-paste snippet + 6 unit tests + 7 manual walkthroughs. File renames: `voice-cc-record` → `purplevoice-record`, `voice-cc-lua/` → `purplevoice-lua/`. 5 hs.notify titles use `PurpleVoice:` prefix; module load alert uses `PurpleVoice loaded — local dictation, cmd+shift+e` (D-12 form factor); hs.notify orphan-tag cleanup (`pcall(hs.notify.unregister, "voiceccOpen{Mic,Accessibility}Settings")`) inserted at module top per RESEARCH Pattern 4; new `purplevoice*` tag namespace in register + send call sites; `M.BRAND` constants table (NAME / TAGLINE / COLOUR_LAVENDER) exported for Phase 3.5 HUD. Cache-path edit consolidated from Plan 02.5-02 per checker iter 1: exit-12 informativeText now references `~/.cache/purplevoice/error.log` — eliminates Wave 2 init.lua file-write race with Plan 02.5-03. 6 env vars renamed (`VOICE_CC_*` → `PURPLEVOICE_*`) — hard rename, no fallback shim per personal-tool ethos. Pattern 2 invariant verified post-edit (`grep -c WHISPER_BIN purplevoice-record == 2`); Pattern 2 corollary verified (`! grep -q "whisper-cli" purplevoice-lua/init.lua`). 4 Rule 1 deviations auto-fixed inline (stale comments referring to old `voiceccOpenAccessibilitySettings`, `VOICE_CC_NO_SOUNDS`, `whisper-cli`, and `voice-cc` strings). All 6 bash unit tests still GREEN. BRD-02 closed for code surfaces (runtime XDG paths intentionally preserved for Plan 02.5-02 ownership). Commits: 2c9a7f2 (Task 1 — file/dir renames + bash glue + tests + manual walkthroughs), 090c1dd (Task 2 — Lua module strings + orphan-tag cleanup + cache-path edit). See 02.5-01-SUMMARY.md.
 - Plan 02-03 (2026-04-28): voice-cc-lua/init.lua final form (315 lines) — full `hs.notify` dispatch for exit codes 10 / 11 / 12 + System Settings deep links + 60s notifyOnce dedup + defence-in-depth Accessibility-deny notification. Both manual checkpoints signed off live by user ("approved"). Three coupled regressions fixed inline (commit 81334ce): (a) SOX_SIGNALED flag distinguishes trap-induced sox exit from real failure, (b) Sequoia silent-stream amplitude detection replaces dead stderr-fingerprint, (c) deep-link URLs use `://` instead of bare `:` for Hammerspoon's openURL API. All 6 bash unit tests still GREEN. Pattern 2 boundary preserved. Commits: 8b32e45 (Task 3-1 dispatcher), 81334ce (3 deviations fix). See 02-03-SUMMARY.md.
 - Plan 02-02 (2026-04-28): voice-cc-lua/init.lua hardened (82 → 208 lines). Menubar indicator + audio cues + clipboard preserve/restore with TransientType UTI + re-entrancy guard + handleExit stub + hs.accessibilityState(true) on load. `.hammerspoon-init-snippet.lua` staged for `require("hs.ipc")`; user pasted; IPC working. FBK-01, FBK-02, INJ-02, INJ-03, ROB-01 closed. Phase-1 TODOs (a) and (b) closed. Commits: f4da016, deee0fe.
