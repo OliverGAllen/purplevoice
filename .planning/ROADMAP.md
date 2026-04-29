@@ -75,7 +75,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
   5. Phase 2 hardening invariants survive: Pattern 2 boundary intact (`grep -c WHISPER_BIN purplevoice-record == 2`), all 6 prior unit tests still GREEN.
 **Plans:** 4 plans
   - [x] 02.5-01-PLAN.md — String propagation in code surfaces (rename voice-cc-record → purplevoice-record, voice-cc-lua/ → purplevoice-lua/, env vars VOICE_CC_* → PURPLEVOICE_*, 5 notification titles, load alert, hs.notify orphan-tag cleanup); BRD-02 — completed 2026-04-29 (commits 2c9a7f2, 090c1dd; cache-path edit consolidated from Plan 02.5-02 per checker iter 1)
-  - [ ] 02.5-02-PLAN.md — XDG path rename + idempotent setup.sh migration (4-state guard for ~/.config|.local/share|.cache/voice-cc/ → purplevoice/, symlink hygiene, banner tagline + new require line); BRD-02
+  - [x] 02.5-02-PLAN.md — XDG path rename + idempotent setup.sh migration (4-state guard for ~/.config|.local/share|.cache/voice-cc/ → purplevoice/, symlink hygiene, banner tagline + new require line); BRD-02 — completed 2026-04-29 (commits ca231e4, cc27db0; live migration moved 466 MB models on Oliver's machine; second run silent/idempotent; 6 bash tests still GREEN; 1 Rule 1 deviation auto-fixed — ~/.hammerspoon/purplevoice removed from mkdir block to fix mkdir/ln-sfn race)
   - [x] 02.5-03-PLAN.md — Visual identity (assets/icon.svg + sips → assets/icon-256.png, menubar lavender via BRAND.COLOUR_LAVENDER + outline/filled glyph differentiation); BRD-03
   - [ ] 02.5-04-PLAN.md — Documentation closure (PROJECT.md name + positioning, formal BRD-01..03 in REQUIREMENTS.md, expanded README, CLAUDE.md updates, tests/test_brand_consistency.sh regression catch); BRD-01, BRD-02, BRD-03
 **UI hint**: light (naming + minor visual polish, no full design system)
@@ -181,7 +181,7 @@ Listed in **execution order** (Phase 3 reordered to come last in v1; phase numbe
 |---|-------|----------------|--------|-----------|
 | 1 | Phase 1: Spike | 3/3 | Complete | 2026-04-27 |
 | 2 | Phase 2: Hardening | 4/4 | Complete | 2026-04-28 |
-| 3 | Phase 2.5: Branding | 1/4 | Wave 1 done — Plan 02.5-01 complete 2026-04-29; Wave 2 (02.5-02 + 02.5-03) unblocked | 2026-04-29 |
+| 3 | Phase 2.5: Branding | 3/4 | Wave 2 done — Plan 02.5-01, 02.5-02, 02.5-03 complete 2026-04-29; Wave 3 (02.5-04 docs closure) unblocked | 2026-04-29 |
 | 4 | Phase 2.7: Security Posture & Government Readiness | 0/0 | Queued — needs `/gsd:discuss-phase 2.7` then `/gsd:research-phase 2.7` | - |
 | 5 | Phase 3.5: Hover UI / HUD | 0/0 | Queued | - |
 | 6 | Phase 4 (v1.x): Quality of Life | 0/0 | Queued | - |
