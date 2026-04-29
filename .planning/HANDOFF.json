@@ -1,99 +1,66 @@
 {
   "version": "1.0",
-  "timestamp": "2026-04-28T17:54:16.767Z",
-  "phase": "2.5",
-  "phase_name": "Branding",
-  "phase_dir": ".planning/phases/02.5-branding",
+  "timestamp": "2026-04-29T09:03:01.484Z",
+  "phase": "2.7",
+  "phase_name": "Security Posture & Government Readiness",
+  "phase_dir": ".planning/phases/02.7-security-posture",
   "plan": null,
   "task": null,
   "total_tasks": null,
-  "status": "paused_strategic_decision",
+  "status": "paused_between_phases",
   "completed_tasks": [
     {
-      "id": "02-03 walkthroughs",
-      "name": "Plan 02-03 live checkpoints (TCC mic-deny + Accessibility-deny)",
+      "id": "phase 2.5",
+      "name": "Branding — PurpleVoice rebrand + visual identity + broadened positioning",
       "status": "done",
-      "commit": "81334ce"
+      "commit": "9033622",
+      "verification": "23/23 predicates pass; 7/7 tests GREEN; Pattern 2 boundary preserved"
     },
     {
-      "id": "02-03 docs",
-      "name": "02-03-SUMMARY.md + STATE.md + ROADMAP.md (Phase 2 closure + roadmap reorder)",
+      "id": "github backup",
+      "name": "Private GitHub repo created at OliverGAllen/purplevoice; main pushed",
       "status": "done",
-      "commit": "9dc48cf"
-    },
-    {
-      "id": "2.5 discussion (partial)",
-      "name": "Phase 2.5 brainstorm: 3 waves of name candidates explored, web-checked for namespace conflicts",
-      "status": "in_progress",
-      "progress": "Brainstormed Hush/Whisp/Pith/Magpie/Cricket/Pip/Koe/Hayai/Bankai etc. Most have direct dictation-tool competitors. Cricket/Patter/Hayai/Bankai are clean. Discovered Koe (github.com/missuo/koe) is exact same architecture as voice-cc — paused for strategic decision."
+      "url": "https://github.com/OliverGAllen/purplevoice",
+      "visibility": "PRIVATE"
     }
   ],
   "remaining_tasks": [
     {
-      "id": "strategic_decision",
-      "name": "Decide path forward: (A) keep building voice-cc, (B) pivot to thin wrapper around Koe's Rust core, (C) adopt Koe + archive voice-cc",
-      "status": "blocking"
+      "id": "phase_2.7_discuss",
+      "name": "/gsd:discuss-phase 2.7 — gather context for Security Posture & Government Readiness phase",
+      "status": "next"
     },
     {
-      "id": "2.5_name_pick",
-      "name": "If path A: pick name from clean candidates (Cricket, Patter, Hayai, Bankai) or generate another wave",
+      "id": "phase_2.7_plan",
+      "name": "/gsd:plan-phase 2.7 — break the security work into atomic plans (likely 4 plans: threat model, verification mechanisms, gap analysis, docs)",
       "status": "not_started"
     },
     {
-      "id": "2.5_rename_scope",
-      "name": "Decide rename scope: binary name (voice-cc-record), Lua module name (require('voice-cc')), XDG paths (~/.config/voice-cc/)",
-      "status": "not_started"
-    },
-    {
-      "id": "2.5_visual_identity",
-      "name": "Decide BRD-03 visual identity: pursue menu-bar glyph/icon now, punt to Phase 4, or skip",
-      "status": "not_started"
-    },
-    {
-      "id": "2.5_tagline",
-      "name": "Decide tagline / positioning line for README + setup.sh banner",
-      "status": "not_started"
-    },
-    {
-      "id": "2.5_context_md",
-      "name": "Write 02.5-CONTEXT.md capturing decisions",
+      "id": "phase_2.7_execute",
+      "name": "/gsd:execute-phase 2.7 — produce SECURITY.md, SBOM, zero-egress test, code-signing setup",
       "status": "not_started"
     }
   ],
-  "blockers": [
-    {
-      "description": "Discovered Koe (github.com/missuo/koe, 329 stars, MIT, March 2026) — same product as voice-cc but more polished: streaming ASR, LLM correction, multi-backend (Apple Speech / MLX Qwen3-ASR / sherpa-onnx / Doubao cloud), Fn-key default, Homebrew-distributed, 15MB native ObjC+Rust app. Question is whether to continue voice-cc or adopt/wrap Koe.",
-      "type": "strategic",
-      "workaround": "User paused to evaluate. Re-read .planning/phases/02.5-branding/.continue-here.md (Koe comparison section) before resuming."
-    }
-  ],
-  "human_actions_pending": [
-    {
-      "action": "Strategic decision: voice-cc vs Koe vs hybrid",
-      "context": "Koe ships everything voice-cc would ship in Phases 3-5 (distribution, streaming, LLM correction). User needs to weigh: pure-local-by-default + hackability + sunk cost vs. adopt-and-move-on.",
-      "blocking": true
-    }
-  ],
+  "blockers": [],
+  "human_actions_pending": [],
   "decisions": [
     {
-      "decision": "Roadmap reordered: Phase 3 (Distribution + Public Install + hyperfine) moved to end of v1 — execute order is now 1 → 2 → 2.5 → 3.5 → 4 → 3 → 5",
-      "rationale": "Distribute the polished product, not bare hardening. Phase 3.5 dep flipped from Phase 3 to Phase 2.5.",
+      "decision": "Repo stays private on GitHub by default — flip to public only with a specific reason (Phase 3 distribution being the obvious one, after Phase 2.7 SECURITY.md substantiates the privacy claims)",
+      "rationale": "Privacy-first positioning + premature public exposure undermines the brand. User-stated 2026-04-29.",
+      "phase": "policy"
+    },
+    {
+      "decision": "Phase 2.7 (Security Posture & Government Readiness) added to roadmap, inserted between 2.5 and 3.5",
+      "rationale": "User direction 2026-04-29 — broaden audience to include government / defence / institutional buyers; produce auditable SECURITY.md as substantiation for institutional claims",
       "phase": "roadmap"
     },
     {
-      "decision": "Phase 2 hardening: three coupled Sequoia regressions fixed inline during live walkthrough — (a) SOX_SIGNALED flag distinguishes trap-induced sox exit from real failure, (b) amplitude-based TCC detection replaces dead stderr-fingerprint (Sequoia feeds silent stream not stderr error), (c) deep-link URLs use '://' for hs.urlevent.openURL",
-      "rationale": "Plan 02-01 RESEARCH §4 was wrong about Sequoia 15.7.5 behaviour; spike worked only because wait || true masked exit codes",
-      "phase": "02"
-    },
-    {
-      "decision": "Project paused: ~/.hammerspoon/init.lua require('voice-cc') and require('hs.ipc') commented out; Hammerspoon quit. Easy to re-enable (uncomment two lines).",
-      "rationale": "User asked to stop everything running while evaluating Koe alternative",
+      "decision": "Audience broadened from 'privacy-conscious individuals' to 6 segments (individuals + government/defence + healthcare/legal + finance/compliance + journalists + air-gapped operators)",
+      "rationale": "User direction 2026-04-29; load-bearing differentiator vs Koe / Wispr Flow / cloud dictation broadly",
       "phase": "2.5"
     }
   ],
-  "uncommitted_files": [
-    "/Users/oliverallen/.hammerspoon/init.lua (user's personal Hammerspoon config — NOT in repo; commented out voice-cc requires)"
-  ],
-  "next_action": "Read .planning/phases/02.5-branding/.continue-here.md (Koe comparison section). User decides path forward (A/B/C). If A: resume Phase 2.5 discussion with name pick from clean candidates. If B: rescope Phase 2.5 + Phase 3 around Koe wrapping. If C: archive project with milestone summary.",
-  "context_notes": "Phase 2 is closed (4/4 plans, all signed off, all 12 v1 requirements implemented). The strategic question landed via the Phase 2.5 namespace search: when checking Koe for availability, we found it's literally voice-cc but better — same press-and-hold-mac-dictation architecture, even uses Fn key (which user asked about during Phase 2 wrap-up). User has invested 7 plans of work but hasn't shipped. The honest read: Koe is more capable than voice-cc-as-designed. Build vs adopt is a vision call, not engineering."
+  "uncommitted_files": [],
+  "next_action": "Run `/gsd:discuss-phase 2.7` to gather context for the Security Posture phase. The phase produces SECURITY.md (threat model + zero-egress verification + SBOM + gap analysis vs NIST SP 800-53 / FIPS 140-3 / FedRAMP / Common Criteria) plus implementation tasks for verification mechanisms (Little Snitch egress proof, SBOM tooling, code signing). Research + verification depth, NOT formal certifications.",
+  "context_notes": "Phase 2.5 closed cleanly. Working tree empty. Models migrated on host (~466 MB voice-cc → purplevoice). 7/7 tests green. Repo backed up to private GitHub. The .planning/STATE.md follow-ups are all logged (Phase 2 vocab A/B deferred, test_tcc_grep replacement, manual walkthroughs run, Phase 3 STACK.md update, Phase 4 fn-key hotkey schemes). None gate Phase 2.7. Resume cost is low — fresh context window recommended."
 }
