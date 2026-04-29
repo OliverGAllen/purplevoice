@@ -56,8 +56,10 @@ local accessibilityOk = hs.accessibilityState(true)
 -- Constants
 -- ----------------------------------------------------------------
 local SCRIPT_PATH = os.getenv("HOME") .. "/.local/bin/purplevoice-record"
-local MENUBAR_IDLE_COLOR = "#888888"
-local MENUBAR_RECORDING_COLOR = "#FF3B30"
+-- Menubar palette - Phase 2.5 visual identity (BRD-03, D-09).
+-- Lavender for both states; recording-state differentiation via glyph shape (filled vs outline)
+-- per RESEARCH Pattern 3. Single hex constant lives on M.BRAND.COLOUR_LAVENDER.
+local MENUBAR_COLOR = BRAND.COLOUR_LAVENDER
 
 -- ----------------------------------------------------------------
 -- Module state (Lua-local, in-memory only)
@@ -73,8 +75,12 @@ local currentTask = nil
 -- Menubar (FBK-01)
 -- ----------------------------------------------------------------
 local menubar = hs.menubar.new()
-local idleTitle = hs.styledtext.new("●", { color = { hex = MENUBAR_IDLE_COLOR } })
-local recordingTitle = hs.styledtext.new("●", { color = { hex = MENUBAR_RECORDING_COLOR } })
+-- Filled vs outline differentiation (RESEARCH Pattern 3 recommendation):
+--   idle      = U+25CB white circle outline glyph
+--   recording = U+25CF black circle filled glyph
+-- Both styled lavender; the shape difference is what the user sees.
+local idleTitle = hs.styledtext.new("○", { color = { hex = MENUBAR_COLOR } })
+local recordingTitle = hs.styledtext.new("●", { color = { hex = MENUBAR_COLOR } })
 
 local function setMenubarIdle()
   if menubar then menubar:setTitle(idleTitle) end
