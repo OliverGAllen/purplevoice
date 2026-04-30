@@ -109,18 +109,23 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
 ### Phase 3.5: Hover UI / HUD
 **Goal**: A small floating HUD that surfaces voice-cc state at-a-glance — visible "● recording" indicator while the hotkey is held, fading or hideable when idle. Complements (does not replace) Phase 2's menu-bar indicator. Optimised for low CPU when idle and zero distraction when not actively recording.
 **Depends on**: Phase 2.5 (HUD uses the brand chosen in Branding). Also Phase 2 (the press/release lifecycle and menu-bar indicator are the layer the HUD piggybacks on). *(Note: previously listed as depending on Phase 3 — flipped 2026-04-28 when Phase 3 was reordered to come last; the dependency on Distribution was sequencing-by-polish, not technical.)*
-**Requirements**: TBD — defined during `/gsd:discuss-phase 3.5`. Likely shape:
-  - **HUD-01** — Floating canvas widget (`hs.canvas` or `hs.drawing`) appears within ~50 ms of hotkey press and disappears within ~250 ms of release
-  - **HUD-02** — User-toggle-able visibility (env var or `~/.config/voice-cc/config.sh` setting)
-  - **HUD-03** — Effectively zero CPU when idle (no animation loops; only redraws on state change)
-  - **HUD-04** — Position configurable (near cursor / screen edge / fixed coordinates) with a sensible default
+**Requirements**: HUD-01, HUD-02, HUD-03, HUD-04 (formalised during `/gsd:discuss-phase 3.5` 2026-04-30 — see `.planning/phases/03.5-hover-ui-hud/03.5-CONTEXT.md` D-01..D-16)
+  - **HUD-01** — Floating `hs.canvas` pill (~140×36, translucent lavender `#B388EB` alpha ~0.85, no backdrop blur, white "● Recording" text) appears within ~50 ms of hotkey press; disappears within ~250 ms of release
+  - **HUD-02** — User-toggle-able via `PURPLEVOICE_HUD_OFF=1` env var (matches `PURPLEVOICE_NO_SOUNDS` precedent; default ON; reload Hammerspoon to apply)
+  - **HUD-03** — Effectively zero CPU when idle (no animation loops; canvas hidden via `:hide(0)` when `resetState()` fires; only redraws on state change)
+  - **HUD-04** — Position configurable via `PURPLEVOICE_HUD_POSITION` (six named positions: `top-center` default, `top-right`, `bottom-center`, `bottom-right`, `near-cursor`, `center`); does not steal focus (`hs.canvas` defaults: `ignoresMouseEvents=YES`, `canBecomeKeyWindow=NO`); does not interfere with paste; **screen-recording behaviour reframed per RESEARCH Priority 2** — ScreenCaptureKit on macOS 15+ ignores `NSWindowSharingNone`, so PurpleVoice does not pursue exclusion; for sensitive sessions use `PURPLEVOICE_HUD_OFF=1`
 **Success Criteria** (what must be TRUE):
-  1. While the hotkey is held, a floating HUD element appears with a visible "● recording" affordance using the brand chosen in Phase 2.5.
+  1. While the hotkey is held, a floating HUD element appears with a visible "● Recording" affordance using the lavender brand from Phase 2.5.
   2. The HUD disappears within ~250 ms of release; while idle, no HUD is on screen and no measurable CPU is consumed.
-  3. A config toggle hides the HUD entirely for users who only want the menu-bar indicator (Phase 2 still ships the menu-bar indicator regardless of HUD state).
-  4. The HUD does not steal focus, does not interfere with paste, and does not appear in screen recordings unless the user explicitly enables it.
-**Plans**: 4 plans
+  3. `PURPLEVOICE_HUD_OFF=1` hides the HUD entirely (Phase 2 menubar indicator still ships regardless).
+  4. The HUD does not steal focus, does not interfere with paste, and the screen-recording limitation is documented honestly in README + SECURITY.md (per Priority 2 reframing).
+**Plans:** 4 plans
+  - [ ] 03.5-00-PLAN.md — Wave 0 staging: 2 bash unit tests (`test_hud_env_off.sh`, `test_hud_position_validation.sh`) + 5 manual walkthrough scaffolds + REQUIREMENTS.md HUD-01..04 stubs + VALIDATION.md frontmatter flip — *Task 0-1 complete (commit `2830e76`); 4 tasks remaining*
+  - [ ] 03.5-01-PLAN.md — HUD core: `hs.canvas` overlay creation at module load + show/hide functions + lifecycle wiring in `onPress` / `resetState` (HUD-01, HUD-03, HUD-04 focus half) — *includes `checkpoint:human-verify` for HUD-01 appearance walkthrough*
+  - [ ] 03.5-02-PLAN.md — Configuration surface: `PURPLEVOICE_HUD_OFF` + `PURPLEVOICE_HUD_POSITION` env-var read at module load + 6-named-position arithmetic + setup.sh Step 7 banner one-liner (HUD-02, HUD-04 position half) — *includes `checkpoint:human-verify` for HUD-02 disable + HUD-04 position walkthroughs*
+  - [ ] 03.5-03-PLAN.md — Documentation closure: README `## Security & Privacy` HUD subsection + SECURITY.md `## How to Verify These Claims` HUD limitation + REQUIREMENTS.md HUD-01..04 finalisation [ ]→[x] + 3 live walkthrough sign-offs + STATE.md + ROADMAP.md updates (HUD-01..04 closure) — *includes `checkpoint:human-verify` for HUD-04 focus + recordings walkthroughs*
 **UI hint**: yes (this IS the UI phase)
+**Research flag**: yes — `/gsd:research-phase 3.5` complete 2026-04-30 (commit `5396ac6`). Critical finding: ScreenCaptureKit on macOS 15+ ignores NSWindowSharingNone (Apple Forums thread 792152). D-14 caveat reframed accordingly.
 
 ### Phase 4 (v1.x): Quality of Life
 **Goal**: Address the first real-use frustrations now that the polished loop is stable. Each item has a specific trigger; do not build speculatively.
@@ -185,7 +190,7 @@ Listed in **execution order** (Phase 3 reordered to come last in v1; phase numbe
 | 2 | Phase 2: Hardening | 4/4 | Complete | 2026-04-28 |
 | 3 | Phase 2.5: Branding | 3/4 | Wave 2 done — Plan 02.5-01, 02.5-02, 02.5-03 complete 2026-04-29; Wave 3 (02.5-04 docs closure) unblocked | 2026-04-29 |
 | 4 | Phase 2.7: Security Posture & Government Readiness | 6/6 | Complete 2026-04-29..2026-04-30 — Plan 02.7-00 (skeleton + Syft hard dep + OFFLINE guards), Plan 02.7-01 (threat model + D-17 framing lint), Plan 02.7-02 (verify scripts + SBOM regen), Plan 02.7-03a (NIST SP 800-53 Rev 5 deep mapping), Plan 02.7-03b (6 framed framework sections), Plan 02.7-04 (closure: SECURITY.md filled to 18 H2 sections / 751 lines / 0 TODOs + verify_reproducibility.sh impl + REQUIREMENTS.md SEC-01..06 + README.md ## Security & Privacy section; security suite 5/0; functional suite 8/0). Awaiting `/gsd:verify-work 2.7` Sonnet sign-off | 2026-04-30 |
-| 5 | Phase 3.5: Hover UI / HUD | 0/0 | Queued | - |
+| 5 | Phase 3.5: Hover UI / HUD | 0/4 | Planned 2026-04-30 — context (`0595dd0`), research (`5396ac6`), validation (`7d7d97b`), 4 plans created (03.5-00 through 03.5-03), Plan 00 Task 0-1 complete (`2830e76`). Plans 01/02/03 each contain `checkpoint:human-verify` tasks for live walkthroughs. Auto-advance disabled per user direction. | - |
 | 6 | Phase 4 (v1.x): Quality of Life | 0/0 | Queued | - |
 | 7 | Phase 3: Distribution & Benchmarking + Public Install | 0/0 | Queued (final v1 phase) | - |
 | 8 | Phase 5 (v1.1, conditional): Warm-Process Upgrade | 0/0 | Conditional on Phase 3 hyperfine | - |
@@ -195,7 +200,7 @@ Listed in **execution order** (Phase 3 reordered to come last in v1; phase numbe
 - **Original v1 requirements:** 26 total (CAP-01..04, TRA-01..06, INJ-01..04, FBK-01..03, ROB-01..05, DST-01..04)
 - **Mapped to v1 phases (1–3):** 26
 - **Unmapped v1:** 0
-- **New requirements added 2026-04-27 (TBD elaboration):** BRD-01..03 (Phase 2.5 — formalised 2026-04-29), DST-05 (Phase 3 extension), HUD-01..04 (Phase 3.5)
+- **New requirements added 2026-04-27 (TBD elaboration):** BRD-01..03 (Phase 2.5 — formalised 2026-04-29), DST-05 (Phase 3 extension), HUD-01..04 (Phase 3.5 — formalised 2026-04-30 in `03.5-CONTEXT.md` D-01..D-16; REQUIREMENTS.md stubs landed in Plan 03.5-00; finalised by Plan 03.5-03)
 - **New requirements added 2026-04-29 (TBD elaboration):** SEC-01..06 (Phase 2.7 — formalised during `/gsd:discuss-phase 2.7`)
 - **v2 requirements (deferred):** QOL-01..05, PERF-01..02 — assigned to Phase 4 (QoL) and Phase 5 (conditional warm process)
 
@@ -205,10 +210,11 @@ Listed in **execution order** (Phase 3 reordered to come last in v1; phase numbe
 | 2. Hardening | TRA-04, TRA-05, TRA-06, INJ-02, INJ-03, INJ-04, FBK-01, FBK-02, FBK-03, ROB-01, ROB-02, ROB-04 | 12 |
 | 2.5. Branding | BRD-01, BRD-02, (BRD-03) | 2-3 (TBD) |
 | 3. Distribution & Benchmarking + Public Install | DST-01, DST-02, DST-03, DST-04, DST-05 | 5 |
-| 3.5. Hover UI / HUD | HUD-01, HUD-02, HUD-03, HUD-04 | 4 (TBD) |
-| **Total v1** | | **33-34** (was 26) |
+| 3.5. Hover UI / HUD | HUD-01, HUD-02, HUD-03, HUD-04 | 4 |
+| **Total v1** | | **39** (was 26 → 29 with BRD → 35 with SEC → 39 with HUD) |
 
 ---
 *Roadmap created: 2026-04-23*
 *Roadmap extended: 2026-04-27 (Phase 2.5 Branding, Phase 3 Public Install extension, Phase 3.5 Hover UI per user request)*
 *Roadmap reordered: 2026-04-28 (Phase 3 Distribution moved to end of v1 per user direction; Phase 3.5 dependency flipped from Phase 3 to Phase 2.5; Phase 2 closed)*
+*Roadmap updated: 2026-04-30 (Phase 2.7 Security Posture closed 6/6; Phase 3.5 Hover UI / HUD planned with 4 plans + research finding on ScreenCaptureKit limitation; HUD-01..04 formalised; coverage 35→39 v1 reqs)*
