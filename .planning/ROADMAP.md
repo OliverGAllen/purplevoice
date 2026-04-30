@@ -119,9 +119,9 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
   2. The HUD disappears within ~250 ms of release; while idle, no HUD is on screen and no measurable CPU is consumed.
   3. `PURPLEVOICE_HUD_OFF=1` hides the HUD entirely (Phase 2 menubar indicator still ships regardless).
   4. The HUD does not steal focus, does not interfere with paste, and the screen-recording limitation is documented honestly in README + SECURITY.md (per Priority 2 reframing).
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
   - [x] 03.5-00-PLAN.md — Wave 0 staging: 2 bash unit tests (`test_hud_env_off.sh`, `test_hud_position_validation.sh`) + 5 manual walkthrough scaffolds + REQUIREMENTS.md HUD-01..04 stubs + VALIDATION.md frontmatter flip — *Task 0-1 complete (commit `2830e76`); 4 tasks remaining*
-  - [ ] 03.5-01-PLAN.md — HUD core: `hs.canvas` overlay creation at module load + show/hide functions + lifecycle wiring in `onPress` / `resetState` (HUD-01, HUD-03, HUD-04 focus half) — *includes `checkpoint:human-verify` for HUD-01 appearance walkthrough*
+  - [x] 03.5-01-PLAN.md — HUD core: `hs.canvas` overlay creation at module load + show/hide functions + lifecycle wiring in `onPress` / `resetState` (HUD-01, HUD-03, HUD-04 focus half) — *includes `checkpoint:human-verify` for HUD-01 appearance walkthrough*
   - [ ] 03.5-02-PLAN.md — Configuration surface: `PURPLEVOICE_HUD_OFF` + `PURPLEVOICE_HUD_POSITION` env-var read at module load + 6-named-position arithmetic + setup.sh Step 7 banner one-liner (HUD-02, HUD-04 position half) — *includes `checkpoint:human-verify` for HUD-02 disable + HUD-04 position walkthroughs*
   - [ ] 03.5-03-PLAN.md — Documentation closure: README `## Security & Privacy` HUD subsection + SECURITY.md `## How to Verify These Claims` HUD limitation + REQUIREMENTS.md HUD-01..04 finalisation [ ]→[x] + 3 live walkthrough sign-offs + STATE.md + ROADMAP.md updates (HUD-01..04 closure) — *includes `checkpoint:human-verify` for HUD-04 focus + recordings walkthroughs*
 **UI hint**: yes (this IS the UI phase)
