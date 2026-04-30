@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
-status: executing
-last_updated: "2026-04-30T01:39:54.086Z"
+status: planning
+last_updated: "2026-04-30T02:03:46.870Z"
 progress:
   total_phases: 6
   completed_phases: 4
@@ -31,9 +31,9 @@ Plan: 6 of 6 (all waves complete — Wave 0 / Wave 1 / Wave 2 / Wave 3 / Wave 4)
 Next: `/gsd:verify-work 2.7` (orchestrator-side Sonnet verification of all 6 Phase 2.7 plans + cross-plan invariants). After verifier sign-off + Phase 2.7 close, Phase 3.5 (HUD) is next per ROADMAP order.
 
 - **Milestone:** v1
-- **Phase:** 2.7 — COMPLETE
-- **Plan:** all 6 plans complete (02.7-00 + 02.7-01 + 02.7-02 + 02.7-03a + 02.7-03b + 02.7-04)
-- **Status:** Phase 02.7 closure-ready
+- **Phase:** 3.5
+- **Plan:** Not started
+- **Status:** Ready to plan
 
 ### Progress
 
@@ -202,6 +202,7 @@ Plan 02.7-04 complete (6 tasks autonomous, 28 min wall-clock, single executor �
 **Pattern 2 invariant intact** (`grep -c WHISPER_BIN purplevoice-record == 2`); `purplevoice-record` SHA256 unchanged through this plan. **Brand consistency intact**: `bash tests/test_brand_consistency.sh` exits 0; zero new `voice-cc` strings introduced anywhere. **D-17 framing intact**: zero `\bcompliant\b` / `\bcertified\b` / `\bguarantees\b` hits outside qualified contexts; framing lint clean.
 
 **3 Rule 1 deviations** documented:
+
 1. Auto-fixed inline (Task 4-1a, commit `012850d`): TL;DR template literal "What PurpleVoice is NOT certified, audited, or compliant with:" rephrased to lint-clean qualified form using quoted-word contrast ("never claims to *be* \"compliant\" or \"certified\""). Same plan-prose-vs-verify-regex pattern as Plans 00 / 03a / 03b. Deviation library now spans 5+ plans across Phase 2.7.
 2. Documented (Task 4-3, commit `43518f9`): plan verify clause `! grep -q "voice-cc" README.md` is inconsistent with documented BRD-02 exemption (README.md is on tests/test_brand_consistency.sh exemption list because the working-name "voice-cc" is preserved as legitimate historical mention in 3 specific places). Task introduced ZERO new voice-cc strings (verified via `git diff`).
 3. Documented (Task 4-4, verification-only): plan verify clauses `! grep -nE '\\bcompliant\\b' SECURITY.md` and `! grep -nE '\\bcertified\\b' SECURITY.md` are stricter than framing lint qualified-context allowance for quoted forms (line 27 of SECURITY.md TL;DR legitimately contains `*be* "compliant" or "certified"` as the canonical D-17 disclaimer). The framing lint at `tests/test_security_md_framing.sh` is the canonical D-17 gate per Plan 02.7-01 design.
