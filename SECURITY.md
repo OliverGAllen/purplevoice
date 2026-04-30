@@ -240,15 +240,87 @@ Marking these "Out of Scope" with rationale (rather than "Failed" or "Not Applic
 
 ## FIPS 140-3
 
-<!-- TODO: Plan 02.7-03b fills this section (framed; "compatible with FIPS-validated cryptographic modules" framing). -->
+**Status: Compatible with FIPS-validated cryptographic modules where the underlying macOS crypto APIs are FIPS-validated. PurpleVoice itself is not in scope for FIPS validation.**
+
+FIPS 140-3 (Federal Information Processing Standard) is a US government standard for cryptographic modules. NIST's Cryptographic Module Validation Program (CMVP) certifies specific module implementations; FIPS 140-2 sunset on 2026-09 in favour of FIPS 140-3.
+
+PurpleVoice does not perform cryptographic operations on user data:
+
+- No encryption of voice content (it never leaves the machine — see [Egress Verification](#egress-verification)).
+- No key management.
+- No hash-based message authentication.
+- No transport-layer cryptography (no transmission).
+
+The only cryptographic primitive in use is **SHA-256 for model file integrity** at install time (`setup.sh` Step 5 verifies `ggml-small.en.bin` against `MODEL_SHA256`). This uses macOS's `shasum` tool, which on FIPS-validated macOS versions invokes Common Crypto — a FIPS 140-3-validated module per Apple's CMVP submissions.
+
+**Implication:** PurpleVoice is **compatible with** FIPS-validated cryptographic modules (specifically: macOS Common Crypto where validated) without itself being a FIPS-validated cryptographic module. There is no PurpleVoice cryptographic module to validate — PurpleVoice consumes the OS's crypto API, it does not implement crypto.
+
+| FIPS 140-3 Concern | PurpleVoice Status | Rationale |
+|---|---|---|
+| Cryptographic module identification | N/A | No PurpleVoice cryptographic module exists. |
+| Approved algorithms (FIPS 180-4 hashing) | Met | SHA-256 via macOS Common Crypto where validated. |
+| Key management | N/A | No keys. |
+| Self-tests on power-up | N/A | No cryptographic module. |
+| Operator authentication | N/A | No cryptographic role separation. |
+
+Organisations that require FIPS-validated cryptography for the broader system in which PurpleVoice runs should verify that their macOS version's Common Crypto module has a current FIPS 140-3 validation certificate via the [NIST CMVP search](https://csrc.nist.gov/projects/cryptographic-module-validation-program).
 
 ## FedRAMP-tailored
 
-<!-- TODO: Plan 02.7-03b fills this section (framed; "achievable IF a sponsoring agency pursues authorisation; not unilaterally pursuable" framing). -->
+**Status: Compatible with applicable FedRAMP-tailored Low-baseline obligations for in-scope code. Not FedRAMP-authorised. Authorisation requires a sponsoring federal agency.**
+
+FedRAMP (Federal Risk and Authorization Management Program) is an authorisation programme for cloud services used by US federal agencies. **FedRAMP is not a control catalogue** — it inherits from NIST SP 800-53. The FedRAMP-tailored Low-baseline is a subset designed for low-impact systems.
+
+Two structural realities make FedRAMP authorisation impractical for PurpleVoice in v1:
+
+1. **PurpleVoice is not a cloud service.** FedRAMP's scope is cloud-delivered services; PurpleVoice runs locally on a macOS Apple Silicon machine.
+2. **Authorisation requires a sponsoring federal agency.** A vendor cannot unilaterally pursue a FedRAMP authorisation; an agency-sponsored ATO (Authorization to Operate) process is required (12-18 months, $250k-$1M+ documented industry cost).
+
+**PurpleVoice's design is compatible with** the technical control families a FedRAMP Low-baseline assessment would examine — these are the same NIST 800-53 Rev 5 controls mapped above. Specifically:
+
+- SC-7 Boundary Protection — Met (zero-egress; verified)
+- SI-7 Software Integrity — Met (SHA256 model verification)
+- AC-3 Access Enforcement — Met (TCC)
+- PT-3 PII Processing Purposes — Met (this document substantiates)
+
+| FedRAMP Concern | PurpleVoice Status |
+|---|---|
+| Cloud service classification | N/A — local tool |
+| NIST 800-53 Low-baseline alignment | Met (see [NIST 800-53 mapping](#nist-sp-800-53-rev-5--low-baseline-mapping)) |
+| Continuous monitoring (FedRAMP-specific) | Not Pursued — release-gate verification per D-03 |
+| 3PAO assessment | N/A — no auditing organisation engaged |
+| Sponsoring agency | N/A — no agency sponsor |
+
+**PurpleVoice will support an agency-sponsored authorisation effort** by maintaining the security artefacts in this document (threat model, SBOM, verification scripts, gap analysis) — but the path to authorisation is owned by the sponsoring agency, not by the PurpleVoice project.
 
 ## Common Criteria
 
-<!-- TODO: Plan 02.7-03b fills this section (framed; "out of scope for v1; ST-based future evaluation simplification" framing). -->
+**Status: Not evaluated under Common Criteria. Out of scope for v1. PurpleVoice's small TCB and open-source posture would simplify a future Security Target-based evaluation if a sponsoring institution funds it.**
+
+Common Criteria (CC; ISO/IEC 15408) is an international product evaluation scheme administered through national schemes (NIAP in the US, BSI in Germany, CCN in Spain, etc.). Products are evaluated against a Security Target (ST) at an Evaluation Assurance Level (EAL) from EAL1 (basic) to EAL7 (formally verified design + tested).
+
+PurpleVoice has not undergone Common Criteria evaluation. Out of scope for v1 because:
+
+- **Cost & timeline:** EAL2-EAL4 evaluations typically run $50k-$500k and 6-18 months (industry sources: cclab.com, Wikipedia CC EAL summary). Disproportionate for a free open-source personal tool.
+- **Sponsoring laboratory:** CC evaluation requires engagement with an accredited Common Criteria Testing Laboratory (CCTL); PurpleVoice has no CCTL engagement.
+- **Protection Profile fit:** No existing Protection Profile (PP) cleanly fits a local one-shot dictation CLI; a custom Security Target would be required.
+
+**Compatible with** future evaluation: PurpleVoice's design has properties that *would simplify* an EAL2-EAL4 evaluation if a sponsoring institution funds it:
+
+- **Small TCB** — Single bash script (`purplevoice-record`, ~150 lines) + Lua module (`purplevoice-lua/init.lua`, ~315 lines) + brew-installed binaries (sox + transcription binary) + GGML model files. The trusted compute base is enumerable and reviewable.
+- **Open-source posture** — All source is git-tracked and human-readable; no opaque binaries beyond brew-bottle SHA256-verified dependencies.
+- **Minimal external interface** — One hotkey, one clipboard write, one paste. No network surface (verified). No daemon (one-shot CLI).
+- **Documented threat model** — STRIDE + LINDDUN mapping (this document) is the kind of artefact a CC evaluator expects in a Security Target.
+
+| Common Criteria Concern | PurpleVoice Status |
+|---|---|
+| Security Target authored | Not Pursued — would be drafted at evaluation time |
+| Protection Profile alignment | N/A — no fitting PP exists |
+| EAL targeted | N/A — out of scope for v1 |
+| CCTL engaged | N/A |
+| Sponsoring institution | N/A |
+
+Institutions that require Common Criteria evaluation for tools in their environment should treat PurpleVoice as a **not-evaluated** component and apply organisational risk-acceptance accordingly.
 
 ## HIPAA Security Rule §164.312
 
