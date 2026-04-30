@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
-status: completed
-last_updated: "2026-04-30T07:25:36.574Z"
+status: executing
+last_updated: "2026-04-30T16:00:23.331Z"
 progress:
-  total_phases: 6
+  total_phases: 8
   completed_phases: 5
-  total_plans: 21
-  completed_plans: 21
+  total_plans: 24
+  completed_plans: 22
 ---
 
 # State: voice-cc
@@ -19,21 +19,21 @@ progress:
 
 - **Name:** PurpleVoice *(working name `voice-cc` preserved as historical record in repo path / git history / .planning/ artifacts per BRD-02)*
 - **Core value:** Speak → text appears in Claude Code, instantly and reliably, with no recurring cost or external dependency.
-- **Current focus:** Phase 03.5 — hover-ui-hud
+- **Current focus:** Phase 04 — quality-of-life-v1-x
 - **Mode:** yolo
 - **Granularity:** standard
 - **Parallelization:** enabled
 
 ## Current Position
 
-Phase: 03.5 (hover-ui-hud) — EXECUTING
-Plan: 1 of 4
-Next: `/gsd:verify-work 2.7` (orchestrator-side Sonnet verification of all 6 Phase 2.7 plans + cross-plan invariants). After verifier sign-off + Phase 2.7 close, Phase 3.5 (HUD) is next per ROADMAP order.
+Phase: 04 (quality-of-life-v1-x) — EXECUTING
+Plan: 2 of 3 (04-00 staging complete 2026-04-30; 04-01 lua-core next)
+Next: `/gsd:execute-phase 04` continues with Plan 04-01 (Lua core: cmd+shift+v re-paste hotkey + lastTranscript module-scope cache + F19 binding replacing cmd+shift+e in purplevoice-lua/init.lua). Plan 04-02 (Karabiner integration + docs closure) follows.
 
 - **Milestone:** v1
-- **Phase:** 03.5
-- **Plan:** Not started
-- **Status:** Milestone complete
+- **Phase:** 04
+- **Plan:** 04-00 complete; 04-01 next
+- **Status:** Executing Phase 04
 
 ### Progress
 
@@ -43,7 +43,7 @@ Phase 2: Hardening                        ██████████  100% [
 Phase 2.5: Branding                       ██████████  100% [4/4 plans complete 2026-04-29]
 Phase 2.7: Security Posture & Gov Ready   ██████████  100% [6/6 plans complete 2026-04-29..2026-04-30 — Wave 0 (02.7-00) + Wave 1 (02.7-01 + 02.7-02 parallel) + Wave 2 (02.7-03a NIST 800-53 Rev 5 deep mapping) + Wave 3 (02.7-03b 6 framed frameworks: FIPS / FedRAMP / Common Criteria / HIPAA / SOC 2 / ISO 27001) + Wave 4 (02.7-04 closure: TL;DR + Audience Entry-Points + How to Verify + Egress + SBOM + Air-Gap narratives + Code Signing + Reproducible Build + Vulnerability Disclosure deferral framing + verify_reproducibility.sh impl + REQUIREMENTS.md SEC-01..06 + README.md ## Security & Privacy section). SECURITY.md 751 lines, 18 H2 sections; security suite 5 PASS / 0 FAIL; functional suite 8/0; awaiting `/gsd:verify-work 2.7` sign-off]
 Phase 3.5: Hover UI / HUD                 ░░░░░░░░░░  0%   [Added 2026-04-27 — needs planning]
-Phase 4 (v1.x): Quality of Life           ░░░░░░░░░░  0%   [Queued]
+Phase 4 (v1.x): Quality of Life           ███░░░░░░░  33%  [1/3 plans — Plan 04-00 staging complete 2026-04-30 (test_karabiner_check.sh RED-at-Wave-0 + 3 manual scaffolds + REQUIREMENTS.md QOL-01 promoted, QOL-NEW-01 added, v2 stubs rebranded); 04-01 lua-core + 04-02 karabiner-docs queued]
 Phase 3: Distribution + Public Install    ░░░░░░░░░░  0%   [Reordered to end 2026-04-28 per user direction]
 Phase 5 (v1.1, cond.): Warm-Process       ░░░░░░░░░░  0%   [Conditional on Phase 3 hyperfine]
 
@@ -73,6 +73,7 @@ Overall v1 (Phases 1, 2, 2.5, 2.7, 3.5, 4, 3): █████░░░░░  ~
 | Phase 02.7-security-posture P03b | 9m 53s | 2 tasks | 1 files |
 | Phase 02.7-security-posture P03b | 9m 53s | 2 tasks | 1 files |
 | Phase 02.7 P04 | 28min | 6 tasks | 5 files |
+| Phase 04 P00 | 12 min | 5 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -126,6 +127,7 @@ Overall v1 (Phases 1, 2, 2.5, 2.7, 3.5, 4, 3): █████░░░░░  ~
 | Plan 02.7-04 plan-verify-clause-inconsistency #1 (Task 4-3): plan verify clause `! grep -q "voice-cc" README.md` is inconsistent with documented Phase 2.5 BRD-02 exemption (README.md is on tests/test_brand_consistency.sh exemption list because the working-name "voice-cc" is preserved as legitimate historical mention in 3 specific places per PROJECT.md "working name was voice-cc; renamed during Phase 2.5"). Task introduced ZERO new voice-cc strings. Canonical brand-discipline gate `bash tests/test_brand_consistency.sh` is GREEN — that is the load-bearing gate, not the plan's stricter literal grep. | Plan 02.7-04 Task 4-3 | 2026-04-30 |
 | Plan 02.7-04 plan-verify-clause-inconsistency #2 (Task 4-4): plan verify clauses `! grep -nE '\\bcompliant\\b' SECURITY.md` and `! grep -nE '\\bcertified\\b' SECURITY.md` are stricter than the framing lint's qualified-context allowance for quoted forms. Line 27 of SECURITY.md (TL;DR) legitimately contains `*be* "compliant" or "certified"` as the canonical D-17 disclaimer (quoted-word contrast). The framing lint at tests/test_security_md_framing.sh (Plan 02.7-01 design) explicitly exempts quoted forms (`"compliant"`, `"certified"`) because that IS the canonical D-17 framing pattern. Decomposed Gate 9 into 9a (raw TODO check) + 9b (framing lint — canonical D-17 gate) + 9c (raw voice-cc check) for transparent reporting; all three sub-gates GREEN. | Plan 02.7-04 Task 4-4 | 2026-04-30 |
 | Phase 02.7 release-gate verification flow runnable end-to-end from clean clone: `git clone ... && cd ... && bash setup.sh && bash tests/run_all.sh && bash tests/security/run_all.sh` produces 8 PASS / 0 FAIL functional + 5 PASS / 0 FAIL security. SECURITY.md §How to Verify These Claims documents this procedure verbatim. SBOM idempotency proven at same git HEAD: `3cd69f757fe9d4318c4e53cd4d4a3a3bcb3f88dadebbfa6ce9fdd54aef1f408a` byte-identical across 2 consecutive setup.sh runs. | Plan 02.7-04 Task 4-4 | 2026-04-30 |
+| Plan 04-00 Wave 0 staging complete: tests/test_karabiner_check.sh RED-at-commit by design (8 string-level wiring assertions; 6 fail at commit because assets/karabiner-fn-to-f19.json + setup.sh Step 9 + init.lua F19/cmd+shift+v bindings do not yet exist). Plan 04-01 turns checks 6, 7, 8 GREEN; Plan 04-02 turns checks 1-5 GREEN. Final state 8/8 GREEN. 3 manual walkthrough scaffolds land for live sign-off after production code (test_repaste_walkthrough.md, test_f19_walkthrough.md, test_setup_karabiner_missing.md). REQUIREMENTS.md: QOL-01 promoted from v2 stub to v1 (cmd+shift+v re-paste, in-memory cache, nil-state alert per D-04); QOL-NEW-01 added (F19 alt hotkey via Karabiner per D-05..D-08); v1 coverage 39 → 41; v2 QOL stubs rebranded to purplevoice namespace per D-10; both `[ ]` Pending (Plan 04-02 closes). Suite: 10 PASS + 1 FAIL functional (expected RED); 5/0 security; brand consistency GREEN; Pattern 2 invariants intact (init.lua + purplevoice-record untouched). Zero deviations — plan executed exactly as written. | Plan 04-00 Tasks 0-1..0-5 | 2026-04-30 |
 
 ### Open TODOs (cross-phase)
 
