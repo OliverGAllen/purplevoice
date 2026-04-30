@@ -47,7 +47,7 @@ local BRAND = {
 local HUD_W = 140
 local HUD_H = 36
 local HUD_CORNER_RADIUS = 18
-local HUD_ALPHA = 0.85
+local HUD_ALPHA = 0.70
 local HUD_FONT_SIZE = 14
 local HUD_TOP_GAP = 50         -- ~50px below menubar (D-08)
 
@@ -173,7 +173,10 @@ if hudEnabled then
     :level("status")
     :behaviorAsLabels({"canJoinAllSpaces", "stationary", "transient"})
     :wantsLayer(true)
-    :alpha(HUD_ALPHA)
+    -- Canvas-level alpha stays at default 1.0 so text renders crisply.
+    -- Translucency lives on the rectangle fillColor.alpha (D-03 — translucent
+    -- lavender WITHOUT backdrop blur). User-tuned to 0.70 from the 0.85
+    -- CONTEXT.md baseline based on live observation 2026-04-30.
 
   hudCanvas:appendElements(
     {
@@ -181,7 +184,7 @@ if hudEnabled then
       action = "fill",
       frame = { x = 0, y = 0, w = HUD_W, h = HUD_H },
       roundedRectRadii = { xRadius = HUD_CORNER_RADIUS, yRadius = HUD_CORNER_RADIUS },
-      fillColor = { hex = BRAND.COLOUR_LAVENDER, alpha = 1.0 },
+      fillColor = { hex = BRAND.COLOUR_LAVENDER, alpha = HUD_ALPHA },
     },
     {
       type = "text",
