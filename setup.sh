@@ -319,6 +319,8 @@ PurpleVoice setup complete.
 
 Local voice dictation. Nothing leaves your Mac.
 
+HUD options: PURPLEVOICE_HUD_OFF=1 to disable, PURPLEVOICE_HUD_POSITION=top-right (or top-center, bottom-center, bottom-right, near-cursor, center)
+
 Next manual steps (one-time):
   - Add to ~/.hammerspoon/init.lua (paste this exact line):
       require("purplevoice")
