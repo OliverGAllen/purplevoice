@@ -75,8 +75,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Quality of Life
 
-- [ ] **QOL-01**: Paste-last-transcript hotkey (`cmd+shift+v`) re-pastes the most recent successful transcript into the focused window. Implemented as `hs.hotkey.bind({"cmd","shift"}, "v", repaste)` in `purplevoice-lua/init.lua` calling `pasteWithRestore(lastTranscript)`. Storage = in-memory Lua module-scope `local lastTranscript = nil`, updated AFTER the `cmd+v` keystroke fires inside `pasteWithRestore()` (per CONTEXT.md D-03). NO disk persistence — `lastTranscript` is lost on Hammerspoon reload by design (privacy-first; institutional / healthcare audience). Nil-state behaviour: `hs.alert.show("PurpleVoice: nothing to re-paste yet", 1.5)` (per CONTEXT.md D-04). Verified by `tests/test_karabiner_check.sh` check 7 (string-level wiring) + `tests/manual/test_repaste_walkthrough.md` (live end-to-end sign-off).
-- [ ] **QOL-NEW-01**: F19 alt hotkey replaces `cmd+shift+e` for push-and-hold recording. Implemented as `hs.hotkey.bind({}, "f19", onPress, onRelease)` in `purplevoice-lua/init.lua` (no modifier table; per CONTEXT.md D-05). The previous `cmd+shift+e` binding is REMOVED, not supplemented (D-05). Karabiner-Elements remaps `fn` → `F19` via `assets/karabiner-fn-to-f19.json` (complex modification with `to_if_alone` + `to_if_held_down` + 200ms threshold; D-06). `setup.sh` Step 9 detects `/Applications/Karabiner-Elements.app` and refuses to declare install complete without it (D-07); `PURPLEVOICE_OFFLINE=1` mode notes USB-sneakernet path for the .dmg (D-08). Verified by `tests/test_karabiner_check.sh` checks 1-6 + 8 (string-level wiring) + `tests/manual/test_f19_walkthrough.md` + `tests/manual/test_setup_karabiner_missing.md` (live end-to-end + negative-control sign-offs).
+- [x] **QOL-01**: Paste-last-transcript hotkey (`cmd+shift+v`) re-pastes the most recent successful transcript into the focused window. Implemented as `hs.hotkey.bind({"cmd","shift"}, "v", repaste)` in `purplevoice-lua/init.lua` calling `pasteWithRestore(lastTranscript)`. Storage = in-memory Lua module-scope `local lastTranscript = nil`, updated AFTER the `cmd+v` keystroke fires inside `pasteWithRestore()` (per CONTEXT.md D-03). NO disk persistence — `lastTranscript` is lost on Hammerspoon reload by design (privacy-first; institutional / healthcare audience). Nil-state behaviour: `hs.alert.show("PurpleVoice: nothing to re-paste yet", 1.5)` (per CONTEXT.md D-04). Verified by `tests/test_karabiner_check.sh` check 7 (string-level wiring) + `tests/manual/test_repaste_walkthrough.md` (live end-to-end sign-off).
+- [x] **QOL-NEW-01**: F19 alt hotkey replaces `cmd+shift+e` for push-and-hold recording. Implemented as `hs.hotkey.bind({}, "f19", onPress, onRelease)` in `purplevoice-lua/init.lua` (no modifier table; per CONTEXT.md D-05). The previous `cmd+shift+e` binding is REMOVED, not supplemented (D-05). Karabiner-Elements remaps `fn` → `F19` via `assets/karabiner-fn-to-f19.json` (complex modification with `to_if_alone` + `to_if_held_down` + 200ms threshold; D-06). `setup.sh` Step 9 detects `/Applications/Karabiner-Elements.app` and refuses to declare install complete without it (D-07); `PURPLEVOICE_OFFLINE=1` mode notes USB-sneakernet path for the .dmg (D-08). Verified by `tests/test_karabiner_check.sh` checks 1-6 + 8 (string-level wiring) + `tests/manual/test_f19_walkthrough.md` + `tests/manual/test_setup_karabiner_missing.md` (live end-to-end + negative-control sign-offs).
 
 ## v2 Requirements
 
@@ -162,8 +162,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HUD-02 | Phase 3.5: Hover UI / HUD | Complete |
 | HUD-03 | Phase 3.5: Hover UI / HUD | Complete |
 | HUD-04 | Phase 3.5: Hover UI / HUD | Complete |
-| QOL-01 | Phase 4 (v1.x): Quality of Life | Pending |
-| QOL-NEW-01 | Phase 4 (v1.x): Quality of Life | Pending |
+| QOL-01 | Phase 4 (v1.x): Quality of Life | Complete |
+| QOL-NEW-01 | Phase 4 (v1.x): Quality of Life | Complete |
 | QOL-02 | v2 / backlog (deferred — no real-use trigger as of 2026-04-30 per Phase 4 CONTEXT.md D-01) | Deferred |
 | QOL-03 | v2 / backlog (deferred — no real-use trigger as of 2026-04-30 per Phase 4 CONTEXT.md D-01) | Deferred |
 | QOL-04 | v2 / backlog (deferred — no real-use trigger as of 2026-04-30 per Phase 4 CONTEXT.md D-01) | Deferred |
@@ -184,9 +184,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 - Phase 2.7: Security Posture & Government Readiness — 6 requirements (SEC-01..06) — Pending
 - Phase 3: Distribution & Benchmarking — 4 requirements (DST-01..04)
 - Phase 3.5: Hover UI / HUD — 4 requirements (HUD-01..04) — Complete
-- Phase 4 (v1.x): Quality of Life — 2 requirements (QOL-01, QOL-NEW-01) — Pending
+- Phase 4 (v1.x): Quality of Life — 2 requirements (QOL-01, QOL-NEW-01) — Complete
 
 ---
 *Requirements defined: 2026-04-26*
 *Last updated: 2026-04-30 — Phase 4 staging (Plan 04-00): QOL-01 promoted from v2 stub to v1 with concrete language; QOL-NEW-01 added (F19 alt hotkey via Karabiner); v2 QOL stubs rebranded to `purplevoice` paths/vars per D-10. v1 coverage 39 → 41.*
 *Last updated: 2026-04-30 — four HUD requirements completed for Phase 3.5 (Complete); traceability table extended.*
+*Last updated: 2026-04-30 — Phase 4 Quality of Life closed: QOL-01 (cmd+shift+v re-paste) + QOL-NEW-01 (F19 alt hotkey via Karabiner) marked Complete; v1 coverage stays at 41/41 (100%); 12 manual walkthroughs swept cmd+shift+e → F19; SECURITY.md SBOM scope updated to enumerate Karabiner-Elements as carried-by-reference runtime dep alongside Hammerspoon.*
