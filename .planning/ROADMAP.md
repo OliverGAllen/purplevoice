@@ -16,7 +16,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
 - [x] **Phase 2: Hardening** — Make the loop robust against TCC silent-deny, hallucinations, re-entrancy, clipboard manager leakage, and AirPods surprises. *(completed 2026-04-28)*
 - [ ] **Phase 2.5: Branding** — Pick a public-facing product name and apply it across user-visible surfaces. Pre-requisite for HUD, Security, and Distribution because all three reference the brand.
 - [ ] **Phase 2.7: Security Posture & Government Readiness** — Threat model + verifiable security claims for institutional / government / high-privacy audiences. Produces SECURITY.md as authoritative document; implements quick-win verification mechanisms (no-egress proof, SBOM generation, code signing setup). Research + verification depth, not formal certification.
-- [ ] **Phase 3.5: Hover UI / HUD** — Small floating recording-state indicator that complements the menu-bar indicator. Hideable. Branded per Phase 2.5.
+- [x] **Phase 3.5: Hover UI / HUD** — Small floating recording-state indicator that complements the menu-bar indicator. Hideable. Branded per Phase 2.5. (completed 2026-04-30)
 - [ ] **Phase 4 (v1.x): Quality of Life** — Address first real-use frustrations once the polished loop is stable.
 - [ ] **Phase 3: Distribution & Benchmarking + Public Install** — Reproducible local install, public one-line installer, README, and `hyperfine` measurements that gate the v1.1 decision. **Reordered to end of v1 (2026-04-28) per user direction** — distribute the *finished, security-audited* product, not a half-polished one. Inherits SECURITY.md claims from Phase 2.7.
 - [ ] **Phase 5 (v1.1, conditional): Warm-Process Upgrade** — Gated on Phase 3 hyperfine results.
@@ -119,11 +119,11 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
   2. The HUD disappears within ~250 ms of release; while idle, no HUD is on screen and no measurable CPU is consumed.
   3. `PURPLEVOICE_HUD_OFF=1` hides the HUD entirely (Phase 2 menubar indicator still ships regardless).
   4. The HUD does not steal focus, does not interfere with paste, and the screen-recording limitation is documented honestly in README + SECURITY.md (per Priority 2 reframing).
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
   - [x] 03.5-00-PLAN.md — Wave 0 staging: 2 bash unit tests (`test_hud_env_off.sh`, `test_hud_position_validation.sh`) + 5 manual walkthrough scaffolds + REQUIREMENTS.md HUD-01..04 stubs + VALIDATION.md frontmatter flip — *Task 0-1 complete (commit `2830e76`); 4 tasks remaining*
   - [x] 03.5-01-PLAN.md — HUD core: `hs.canvas` overlay creation at module load + show/hide functions + lifecycle wiring in `onPress` / `resetState` (HUD-01, HUD-03, HUD-04 focus half) — *includes `checkpoint:human-verify` for HUD-01 appearance walkthrough*
   - [x] 03.5-02-PLAN.md — Configuration surface: `PURPLEVOICE_HUD_OFF` + `PURPLEVOICE_HUD_POSITION` env-var read at module load + 6-named-position arithmetic + setup.sh Step 7 banner one-liner (HUD-02, HUD-04 position half) — *includes `checkpoint:human-verify` for HUD-02 disable + HUD-04 position walkthroughs*
-  - [ ] 03.5-03-PLAN.md — Documentation closure: README `## Security & Privacy` HUD subsection + SECURITY.md `## How to Verify These Claims` HUD limitation + REQUIREMENTS.md HUD-01..04 finalisation [ ]→[x] + 3 live walkthrough sign-offs + STATE.md + ROADMAP.md updates (HUD-01..04 closure) — *includes `checkpoint:human-verify` for HUD-04 focus + recordings walkthroughs*
+  - [x] 03.5-03-PLAN.md — Documentation closure: README `## Security & Privacy` HUD subsection + SECURITY.md `## How to Verify These Claims` HUD limitation + REQUIREMENTS.md HUD-01..04 finalisation [ ]→[x] + 3 live walkthrough sign-offs + STATE.md + ROADMAP.md updates (HUD-01..04 closure) — *includes `checkpoint:human-verify` for HUD-04 focus + recordings walkthroughs*
 **UI hint**: yes (this IS the UI phase)
 **Research flag**: yes — `/gsd:research-phase 3.5` complete 2026-04-30 (commit `5396ac6`). Critical finding: ScreenCaptureKit on macOS 15+ ignores NSWindowSharingNone (Apple Forums thread 792152). D-14 caveat reframed accordingly.
 

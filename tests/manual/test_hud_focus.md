@@ -34,3 +34,12 @@
 - [ ] HUD absent from Mission Control window list
 
 **Tester:** _____________  **Date:** _____________
+
+---
+
+## Sign-off (Phase 3.5 close 2026-04-30)
+
+- **Tester:** Oliver Allen (live verification on macOS Sequoia 15.7.5, Apple Silicon)
+- **Date:** 2026-04-30
+- **Result:** PASS — user confirmed "all complete" after walking through B + D + E (A + C already verified during Plan 03.5-01 sign-off `aebd505` / `932ca65`).
+- **HUD live state at sign-off:** lavender translucent pill (alpha 0.70) at top-center of active screen, "● Recording" white text, fade-in instant + fade-out 150ms, focus passthrough confirmed, env-var disable confirmed via quit + relaunch with `PURPLEVOICE_HUD_OFF=1`.
