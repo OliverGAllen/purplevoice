@@ -57,6 +57,15 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **BRD-02**: All user-visible strings (README, Hammerspoon alerts and notification titles, setup.sh banner, install snippet, error messages, manual walkthroughs) use `PurpleVoice` (PascalCase) or `purplevoice` (lowercase paths/modules/binaries) consistently. The original working name `voice-cc` is preserved verbatim ONLY in: the repo working directory path on disk, the git history, all `.planning/` artifacts (historical record), the `migrate_xdg_dir` FROM-arg literals in `setup.sh` (intentional — needed for the migration logic), and the GSD-auto-managed CLAUDE.md block (deferred to Phase 3 STACK.md update — see STATE.md Open TODOs). The canonical tagline `Local voice dictation. Nothing leaves your Mac.` is placed in the README header, the setup.sh banner, and the Hammerspoon module load alert.
 - [x] **BRD-03**: Minimal visual identity — a 256×256 PNG icon at `assets/icon-256.png` (lavender `#B388EB` background, centred white lips silhouette, flat-design) derived deterministically from a hand-authored `assets/icon.svg` source via `sips`; AND a Hammerspoon menubar glyph styled with the same lavender `#B388EB` for both idle and recording states (recording-state differentiation via glyph shape — outline circle U+25CB for idle, filled circle U+25CF for recording).
 
+### Security
+
+- [ ] **SEC-01**: Authoritative `SECURITY.md` published in repo root containing: 1-page TL;DR + audience entry-point ToC + Scope (assets, trust boundaries, out-of-scope rationale) + Threat Model (STRIDE 6×N + LINDDUN 7×N matrices) + Egress Verification methodology + SBOM cross-reference + Air-Gapped Installation procedure + per-control NIST SP 800-53 Rev 5 / Low-baseline mapping + 6 framed framework sections (FIPS 140-3, FedRAMP-tailored, Common Criteria, HIPAA Security Rule §164.312, SOC 2 Type II TSC, ISO/IEC 27001:2022 Annex A) + Code Signing & Notarisation (Phase 3 deferral) + Reproducible Build (best-effort caveat) + Vulnerability Disclosure stub + How to Verify These Claims instructions. "Compatible with" framing (D-17) enforced consistently throughout, verified by `tests/test_security_md_framing.sh` lint.
+- [ ] **SEC-02**: Zero outbound network egress from the PurpleVoice process tree (`purplevoice-record` + `sox` + transcription children) during a recording window, demonstrably true via `tests/security/verify_egress.sh` 3-layer evidence chain (lsof + nettop + pf+tcpdump) with positive-control pf-efficacy check (Pitfall 1 — macOS Sequoia 15.7.5 regression detection). Hammerspoon main process explicitly excluded from scope (D-06; Pitfall 5).
+- [ ] **SEC-03**: Software Bill of Materials at `SBOM.spdx.json` in repo root (SPDX 2.3 JSON format), covering direct + transitive + system-context dependencies (D-11 full scope). System context = macOS version, hardware platform (Apple Silicon variant), Xcode CLT version, brew version (carried via SPDX 2.3 Annotation blocks). Regenerated idempotently by `setup.sh` Step 8 if Syft is present (deterministic post-process per Pitfall 3 — zero spurious git diff). Verified by `tests/security/verify_sbom.sh`.
+- [ ] **SEC-04**: Code signing & notarisation status documented honestly in `SECURITY.md` §"Code Signing & Notarisation" — current architecture (Hammerspoon Spoon + bash glue + brew binaries + GGML model) produces no signable PurpleVoice artifact; Phase 3 deferral with $99/year Apple Developer Program cost framing + Hardened Runtime + entitlements scope; verified by `tests/security/verify_signing.sh` documentation-presence stub. Real signing infrastructure work belongs to Phase 3 when an installer artifact ships.
+- [ ] **SEC-05**: Reproducible build status documented in `SECURITY.md` §"Reproducible Build" — full byte-identical reproducibility deferred (toolchain-version-sensitive; whisper.cpp Metal compilation depends on Xcode CLT version + macOS SDK + compiler revision per Pitfall 14). Best-effort reproducibility documented: SHA256-pinned model + git-tracked source + brew-bottle SHA256 verification + reviewable plain-text bash + Lua. Verified by `tests/security/verify_reproducibility.sh` documentation-presence stub.
+- [ ] **SEC-06**: Air-gapped operation supported via `PURPLEVOICE_OFFLINE=1` mode in `setup.sh` (D-08). Sets the env var → setup.sh skips network calls (Hammerspoon brew install, Whisper model download, Silero VAD download) and verifies sideloaded artefacts at documented paths. Sideload paths: `~/.local/share/purplevoice/models/{ggml-small.en.bin,ggml-silero-v6.2.0.bin}`, `/Applications/Hammerspoon.app`, `/opt/homebrew/bin/{sox,soxi,whisper-cli}`. Verified by `tests/security/verify_air_gap.sh` (2 invariants: sideload populated → exit 0; missing → exit 1 with actionable error). Hammerspoon brew gap (Pitfall 8) is acknowledged honestly — operators must dmg-copy Hammerspoon from a connected machine.
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -132,6 +141,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BRD-01 | Phase 2.5: Branding | Complete |
 | BRD-02 | Phase 2.5: Branding | Complete |
 | BRD-03 | Phase 2.5: Branding | Complete |
+| SEC-01 | Phase 2.7: Security Posture & Government Readiness | Pending |
+| SEC-02 | Phase 2.7: Security Posture & Government Readiness | Pending |
+| SEC-03 | Phase 2.7: Security Posture & Government Readiness | Pending |
+| SEC-04 | Phase 2.7: Security Posture & Government Readiness | Pending |
+| SEC-05 | Phase 2.7: Security Posture & Government Readiness | Pending |
+| SEC-06 | Phase 2.7: Security Posture & Government Readiness | Pending |
 | QOL-01 | Phase 4 (v1.x): Quality of Life | Deferred |
 | QOL-02 | Phase 4 (v1.x): Quality of Life | Deferred |
 | QOL-03 | Phase 4 (v1.x): Quality of Life | Deferred |
@@ -141,8 +156,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERF-02 | Phase 5 (v1.1, conditional): Warm-Process Upgrade | Conditional |
 
 **Coverage:**
-- v1 requirements: 29 total (26 original + BRD-01..03 added 2026-04-29)
-- Mapped to phases: 29 / 29 (100%)
+- v1 requirements: 35 total (26 original + BRD-01..03 added 2026-04-29 + SEC-01..06 added 2026-04-29)
+- Mapped to phases: 35 / 35 (100%)
 - Unmapped: 0
 - v2 requirements: 7 total (5 QOL → Phase 4, 2 PERF → Phase 5 conditional)
 
@@ -150,8 +165,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 - Phase 1: Spike — 10 requirements (CAP-01..04, TRA-01..03, INJ-01, ROB-03, ROB-05)
 - Phase 2: Hardening — 12 requirements (TRA-04..06, INJ-02..04, FBK-01..03, ROB-01, ROB-02, ROB-04)
 - Phase 2.5: Branding — 3 requirements (BRD-01..03) — Complete 2026-04-29
+- Phase 2.7: Security Posture & Government Readiness — 6 requirements (SEC-01..06) — Pending
 - Phase 3: Distribution & Benchmarking — 4 requirements (DST-01..04)
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-29 — three Branding requirements added for Phase 2.5 (Complete); traceability table extended.*
+*Last updated: 2026-04-29 — six Security requirements added for Phase 2.7 (Pending); traceability table extended.*
