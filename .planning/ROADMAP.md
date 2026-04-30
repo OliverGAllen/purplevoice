@@ -17,7 +17,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
 - [ ] **Phase 2.5: Branding** — Pick a public-facing product name and apply it across user-visible surfaces. Pre-requisite for HUD, Security, and Distribution because all three reference the brand.
 - [ ] **Phase 2.7: Security Posture & Government Readiness** — Threat model + verifiable security claims for institutional / government / high-privacy audiences. Produces SECURITY.md as authoritative document; implements quick-win verification mechanisms (no-egress proof, SBOM generation, code signing setup). Research + verification depth, not formal certification.
 - [x] **Phase 3.5: Hover UI / HUD** — Small floating recording-state indicator that complements the menu-bar indicator. Hideable. Branded per Phase 2.5. (completed 2026-04-30)
-- [ ] **Phase 4 (v1.x): Quality of Life** — Address first real-use frustrations once the polished loop is stable.
+- [x] **Phase 4 (v1.x): Quality of Life** — Address first real-use frustrations once the polished loop is stable. *(completed 2026-04-30)*
 - [ ] **Phase 3: Distribution & Benchmarking + Public Install** — Reproducible local install, public one-line installer, README, and `hyperfine` measurements that gate the v1.1 decision. **Reordered to end of v1 (2026-04-28) per user direction** — distribute the *finished, security-audited* product, not a half-polished one. Inherits SECURITY.md claims from Phase 2.7.
 - [ ] **Phase 5 (v1.1, conditional): Warm-Process Upgrade** — Gated on Phase 3 hyperfine results.
 
@@ -139,7 +139,10 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
   5. `VOICE_CC_MODEL=medium.en` (or any other model present in the models dir) is honoured at runtime without code changes.
 **Candidate items in backlog** (surface during `/gsd:discuss-phase 4`):
   - Alternative hotkey schemes — fn-press-and-hold via `hs.eventtap.flagsChanged` (with hold-threshold to avoid racing macOS's emoji popup), Karabiner-Elements remap-fn-to-F19 path. User-surfaced 2026-04-28.
-**Plans**: 4 plans
+**Plans:** 3 plans
+  - [x] 04-00-staging-PLAN.md — Wave 0: test_karabiner_check.sh + 3 manual walkthrough scaffolds + REQUIREMENTS.md QOL-01/QOL-NEW-01 stubs
+  - [x] 04-01-lua-core-PLAN.md — Wave 1: F19 binding + cmd+shift+v re-paste + lastTranscript caching in init.lua (turns checks 6/7/8 GREEN)
+  - [x] 04-02-karabiner-docs-PLAN.md — Wave 2: assets/karabiner-fn-to-f19.json + setup.sh Step 9 + README + SECURITY.md + REQUIREMENTS.md/ROADMAP.md closure (turns checks 1-5 GREEN; 3 live walkthrough sign-offs)
 
 ### Phase 3: Distribution & Benchmarking + Public Install
 **Goal**: Make voice-cc reproducible on a fresh machine via a single idempotent local script, AND make it shareable online via a one-line `curl ... | bash` public installer. Document the permission grants and recovery procedures. Produce `hyperfine` measurements on Oliver's actual hardware that determine whether Phase 5 (warm-process upgrade) is needed.
@@ -196,7 +199,7 @@ Listed in **execution order** (Phase 3 reordered to come last in v1; phase numbe
 | 3 | Phase 2.5: Branding | 3/4 | Wave 2 done — Plan 02.5-01, 02.5-02, 02.5-03 complete 2026-04-29; Wave 3 (02.5-04 docs closure) unblocked | 2026-04-29 |
 | 4 | Phase 2.7: Security Posture & Government Readiness | 6/6 | Complete 2026-04-29..2026-04-30 — Plan 02.7-00 (skeleton + Syft hard dep + OFFLINE guards), Plan 02.7-01 (threat model + D-17 framing lint), Plan 02.7-02 (verify scripts + SBOM regen), Plan 02.7-03a (NIST SP 800-53 Rev 5 deep mapping), Plan 02.7-03b (6 framed framework sections), Plan 02.7-04 (closure: SECURITY.md filled to 18 H2 sections / 751 lines / 0 TODOs + verify_reproducibility.sh impl + REQUIREMENTS.md SEC-01..06 + README.md ## Security & Privacy section; security suite 5/0; functional suite 8/0). Awaiting `/gsd:verify-work 2.7` Sonnet sign-off | 2026-04-30 |
 | 5 | Phase 3.5: Hover UI / HUD | 0/4 | Planned 2026-04-30 — context (`0595dd0`), research (`5396ac6`), validation (`7d7d97b`), 4 plans created (03.5-00 through 03.5-03), Plan 00 Task 0-1 complete (`2830e76`). Plans 01/02/03 each contain `checkpoint:human-verify` tasks for live walkthroughs. Auto-advance disabled per user direction. | - |
-| 6 | Phase 4 (v1.x): Quality of Life | 2/3 | In Progress 2026-04-30 — Plan 04-00 staging complete (tests/test_karabiner_check.sh RED-at-Wave-0 + 3 manual walkthrough scaffolds; REQUIREMENTS.md QOL-01 promoted v2 → v1, QOL-NEW-01 added, v1 coverage 39 → 41). Plan 04-01 lua-core complete 2026-04-30 (`5658f2f` + `c2d165c` + `1be035c` + `d2b138d` — 7 surgical edits to purplevoice-lua/init.lua: lastTranscript module-scope cache + cache-on-success-path inside pasteWithRestore + repaste() with brief-alert nil-state + F19 push-and-hold binding replacing cmd+shift+e per D-05 + cmd+shift+v re-paste binding + module-load alert update Unicode ⌘⇧V + line-2 header update; cmd+shift+e fully eradicated 4 → 0; test_karabiner_check.sh advanced 0/8 → 3/8 GREEN with checks 6/7/8 GREEN, checks 1/4/5 still RED handoff to Plan 04-02; functional 10P+1F expected RED, security 5/0, brand consistency GREEN, Pattern 2 invariant intact; 3 Rule 1 verify-defects auto-fixed inline; Task 1-5 live re-paste walkthrough DEFERRED to Plan 04-02 phase-gate sign-off per plan's documented expected path). 04-02 karabiner-docs (assets/karabiner-fn-to-f19.json + setup.sh Step 9 + README + SECURITY.md + REQUIREMENTS.md QOL-01/QOL-NEW-01 closure + 3 deferred live walkthroughs) remains. | - |
+| 6 | Phase 4 (v1.x): Quality of Life | 3/3 | Complete — QOL-01 (cmd+shift+v re-paste) + QOL-NEW-01 (F19 alt hotkey via Karabiner) shipped; test_karabiner_check.sh 8/8 GREEN; 3 manual walkthroughs signed off live | 2026-04-30 |
 | 7 | Phase 3: Distribution & Benchmarking + Public Install | 0/0 | Queued (final v1 phase) | - |
 | 8 | Phase 5 (v1.1, conditional): Warm-Process Upgrade | 0/0 | Conditional on Phase 3 hyperfine | - |
 
@@ -216,10 +219,12 @@ Listed in **execution order** (Phase 3 reordered to come last in v1; phase numbe
 | 2.5. Branding | BRD-01, BRD-02, (BRD-03) | 2-3 (TBD) |
 | 3. Distribution & Benchmarking + Public Install | DST-01, DST-02, DST-03, DST-04, DST-05 | 5 |
 | 3.5. Hover UI / HUD | HUD-01, HUD-02, HUD-03, HUD-04 | 4 |
-| **Total v1** | | **39** (was 26 → 29 with BRD → 35 with SEC → 39 with HUD) |
+| 4 (v1.x). Quality of Life | QOL-01, QOL-NEW-01 | 2 |
+| **Total v1** | | **41** (was 26 → 29 with BRD → 35 with SEC → 39 with HUD → 41 with QOL) |
 
 ---
 *Roadmap created: 2026-04-23*
 *Roadmap extended: 2026-04-27 (Phase 2.5 Branding, Phase 3 Public Install extension, Phase 3.5 Hover UI per user request)*
 *Roadmap reordered: 2026-04-28 (Phase 3 Distribution moved to end of v1 per user direction; Phase 3.5 dependency flipped from Phase 3 to Phase 2.5; Phase 2 closed)*
 *Roadmap updated: 2026-04-30 (Phase 2.7 Security Posture closed 6/6; Phase 3.5 Hover UI / HUD planned with 4 plans + research finding on ScreenCaptureKit limitation; HUD-01..04 formalised; coverage 35→39 v1 reqs)*
+*Roadmap updated: 2026-04-30 — Phase 4 Quality of Life closed (3/3 plans; QOL-01 + QOL-NEW-01 Complete; coverage 39 → 41 v1 reqs; F19 push-to-talk + cmd+shift+v re-paste shipped; Karabiner-Elements added as carried-by-reference runtime dep in SBOM scope).*
