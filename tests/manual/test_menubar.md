@@ -7,7 +7,7 @@
 ## Steps
 
 1. Look at the macOS menubar (top-right). The PurpleVoice indicator (`●`) should be visible in **grey** (#888888).
-2. Press and HOLD cmd+shift+e. The `●` should turn **red** (#FF3B30) within ~50 ms.
+2. Press and HOLD F19 (Karabiner-remapped from fn). The `●` should turn **red** (#FF3B30) within ~50 ms.
 3. While still holding, observe the dot stays red.
 4. Release the hotkey. The `●` should return to **grey** within ~500 ms (after the bash glue exits and the Lua callback fires).
 5. Repeat 3–4 times to confirm reliable state change.

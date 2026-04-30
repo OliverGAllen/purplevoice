@@ -12,7 +12,7 @@
 ## Steps
 1. Open Terminal: `top -pid $(pgrep Hammerspoon | head -1) -stats pid,command,cpu`
 2. Wait ~10 seconds for the CPU% column to stabilise. Record the BASELINE value (e.g., "0.2%").
-3. Hold cmd+shift+e for 2 seconds. Observe the CPU% column during the press. Record the ACTIVE value (e.g., "0.6%").
+3. Hold F19 (Karabiner-remapped from fn) for 2 seconds. Observe the CPU% column during the press. Record the ACTIVE value (e.g., "0.6%").
 4. Release. Wait ~5 seconds. Observe the CPU% column should return to BASELINE ± noise (~0.2% on M-series).
 5. Repeat the press cycle 5 times in quick succession. Confirm CPU% returns to baseline after each release.
 6. Idle for 30 seconds with HUD hidden. Confirm CPU% does NOT drift upward.

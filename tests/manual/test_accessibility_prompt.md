@@ -14,7 +14,7 @@
 4. **Expected:** Within ~2 seconds of Hammerspoon launch (and the PurpleVoice module loading), a macOS dialog appears: "Hammerspoon would like to control this computer using accessibility features." with an "Open System Settings" button.
 5. Click "Open System Settings" — System Settings opens to Privacy & Security → Accessibility.
 6. Toggle Hammerspoon to ON. Close System Settings.
-7. Press and hold cmd+shift+e, say "test phrase", release. Transcript should paste normally.
+7. Press and hold F19 (Karabiner-remapped from fn), say "test phrase", release. Transcript should paste normally.
 
 ## Optional: deny path
 

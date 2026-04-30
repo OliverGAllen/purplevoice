@@ -11,7 +11,7 @@
 1. **CAPTURE BASELINE FIRST:** Confirm PurpleVoice currently works (hold hotkey, say something, transcript appears). This proves Microphone is currently granted.
 2. In Terminal: `tccutil reset Microphone org.hammerspoon.Hammerspoon`
 3. Restart Hammerspoon (menubar → Reload Config OR `hs -c "hs.reload()"`).
-4. Press and hold cmd+shift+e for ~1 second. Release.
+4. Press and hold F19 (Karabiner-remapped from fn) for ~1 second. Release.
 5. **Expected:** Within ~2 seconds, a macOS notification appears with:
    - Title: "PurpleVoice: microphone blocked"
    - Body: "Grant Hammerspoon access in Privacy & Security → Microphone"

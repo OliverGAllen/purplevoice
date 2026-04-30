@@ -12,7 +12,7 @@
 1. Open a text editor (TextEdit, VS Code, anything). Click into an empty document.
 2. In the URL bar of any browser (or another text field), type the literal string `ORIGINAL` and press cmd+a, cmd+c. The macOS clipboard now contains `ORIGINAL`.
 3. Click back into the empty document from step 1.
-4. Hold cmd+shift+e and say "test transcript please" (or any short phrase). Release.
+4. Hold F19 (Karabiner-remapped from fn) and say "test transcript please" (or any short phrase). Release.
 5. Within ~2 seconds, "test transcript please" (or your phrase) appears in the document. **PASS-1:** transcript appeared.
 6. **Wait ~500 ms** (one Mississippi). Now move to a SECOND text field (a different document or text input). Press cmd+v.
 7. Expected: `ORIGINAL` pastes (NOT "test transcript please"). **PASS-2:** prior clipboard restored.

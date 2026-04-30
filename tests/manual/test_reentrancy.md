@@ -7,10 +7,10 @@
 ## Steps
 
 1. In a Terminal: `watch -n 0.1 'pgrep -fa sox'` (or repeatedly `pgrep -fa sox` if `watch` isn't installed; `brew install watch` if needed).
-2. Press cmd+shift+e and HOLD it. **Expected in `pgrep`:** ONE sox process appears.
-3. While still holding, ask another person (or use a foot switch) to press cmd+shift+e a second time. **Expected:** STILL ONE sox process — the second press dropped silently.
+2. Press F19 (Karabiner-remapped from fn) and HOLD it. **Expected in `pgrep`:** ONE sox process appears.
+3. While still holding, ask another person (or use a foot switch) to press F19 a second time. **Expected:** STILL ONE sox process — the second press dropped silently.
 4. Release the first press. **Expected:** the sox process exits (disappears from pgrep).
-5. **Rapid-tap test:** press and release cmd+shift+e 10 times in 1 second (drum your finger). **Expected in pgrep:** at most ONE sox process at any moment.
+5. **Rapid-tap test:** press and release F19 10 times in 1 second (drum your finger). **Expected in pgrep:** at most ONE sox process at any moment.
 6. After the burst, no sox process remains; menubar dot is grey.
 
 ## Expected Outcome

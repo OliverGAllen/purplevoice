@@ -11,11 +11,11 @@
 
 1. Open Maccy (cmd+shift+c default hotkey). Note the current top entry.
 2. Open a text editor. Click into an empty document.
-3. Hold cmd+shift+e, say "first test phrase". Release. Wait for paste.
-4. Hold cmd+shift+e, say "second test phrase". Release. Wait for paste.
-5. Hold cmd+shift+e, say "third test phrase". Release. Wait for paste.
-6. Hold cmd+shift+e, say "fourth test phrase". Release. Wait for paste.
-7. Hold cmd+shift+e, say "fifth test phrase". Release. Wait for paste.
+3. Hold F19 (Karabiner-remapped from fn), say "first test phrase". Release. Wait for paste.
+4. Hold F19, say "second test phrase". Release. Wait for paste.
+5. Hold F19, say "third test phrase". Release. Wait for paste.
+6. Hold F19, say "fourth test phrase". Release. Wait for paste.
+7. Hold F19, say "fifth test phrase". Release. Wait for paste.
 8. Open Maccy. Inspect the history.
 
 ## Expected Outcome

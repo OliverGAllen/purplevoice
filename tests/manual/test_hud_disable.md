@@ -11,13 +11,13 @@
 1. From the shell: `export PURPLEVOICE_HUD_OFF=1`
 2. Reload Hammerspoon: `hs -c "hs.reload()"` OR menubar → Reload Config.
 3. Confirm the load alert appears.
-4. Hold cmd+shift+e for ~2 seconds.
+4. Hold F19 (Karabiner-remapped from fn) for ~2 seconds.
 5. Observe: NO HUD pill appears.
 6. Confirm the menubar indicator DOES change to recording (filled ●) — Phase 2 menubar still ships per HUD-02 spec.
 7. Confirm paste still works — type into a focused text editor first, hold hotkey, speak, release; transcript should paste normally.
 8. Unset: `unset PURPLEVOICE_HUD_OFF` (or `export PURPLEVOICE_HUD_OFF=0` — anything other than "1").
 9. Reload Hammerspoon.
-10. Hold cmd+shift+e — HUD should reappear (default-ON per D-09).
+10. Hold F19 — HUD should reappear (default-ON per D-09).
 
 ## Expected Outcome
 - With PURPLEVOICE_HUD_OFF=1, no HUD on press; menubar indicator unchanged in behaviour; paste path unaffected.

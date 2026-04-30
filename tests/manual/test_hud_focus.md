@@ -9,7 +9,7 @@
 
 ## Steps
 1. Open a text editor (TextEdit, VS Code, Terminal). Click into it. Confirm the cursor is blinking (text-input focus).
-2. Hold cmd+shift+e. Observe the HUD appear at top-center. The cursor should STILL be in the editor (focus did not move to the HUD).
+2. Hold F19 (Karabiner-remapped from fn). Observe the HUD appear at top-center. The cursor should STILL be in the editor (focus did not move to the HUD).
 3. While holding, type a few keys (the keys may go to recording — that's the point; we're just confirming focus is in the editor, not the HUD).
 4. Release. Observe HUD disappear. Cursor stays in editor.
 5. Click somewhere on the HUD pill area while a press cycle is active (rapid: press hotkey, click on the pill area, release — or use a second hotkey if needed). The click should pass THROUGH the HUD to whatever app is behind. The HUD should not become focused or move (focus passes through).

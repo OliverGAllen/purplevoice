@@ -12,9 +12,9 @@
 ## Steps
 1. Reload Hammerspoon (menubar → Reload Config). Confirm the load alert appears.
 2. Note the menubar dot is in idle (○ outline lavender) state.
-3. Hold cmd+shift+e for ~2 seconds while watching the top-center of the active screen.
+3. Hold F19 (Karabiner-remapped from fn) for ~2 seconds while watching the top-center of the active screen.
 4. Observe: a lavender pill (~140×36) reading "● Recording" should appear at top-center, ~50px below the menubar, within one perceptual frame of the press (no visible lag).
-5. Release cmd+shift+e. Observe: the pill should fade out within ~250ms (perceptually "just disappeared").
+5. Release F19. Observe: the pill should fade out within ~250ms (perceptually "just disappeared").
 6. Repeat 3-5 times. Behaviour should be consistent.
 7. Optional: a stopwatch on a phone can be used to confirm appearance < 100ms and disappearance < 300ms (the 50/250 numbers in HUD-01 are below human perception thresholds; observation suffices).
 

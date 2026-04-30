@@ -12,16 +12,16 @@
 ## Steps
 
 ### Sub-test A: legacy `screencapture` CLI
-1. Trigger HUD: hold cmd+shift+e (HUD visible at top-center).
+1. Trigger HUD: hold F19 (Karabiner-remapped from fn; HUD visible at top-center).
 2. While HUD is visible, in a SEPARATE terminal: `screencapture -x /tmp/purplevoice_hud_test_legacy.png` (the `-x` flag suppresses the camera-shutter sound).
-3. Release cmd+shift+e.
+3. Release F19.
 4. Open `/tmp/purplevoice_hud_test_legacy.png` in Preview.
 5. **Document:** is the HUD pill visible in the screenshot? (Expected on Sequoia 15.7+: HUD likely ABSENT — legacy screencapture uses CGWindowList which honours kCGWindowSharingNone... but this is unverified for 15.7+; record the actual outcome.)
 
 ### Sub-test B: modern QuickTime screen recording
 1. Open QuickTime Player → File → New Screen Recording.
 2. Start recording the entire screen.
-3. Trigger HUD: hold cmd+shift+e for ~3 seconds.
+3. Trigger HUD: hold F19 for ~3 seconds.
 4. Stop the QuickTime recording.
 5. Play back the recording.
 6. **Document:** is the HUD pill visible in the playback? (Expected on macOS 15+: HUD PRESENT — QuickTime uses ScreenCaptureKit which ignores NSWindowSharingNone.)
@@ -30,7 +30,7 @@
 Only run if Zoom is installed.
 1. Start a Zoom meeting (with yourself, no other participants needed).
 2. Click "Share Screen" → "Entire Screen".
-3. Trigger HUD via cmd+shift+e.
+3. Trigger HUD via F19.
 4. Use Zoom's "view what's being shared" option (or screenshot the share-preview).
 5. **Document:** is the HUD visible? (Expected: PRESENT — Zoom uses ScreenCaptureKit on macOS 15+.)
 

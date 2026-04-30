@@ -7,7 +7,7 @@
 ## Steps — default-on (cues play)
 
 1. Confirm `PURPLEVOICE_NO_SOUNDS` is NOT set: `echo "${PURPLEVOICE_NO_SOUNDS:-unset}"` in a Terminal — should print `unset`.
-2. Hold cmd+shift+e. **Expected:** brief Pop sound on press.
+2. Hold F19 (Karabiner-remapped from fn). **Expected:** brief Pop sound on press.
 3. Release. **Expected:** brief Tink sound on release.
 4. Repeat to confirm reliable cue playback.
 
@@ -16,7 +16,7 @@
 5. In Terminal: `launchctl setenv PURPLEVOICE_NO_SOUNDS 1`
 6. Restart Hammerspoon: menubar → Hammerspoon icon → Reload Config (or `hs -c "hs.reload()"` if hs.ipc is wired).
 7. Confirm PurpleVoice loaded successfully (alert "PurpleVoice loaded ...").
-8. Hold cmd+shift+e. **Expected: SILENCE** — no Pop sound.
+8. Hold F19. **Expected: SILENCE** — no Pop sound.
 9. Release. **Expected: SILENCE** — no Tink sound.
 10. The transcript should still paste normally (sound suppression does not affect functionality).
 
