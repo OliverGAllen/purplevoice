@@ -73,17 +73,21 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **HUD-03**: Effectively zero CPU when idle — hidden `hs.canvas` orders the NSWindow out (`[NSWindow orderOut:]`); no animation loops, no timers; `:wantsLayer(true)` engages Core Animation GPU compositing during visible state. Verified by `tests/manual/test_hud_idle_cpu.md` (documentation-driven `top -pid` baseline; no specific pass/fail threshold — empirical baseline + active CPU recorded in walkthrough sign-off).
 - [x] **HUD-04**: Position configurable via `PURPLEVOICE_HUD_POSITION` env var (six locked named positions per D-07: `top-center` (default) | `top-right` | `bottom-center` | `bottom-right` | `near-cursor` | `center`). Invalid values fall back to `top-center` with a single warning to the Hammerspoon console at module load. HUD does not steal focus (`hs.canvas` defaults `ignoresMouseEvents = YES` and `canBecomeKeyWindow = NO` — verified in libcanvas.m source). HUD visibility in screen recordings is **limited**: PurpleVoice does not pursue `NSWindowSharingNone` exclusion in v1; even if applied, Apple has stated ScreenCaptureKit on macOS 15+ ignores window-level sharing flags (Apple Developer Forums thread 792152, 2025). Legacy `screencapture` CLI and CGWindowList-based tools may still honour sharing flags, but this is incidental, not pursued. For sensitive recording sessions, run with `PURPLEVOICE_HUD_OFF=1` — that is the only privacy guarantee. Verified by `tests/test_hud_position_validation.sh` + `tests/manual/test_hud_focus.md` (live walkthrough) + `tests/manual/test_hud_screen_capture.md` (documentation-only walkthrough capturing empirical outcomes).
 
+### Quality of Life
+
+- [ ] **QOL-01**: Paste-last-transcript hotkey (`cmd+shift+v`) re-pastes the most recent successful transcript into the focused window. Implemented as `hs.hotkey.bind({"cmd","shift"}, "v", repaste)` in `purplevoice-lua/init.lua` calling `pasteWithRestore(lastTranscript)`. Storage = in-memory Lua module-scope `local lastTranscript = nil`, updated AFTER the `cmd+v` keystroke fires inside `pasteWithRestore()` (per CONTEXT.md D-03). NO disk persistence — `lastTranscript` is lost on Hammerspoon reload by design (privacy-first; institutional / healthcare audience). Nil-state behaviour: `hs.alert.show("PurpleVoice: nothing to re-paste yet", 1.5)` (per CONTEXT.md D-04). Verified by `tests/test_karabiner_check.sh` check 7 (string-level wiring) + `tests/manual/test_repaste_walkthrough.md` (live end-to-end sign-off).
+- [ ] **QOL-NEW-01**: F19 alt hotkey replaces `cmd+shift+e` for push-and-hold recording. Implemented as `hs.hotkey.bind({}, "f19", onPress, onRelease)` in `purplevoice-lua/init.lua` (no modifier table; per CONTEXT.md D-05). The previous `cmd+shift+e` binding is REMOVED, not supplemented (D-05). Karabiner-Elements remaps `fn` → `F19` via `assets/karabiner-fn-to-f19.json` (complex modification with `to_if_alone` + `to_if_held_down` + 200ms threshold; D-06). `setup.sh` Step 9 detects `/Applications/Karabiner-Elements.app` and refuses to declare install complete without it (D-07); `PURPLEVOICE_OFFLINE=1` mode notes USB-sneakernet path for the .dmg (D-08). Verified by `tests/test_karabiner_check.sh` checks 1-6 + 8 (string-level wiring) + `tests/manual/test_f19_walkthrough.md` + `tests/manual/test_setup_karabiner_missing.md` (live end-to-end + negative-control sign-offs).
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
 
 ### Quality of Life
 
-- **QOL-01**: Paste-last-transcript hotkey re-pastes the most recent transcription (recovery from focus-lost paste)
 - **QOL-02**: Pressing Esc while recording cancels the in-flight capture without paste
-- **QOL-03**: User can supply `~/.config/voice-cc/replacements.txt` (find/replace pairs) for recurring mis-transcriptions that `--prompt` doesn't fix ("Versel" → "Vercel")
-- **QOL-04**: Rolling history log at `~/.cache/voice-cc/history.log` capped at 10 MB
-- **QOL-05**: `VOICE_CC_MODEL` environment variable allows runtime model swap (e.g., `medium.en`)
+- **QOL-03** *(deferred — Phase 4 D-01 / D-10 rebrand applied)*: User can supply `~/.config/purplevoice/replacements.txt` (find/replace pairs) for recurring mis-transcriptions that `--prompt` doesn't fix ("Versel" → "Vercel")
+- **QOL-04** *(deferred — Phase 4 D-01 / D-10 rebrand applied)*: Rolling history log at `~/.cache/purplevoice/history.log` capped at 10 MB
+- **QOL-05** *(deferred — Phase 4 D-01 / D-10 rebrand applied)*: `PURPLEVOICE_MODEL` environment variable allows runtime model swap (e.g., `medium.en`)
 
 ### Performance
 
@@ -158,19 +162,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HUD-02 | Phase 3.5: Hover UI / HUD | Complete |
 | HUD-03 | Phase 3.5: Hover UI / HUD | Complete |
 | HUD-04 | Phase 3.5: Hover UI / HUD | Complete |
-| QOL-01 | Phase 4 (v1.x): Quality of Life | Deferred |
-| QOL-02 | Phase 4 (v1.x): Quality of Life | Deferred |
-| QOL-03 | Phase 4 (v1.x): Quality of Life | Deferred |
-| QOL-04 | Phase 4 (v1.x): Quality of Life | Deferred |
-| QOL-05 | Phase 4 (v1.x): Quality of Life | Deferred |
+| QOL-01 | Phase 4 (v1.x): Quality of Life | Pending |
+| QOL-NEW-01 | Phase 4 (v1.x): Quality of Life | Pending |
+| QOL-02 | v2 / backlog (deferred — no real-use trigger as of 2026-04-30 per Phase 4 CONTEXT.md D-01) | Deferred |
+| QOL-03 | v2 / backlog (deferred — no real-use trigger as of 2026-04-30 per Phase 4 CONTEXT.md D-01) | Deferred |
+| QOL-04 | v2 / backlog (deferred — no real-use trigger as of 2026-04-30 per Phase 4 CONTEXT.md D-01) | Deferred |
+| QOL-05 | v2 / backlog (deferred — no real-use trigger as of 2026-04-30 per Phase 4 CONTEXT.md D-01) | Deferred |
 | PERF-01 | Phase 5 (v1.1, conditional): Warm-Process Upgrade | Conditional |
 | PERF-02 | Phase 5 (v1.1, conditional): Warm-Process Upgrade | Conditional |
 
 **Coverage:**
-- v1 requirements: 39 total (35 prior + HUD-01..04 added 2026-04-30)
-- Mapped to phases: 39 / 39 (100%)
+- v1 requirements: 41 total (39 prior + QOL-01 promoted from v2 + QOL-NEW-01 new in Phase 4 2026-04-30)
+- Mapped to phases: 41 / 41 (100%)
 - Unmapped: 0
-- v2 requirements: 7 total (5 QOL → Phase 4, 2 PERF → Phase 5 conditional)
+- v2 requirements: 6 total (4 QOL deferred — QOL-02 Esc, QOL-03 replacements.txt, QOL-04 history.log, QOL-05 PURPLEVOICE_MODEL — paths/vars use `purplevoice` namespace per Phase 2.5 D-05; 2 PERF → Phase 5 conditional)
 
 **Per-phase counts (v1 only):**
 - Phase 1: Spike — 10 requirements (CAP-01..04, TRA-01..03, INJ-01, ROB-03, ROB-05)
@@ -179,7 +184,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 - Phase 2.7: Security Posture & Government Readiness — 6 requirements (SEC-01..06) — Pending
 - Phase 3: Distribution & Benchmarking — 4 requirements (DST-01..04)
 - Phase 3.5: Hover UI / HUD — 4 requirements (HUD-01..04) — Complete
+- Phase 4 (v1.x): Quality of Life — 2 requirements (QOL-01, QOL-NEW-01) — Pending
 
 ---
 *Requirements defined: 2026-04-26*
+*Last updated: 2026-04-30 — Phase 4 staging (Plan 04-00): QOL-01 promoted from v2 stub to v1 with concrete language; QOL-NEW-01 added (F19 alt hotkey via Karabiner); v2 QOL stubs rebranded to `purplevoice` paths/vars per D-10. v1 coverage 39 → 41.*
 *Last updated: 2026-04-30 — four HUD requirements completed for Phase 3.5 (Complete); traceability table extended.*
