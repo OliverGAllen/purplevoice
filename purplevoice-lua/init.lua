@@ -35,6 +35,22 @@ local BRAND = {
   COLOUR_LAVENDER = "#B388EB",
 }
 
+-- ----------------------------------------------------------------
+-- HUD constants (Phase 3.5 — D-01..D-08 locked decisions)
+-- ----------------------------------------------------------------
+-- Form factor: 140x36 lavender pill with 18px corner radius (D-01, D-04).
+-- Translucent (canvas-level alpha 0.85) — D-03 explicitly rejects backdrop blur.
+-- White "● Recording" text on lavender (D-02).
+-- Top-center default position (D-05); ~50px below menubar (D-08).
+-- Plan 03.5-01 ships ONLY the default top-center position; Plan 03.5-02 adds
+-- the env-var-driven six-named-position resolution + fallback warning.
+local HUD_W = 140
+local HUD_H = 36
+local HUD_CORNER_RADIUS = 18
+local HUD_ALPHA = 0.85
+local HUD_FONT_SIZE = 14
+local HUD_TOP_GAP = 50         -- ~50px below menubar (D-08)
+
 local M = {}
 
 -- ----------------------------------------------------------------
@@ -91,12 +107,121 @@ local function setMenubarRecording()
 end
 
 -- ----------------------------------------------------------------
+-- HUD canvas (Phase 3.5 — RESEARCH Pattern 1; defence-in-depth orphan
+-- cleanup mirrors the pcall(hs.notify.unregister, ...) precedent at
+-- line 26-27. _G._purplevoice_hud is a name-spaced global that survives
+-- the Hammerspoon reload Lua-state teardown so the next reload can
+-- delete the previous canvas instance explicitly. RESEARCH Priority 7.
+-- ----------------------------------------------------------------
+if _G._purplevoice_hud then
+  pcall(function() _G._purplevoice_hud:delete() end)
+  _G._purplevoice_hud = nil
+end
+
+-- Active-screen resolution (RESEARCH Pattern 3 / Priority 5).
+-- Per-press resolution cost is microseconds — tiny vs. the press-hold loop.
+local function activeScreen()
+  local fw = hs.window.focusedWindow()
+  if fw then
+    local s = fw:screen()
+    if s then return s end
+  end
+  return hs.screen.mainScreen()
+end
+
+-- Position arithmetic (Plan 03.5-01 STUB — top-center only; Plan 03.5-02
+-- replaces this with the full six-named-position implementation per
+-- RESEARCH Priority 6 / Pattern 5).
+local function positionFor(name, screenFrame)
+  -- screenFrame: hs.screen:fullFrame() — table with x, y, w, h in global coords.
+  -- All coordinates are global (multi-monitor safe per RESEARCH Pitfall 7).
+  return {
+    x = screenFrame.x + (screenFrame.w - HUD_W) / 2,
+    y = screenFrame.y + HUD_TOP_GAP,
+  }
+end
+
+-- Canvas creation (RESEARCH Pattern 1). One canvas per module load,
+-- hidden initially. Created only if hudEnabled — this preserves the
+-- HUD-02 disable-via-env-var contract: env=1 -> canvas never allocated,
+-- showHUD/hideHUD are no-ops via the `if not hudCanvas then return end`
+-- guards.
+--
+-- Note: alpha is set at the CANVAS level (not the rectangle's fillColor)
+-- per RESEARCH Pitfall 3 — single source of truth for translucency,
+-- prevents text-edge double-composite haze.
+local hudCanvas = nil
+if hudEnabled then
+  hudCanvas = hs.canvas.new({ x = 0, y = 0, w = HUD_W, h = HUD_H })
+    :level("status")
+    :behaviorAsLabels({"canJoinAllSpaces", "stationary", "transient"})
+    :wantsLayer(true)
+    :alpha(HUD_ALPHA)
+
+  hudCanvas:appendElements(
+    {
+      type = "rectangle",
+      action = "fill",
+      frame = { x = 0, y = 0, w = HUD_W, h = HUD_H },
+      roundedRectRadii = { xRadius = HUD_CORNER_RADIUS, yRadius = HUD_CORNER_RADIUS },
+      fillColor = { hex = BRAND.COLOUR_LAVENDER, alpha = 1.0 },
+    },
+    {
+      type = "text",
+      text = hs.styledtext.new("● Recording", {
+        font = { name = ".AppleSystemUIFont", size = HUD_FONT_SIZE },
+        color = { white = 1, alpha = 1 },
+        paragraphStyle = { alignment = "center" },
+      }),
+      frame = { x = 0, y = 9, w = HUD_W, h = 18 },
+    }
+  )
+
+  _G._purplevoice_hud = hudCanvas
+end
+
+-- Show/hide functions (RESEARCH Pattern 2 / Priority 4).
+-- :show(0) instant on press — press-hold indicators feel laggy with any
+-- fade-in. :hide(0.15) on release — matches hs.alert.defaultStyle.fadeOutDuration;
+-- well under HUD-01's 250ms budget. Both gated on hudCanvas non-nil so
+-- env=1 produces clean no-ops.
+--
+-- Position recomputed each press (active screen may have changed since
+-- module load — multi-monitor reshuffle, focused-window switch).
+local function showHUD()
+  if not hudCanvas then return end
+  local screen = activeScreen()
+  local screenFrame = screen:fullFrame()
+  local pos = positionFor(hudPosition, screenFrame)
+  hudCanvas:topLeft(pos)
+  hudCanvas:show(0)
+end
+
+local function hideHUD()
+  if not hudCanvas then return end
+  hudCanvas:hide(0.15)
+end
+
+-- ----------------------------------------------------------------
 -- Audio cues (FBK-02)
 -- PURPLEVOICE_NO_SOUNDS read once at module load; reload Hammerspoon to change.
 -- ----------------------------------------------------------------
 local startSound = hs.sound.getByName("Pop")
 local stopSound = hs.sound.getByName("Tink")
 local soundsEnabled = (os.getenv("PURPLEVOICE_NO_SOUNDS") ~= "1")
+
+-- ----------------------------------------------------------------
+-- HUD configuration (Phase 3.5 — D-09..D-11 locked decisions)
+-- ----------------------------------------------------------------
+-- Read once at module load; reload Hammerspoon to apply changes (D-11).
+-- Default-ON (D-09): HUD enabled unless PURPLEVOICE_HUD_OFF == "1".
+-- Mirrors the PURPLEVOICE_NO_SOUNDS idiom on the line above.
+--
+-- Plan 03.5-01: only PURPLEVOICE_HUD_OFF is read here. Position is hard-coded
+-- to "top-center" (D-05 default). Plan 03.5-02 adds PURPLEVOICE_HUD_POSITION
+-- with the six-named-position validation + console fallback warning (D-07).
+local hudEnabled = (os.getenv("PURPLEVOICE_HUD_OFF") ~= "1")
+local hudPosition = "top-center"
 
 local function playStartCue()
   if soundsEnabled and startSound then
@@ -120,6 +245,7 @@ local function resetState()
   -- a closure-captured local (`pendingSaved`) instead of module-level
   -- state, so there is no shared variable to reset. This avoids a latent
   -- footgun where a re-entrant press could nil out an in-flight restore.
+  pcall(hideHUD)             -- Phase 3.5: hide HUD on every exit path
   setMenubarIdle()
 end
 
@@ -269,6 +395,7 @@ local function onPress()
   end
   isRecording = true
   setMenubarRecording()
+  pcall(showHUD)             -- Phase 3.5: show HUD alongside menubar
   playStartCue()
 
   currentTask = hs.task.new(SCRIPT_PATH, function(exitCode, stdOut, stdErr)
