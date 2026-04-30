@@ -107,6 +107,23 @@ local function setMenubarRecording()
 end
 
 -- ----------------------------------------------------------------
+-- HUD configuration (Phase 3.5 — D-09..D-11 locked decisions)
+-- ----------------------------------------------------------------
+-- Read once at module load; reload Hammerspoon to apply changes (D-11).
+-- Default-ON (D-09): HUD enabled unless PURPLEVOICE_HUD_OFF == "1".
+-- Mirrors the PURPLEVOICE_NO_SOUNDS idiom (audio cues block below).
+--
+-- Plan 03.5-01: only PURPLEVOICE_HUD_OFF is read here. Position is hard-coded
+-- to "top-center" (D-05 default). Plan 03.5-02 adds PURPLEVOICE_HUD_POSITION
+-- with the six-named-position validation + console fallback warning (D-07).
+--
+-- Declared HERE (above the HUD canvas block) because Lua locals are not
+-- forward-visible — `if hudEnabled then` in the canvas block requires the
+-- declaration to come first.
+local hudEnabled = (os.getenv("PURPLEVOICE_HUD_OFF") ~= "1")
+local hudPosition = "top-center"
+
+-- ----------------------------------------------------------------
 -- HUD canvas (Phase 3.5 — RESEARCH Pattern 1; defence-in-depth orphan
 -- cleanup mirrors the pcall(hs.notify.unregister, ...) precedent at
 -- line 26-27. _G._purplevoice_hud is a name-spaced global that survives
@@ -209,19 +226,6 @@ end
 local startSound = hs.sound.getByName("Pop")
 local stopSound = hs.sound.getByName("Tink")
 local soundsEnabled = (os.getenv("PURPLEVOICE_NO_SOUNDS") ~= "1")
-
--- ----------------------------------------------------------------
--- HUD configuration (Phase 3.5 — D-09..D-11 locked decisions)
--- ----------------------------------------------------------------
--- Read once at module load; reload Hammerspoon to apply changes (D-11).
--- Default-ON (D-09): HUD enabled unless PURPLEVOICE_HUD_OFF == "1".
--- Mirrors the PURPLEVOICE_NO_SOUNDS idiom on the line above.
---
--- Plan 03.5-01: only PURPLEVOICE_HUD_OFF is read here. Position is hard-coded
--- to "top-center" (D-05 default). Plan 03.5-02 adds PURPLEVOICE_HUD_POSITION
--- with the six-named-position validation + console fallback warning (D-07).
-local hudEnabled = (os.getenv("PURPLEVOICE_HUD_OFF") ~= "1")
-local hudPosition = "top-center"
 
 local function playStartCue()
   if soundsEnabled and startSound then
