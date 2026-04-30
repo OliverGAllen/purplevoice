@@ -127,7 +127,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
 **UI hint**: yes (this IS the UI phase)
 **Research flag**: yes — `/gsd:research-phase 3.5` complete 2026-04-30 (commit `5396ac6`). Critical finding: ScreenCaptureKit on macOS 15+ ignores NSWindowSharingNone (Apple Forums thread 792152). D-14 caveat reframed accordingly.
 
-### Phase 4 (v1.x): Quality of Life
+### Phase 4: Quality of Life (v1.x)
 **Goal**: Address the first real-use frustrations now that the polished loop is stable. Each item has a specific trigger; do not build speculatively.
 **Depends on**: Phase 3.5 (must be triggered by observed v1 frustrations after the loop is fully polished, not anticipated). *(Note: previously framed as "after v1 ships"; reordered 2026-04-28 to come BEFORE Phase 3 Distribution — distribute the QoL-included product, not bare hardening.)*
 **Requirements**: QOL-01, QOL-02, QOL-03, QOL-04, QOL-05 (all v2-tier, deferred until use-driven trigger fires)
@@ -159,7 +159,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
      The chosen option must produce a public installer compatible with success criterion 5 (one-line `curl ... | bash`) and inherit the Phase 2.7 honest-framing discipline (no over-claims about what wrapping does for security; the audit-the-fork story matters for institutional adopters).
 **Plans**: 4 plans
 
-### Phase 5 (v1.1, CONDITIONAL): Warm-Process Upgrade
+### Phase 5: Warm-Process Upgrade (v1.1, CONDITIONAL)
 **Goal**: Cut latency below 1 second by replacing per-utterance `whisper-cli` invocation with a long-running `whisper-server` over localhost HTTP, managed by a LaunchAgent. **CONDITIONAL: only triggered if Phase 3 hyperfine measurements show p50 > 2.0 s OR p95 > 3.0 s on Oliver's hardware.**
 **Depends on**: Phase 3 (hyperfine measurements must demand it; until the data says we need it, the simpler one-shot architecture wins on every dimension that isn't latency).
 **Requirements**: PERF-01, PERF-02 (both v2-tier, conditional)
