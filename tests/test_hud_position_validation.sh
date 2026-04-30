@@ -81,8 +81,61 @@ if grep -q "whisper-cli" "$INIT"; then
   FAIL=1
 fi
 
+# 5. POSITIVE (Plan 03.5-02 tightening): PURPLEVOICE_HUD_POSITION is read at
+#    module load via os.getenv (D-07 / D-11).
+if ! grep -qE 'os\.getenv\("PURPLEVOICE_HUD_POSITION"\)' "$INIT"; then
+  echo "FAIL: $INIT does not read os.getenv(\"PURPLEVOICE_HUD_POSITION\") at module load (D-07 / D-11)"
+  FAIL=1
+fi
+
+# 6. POSITIVE: All six locked named positions appear as quoted string literals
+#    (D-07 lock — top-center | top-right | bottom-center | bottom-right
+#     | near-cursor | center).
+for pos in top-center top-right bottom-center bottom-right near-cursor center; do
+  if ! grep -qF "\"$pos\"" "$INIT"; then
+    echo "FAIL: $INIT missing locked named position literal \"$pos\" (D-07)"
+    FAIL=1
+  fi
+done
+
+# 7. POSITIVE: Default 'top-center' appears at least twice (validation map +
+#    fallback assignment in the invalid-value branch).
+TOP_CENTER_COUNT=$(grep -c '"top-center"' "$INIT" 2>/dev/null || echo 0)
+if [ "$TOP_CENTER_COUNT" -lt 2 ]; then
+  echo "FAIL: $INIT mentions \"top-center\" only $TOP_CENTER_COUNT time(s); expected >= 2 (validation map + fallback)"
+  FAIL=1
+fi
+
+# 8. POSITIVE: validPositions table present (gates env-var read).
+if ! grep -q "validPositions" "$INIT"; then
+  echo "FAIL: $INIT missing validPositions table (D-07 validation gate)"
+  FAIL=1
+fi
+
+# 9. POSITIVE: hs.console.printStyledtext fallback warning present (D-07 —
+#    invalid env-var value emits a single console warning before falling back).
+if ! grep -q "hs.console.printStyledtext" "$INIT"; then
+  echo "FAIL: $INIT missing hs.console.printStyledtext fallback warning (D-07)"
+  FAIL=1
+fi
+
+# 10. POSITIVE: near-cursor uses cursor's screen + clamp (RESEARCH Pitfall 9
+#     + Priority 6 — must use hs.mouse.absolutePosition + math.max/min clamp).
+if ! grep -q "hs.mouse.absolutePosition" "$INIT"; then
+  echo "FAIL: $INIT near-cursor branch missing hs.mouse.absolutePosition (RESEARCH Priority 6)"
+  FAIL=1
+fi
+if ! grep -q "math.max" "$INIT"; then
+  echo "FAIL: $INIT near-cursor clamp missing math.max (RESEARCH Pitfall 9)"
+  FAIL=1
+fi
+if ! grep -q "math.min" "$INIT"; then
+  echo "FAIL: $INIT near-cursor clamp missing math.min (RESEARCH Pitfall 9)"
+  FAIL=1
+fi
+
 if [ "$FAIL" -eq 0 ]; then
-  echo "PASS [test_hud_position_validation.sh]: HUD-04 lifecycle precedent (setMenubarIdle/Recording) present; no rejected HUD env vars; brand-clean"
+  echo "PASS [test_hud_position_validation.sh]: PURPLEVOICE_HUD_POSITION read + six locked positions wired + validPositions gate + console fallback + near-cursor clamp; no rejected env vars; brand-clean"
   exit 0
 fi
 exit 1

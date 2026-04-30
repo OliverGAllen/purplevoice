@@ -50,6 +50,9 @@ local HUD_CORNER_RADIUS = 18
 local HUD_ALPHA = 0.70
 local HUD_FONT_SIZE = 14
 local HUD_TOP_GAP = 50         -- ~50px below menubar (D-08)
+-- Plan 03.5-02 additions (positionFor arithmetic — RESEARCH Priority 6):
+local HUD_EDGE_MARGIN = 24         -- Standard macOS edge gap from screen sides/bottom
+local HUD_NEAR_CURSOR_OFFSET = 30  -- Below cursor; doesn't occlude (RESEARCH Pitfall 9)
 
 local M = {}
 
@@ -113,15 +116,34 @@ end
 -- Default-ON (D-09): HUD enabled unless PURPLEVOICE_HUD_OFF == "1".
 -- Mirrors the PURPLEVOICE_NO_SOUNDS idiom (audio cues block below).
 --
--- Plan 03.5-01: only PURPLEVOICE_HUD_OFF is read here. Position is hard-coded
--- to "top-center" (D-05 default). Plan 03.5-02 adds PURPLEVOICE_HUD_POSITION
--- with the six-named-position validation + console fallback warning (D-07).
+-- Plan 03.5-02 (this block): both env vars are read at module load.
+-- Position name read at module load (D-07; D-11 — env vars read once).
+-- Six locked named positions (D-07): top-center | top-right | bottom-center
+-- | bottom-right | near-cursor | center. Default: top-center (D-05).
+-- Invalid values fall back to top-center with a single console warning
+-- (D-07). No coordinate-precise overrides; no alpha/colour overrides —
+-- D-10 locks the surface to exactly two knobs (Deferred Ideas rejects the
+-- rest). See .planning/phases/03.5-hover-ui-hud/03.5-CONTEXT.md.
 --
 -- Declared HERE (above the HUD canvas block) because Lua locals are not
 -- forward-visible — `if hudEnabled then` in the canvas block requires the
 -- declaration to come first.
 local hudEnabled = (os.getenv("PURPLEVOICE_HUD_OFF") ~= "1")
-local hudPosition = "top-center"
+local hudPosition = os.getenv("PURPLEVOICE_HUD_POSITION") or "top-center"
+
+local validPositions = {
+  ["top-center"] = true,
+  ["top-right"] = true,
+  ["bottom-center"] = true,
+  ["bottom-right"] = true,
+  ["near-cursor"] = true,
+  ["center"] = true,
+}
+if not validPositions[hudPosition] then
+  hs.console.printStyledtext("PurpleVoice HUD: invalid PURPLEVOICE_HUD_POSITION='" ..
+    tostring(hudPosition) .. "'; falling back to top-center")
+  hudPosition = "top-center"
+end
 
 -- ----------------------------------------------------------------
 -- HUD canvas (Phase 3.5 — RESEARCH Pattern 1; defence-in-depth orphan
@@ -146,16 +168,66 @@ local function activeScreen()
   return hs.screen.mainScreen()
 end
 
--- Position arithmetic (Plan 03.5-01 STUB — top-center only; Plan 03.5-02
--- replaces this with the full six-named-position implementation per
--- RESEARCH Priority 6 / Pattern 5).
+-- Position arithmetic — six locked named positions (RESEARCH Pattern 5 /
+-- Priority 6). All coordinates are global (multi-monitor safe per RESEARCH
+-- Pitfall 7); screenFrame.x and screenFrame.y are added to every computed
+-- coordinate. near-cursor uses the CURSOR'S screen (not the focused-window
+-- screen) per RESEARCH Priority 6, with a clamp to keep the pill on-screen
+-- (RESEARCH Pitfall 9 — naive arithmetic could push the pill off-edge when
+-- cursor is near the screen boundary).
 local function positionFor(name, screenFrame)
   -- screenFrame: hs.screen:fullFrame() — table with x, y, w, h in global coords.
-  -- All coordinates are global (multi-monitor safe per RESEARCH Pitfall 7).
-  return {
-    x = screenFrame.x + (screenFrame.w - HUD_W) / 2,
-    y = screenFrame.y + HUD_TOP_GAP,
-  }
+  if name == "top-center" then
+    return {
+      x = screenFrame.x + (screenFrame.w - HUD_W) / 2,
+      y = screenFrame.y + HUD_TOP_GAP,
+    }
+  elseif name == "top-right" then
+    return {
+      x = screenFrame.x + screenFrame.w - HUD_W - HUD_EDGE_MARGIN,
+      y = screenFrame.y + HUD_TOP_GAP,
+    }
+  elseif name == "bottom-center" then
+    return {
+      x = screenFrame.x + (screenFrame.w - HUD_W) / 2,
+      y = screenFrame.y + screenFrame.h - HUD_H - HUD_EDGE_MARGIN,
+    }
+  elseif name == "bottom-right" then
+    return {
+      x = screenFrame.x + screenFrame.w - HUD_W - HUD_EDGE_MARGIN,
+      y = screenFrame.y + screenFrame.h - HUD_H - HUD_EDGE_MARGIN,
+    }
+  elseif name == "near-cursor" then
+    -- Use the CURSOR'S screen, not the focused-window screen (RESEARCH
+    -- Priority 6). hs.screen.find() takes a point and returns the screen
+    -- containing it; falls back to mainScreen on edge cases.
+    local mp = hs.mouse.absolutePosition()
+    local cursorScreen = hs.screen.find(mp) or hs.screen.mainScreen()
+    local cf = cursorScreen:fullFrame()
+    -- Clamp to fit within cursor's screen (RESEARCH Pitfall 9). Inner
+    -- math.min caps the upper bound; outer math.max caps the lower bound.
+    local x = math.max(
+      cf.x + HUD_EDGE_MARGIN,
+      math.min(mp.x - HUD_W / 2, cf.x + cf.w - HUD_W - HUD_EDGE_MARGIN)
+    )
+    local y = math.max(
+      cf.y + HUD_EDGE_MARGIN,
+      math.min(mp.y + HUD_NEAR_CURSOR_OFFSET, cf.y + cf.h - HUD_H - HUD_EDGE_MARGIN)
+    )
+    return { x = x, y = y }
+  elseif name == "center" then
+    return {
+      x = screenFrame.x + (screenFrame.w - HUD_W) / 2,
+      y = screenFrame.y + (screenFrame.h - HUD_H) / 2,
+    }
+  else
+    -- Defensive default. validPositions gates at module load, so this
+    -- branch should be unreachable; keep it for belt-and-braces.
+    return {
+      x = screenFrame.x + (screenFrame.w - HUD_W) / 2,
+      y = screenFrame.y + HUD_TOP_GAP,
+    }
+  end
 end
 
 -- Canvas creation (RESEARCH Pattern 1). One canvas per module load,
