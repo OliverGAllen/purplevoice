@@ -166,15 +166,120 @@ The following threats are explicitly out of scope, with rationale:
 
 ## Egress Verification
 
-<!-- TODO: Plan 02.7-02 fills this section (3-layer evidence chain: lsof + nettop + pf+tcpdump; Pitfall 1 caveat for macOS Sequoia 15.7.5; cross-ref tests/security/verify_egress.sh). -->
+PurpleVoice's central security claim is that **no voice content leaves the machine during operation**. This claim is substantiated by `tests/security/verify_egress.sh`, which any reader can run on their own macOS machine.
+
+### Methodology
+
+`tests/security/verify_egress.sh` uses a **3-layer evidence chain**, scoped tightly to the PurpleVoice process tree (`purplevoice-record` + `sox` + transcription children; Hammerspoon's main PID is intentionally excluded per D-06 — it's a long-running app the user already trusts).
+
+1. **Layer 1 — `lsof`** (no sudo). Snapshot of network sockets per PID at sample points during a synthesised recording window. Expected: zero open sockets.
+2. **Layer 2 — `nettop`** (no sudo). Per-PID network flow snapshot. Expected: zero flows.
+3. **Layer 3 — `pf` + `tcpdump`** (sudo required). A `pf` packet-filter anchor blocks all outbound TCP/UDP for the test UID; `tcpdump` captures on `pflog0` + active interfaces during the recording window. Expected: zero attributable packets.
+
+The script exits 0 only if **all 3 layers report silence**. If sudo is unavailable, layer 3 is gracefully skipped — the egress claim then rests on socket-state evidence (layers 1+2) only, with a "weakened PASS" message.
+
+### macOS Sequoia 15.7.5 caveat (Pitfall 1)
+
+Apple Developer Forums thread 776914 documents a `pf` regression on macOS 15.x where outbound packets bypass `block all` rules under some conditions. Status on 15.7.5 (build 24G624) is unconfirmed by public sources. To handle this:
+
+- `tests/security/verify_egress.sh` includes a **positive-control check**: before declaring layer 3 PASS, it runs `curl --max-time 2 https://example.com` from the same UID under the pf anchor. If `curl` succeeds, pf is silently broken — the script logs a WARNING and falls back to layers 1+2 as the load-bearing evidence.
+- If you run `tests/security/verify_egress.sh` and see `PASS (weakened — pf broken on this macOS build per Pitfall 1; layers 1-2 carry the claim)`, the egress claim is still substantiated by socket-state evidence (no sockets opened, no flows visible). The `pf+tcpdump` packet-flow evidence is unavailable on this OS build.
+
+### What the test does NOT prove
+
+- Setup-time downloads (HuggingFace model, Homebrew bottles, Hammerspoon cask) are explicit, one-time, and over HTTPS with SHA256 verification. The egress test is scoped to **runtime**, not install-time.
+- The test does not prove the kernel is uncompromised; it proves PurpleVoice's user-space process tree does not transmit during a recording window.
+- The test scopes to PurpleVoice's process tree only, not system-wide. Other macOS daemons (mDNS, system telemetry) are out of scope.
+
+### How to run
+
+```bash
+bash tests/security/verify_egress.sh
+# PASS (full 3-layer evidence: lsof + nettop + pf+tcpdump silence on purplevoice process tree)
+# OR
+# PASS (weakened — pf broken on this macOS build per Pitfall 1; layers 1-2 carry the claim)
+# OR
+# PASS (weakened — layer 3 pf+tcpdump skipped due to sudo unavailable; layers 1-2 carry the claim)
+```
 
 ## Software Bill of Materials (SBOM)
 
-<!-- TODO: Plan 02.7-02 fills this section (SPDX 2.3 SBOM.spdx.json; direct + transitive + system context per D-11; cross-ref tests/security/verify_sbom.sh). -->
+PurpleVoice publishes a Software Bill of Materials (`SBOM.spdx.json`) at the repo root in **SPDX 2.3 JSON format** (ISO/IEC 5962:2021). The SBOM enumerates the trusted compute base (TCB) — what runs when PurpleVoice runs.
+
+### Scope (D-11: full)
+
+- **Direct dependencies:** `sox`, the local transcription binary, `ggml-small.en.bin`, `ggml-silero-v6.2.0.bin`, `Hammerspoon.app`, `purplevoice-record`, `purplevoice-lua/init.lua`.
+- **Transitive dependencies:** Compile-time deps of whisper.cpp (ggml internals), sox audio libraries (libsndfile, libvorbis, etc.), Hammerspoon's bundled Lua + LuaSocket. Auto-discovered by Syft.
+- **System context** (carried via SPDX 2.3 Annotation blocks):
+  - `macOS-version` — e.g., `15.7.5 (24G624)`
+  - `hardware-platform` — e.g., `arm64 (Apple Silicon)`
+  - `xcode-clt-version` — e.g., `26.2.0.0.1.1764812424`
+  - `brew-version` — e.g., `4.5.x`
+
+Government-audit framing: this is **what is the trusted compute base**. An auditor can answer "what runs when PurpleVoice runs" by reading `SBOM.spdx.json`.
+
+### SPDX 2.3 Annotation block strategy for system context
+
+SPDX 2.3 does not have a first-class field for "the host OS this software was built/run on". The PurpleVoice SBOM uses SPDX 2.3 `Annotation` blocks attached to the document-level `creationInfo` to carry the 4 system-context dimensions above. Each Annotation block has:
+
+- `annotationType: REVIEW`
+- `annotator: Tool: PurpleVoice setup.sh Step 8`
+- `annotationDate: <ISO 8601 — set deterministically per Pitfall 3>`
+- `annotationComment: <key>=<value>` (one of macOS-version, hardware-platform, xcode-clt-version, brew-version)
+
+Consumers of the SBOM can grep for `annotationComment.*<key>=` to extract the system context.
+
+### Regeneration
+
+`setup.sh` Step 8 regenerates `SBOM.spdx.json` if Syft (Anchore) is installed. The regeneration is **idempotent** — running `setup.sh` twice produces zero git diff when the package set is unchanged (deterministic post-process via `jq` rewrites volatile fields). If Syft is absent, the committed SBOM applies and `setup.sh` prints a skip notice.
+
+Format: SPDX 2.3 JSON. Consumers who prefer CycloneDX can convert at read-time via `syft convert SBOM.spdx.json -o cyclonedx-json`.
+
+### Verification
+
+`tests/security/verify_sbom.sh` validates that `SBOM.spdx.json`:
+
+- Parses as valid JSON.
+- Contains the 6 SPDX 2.3 required top-level fields.
+- Has `name = "PurpleVoice"` and `spdxVersion = "SPDX-2.3"`.
+- Contains ≥ 4 system-context Annotation blocks (the 4 dimensions above).
+- Has deterministic `creationInfo.created` (zero spurious diff per Pitfall 3).
 
 ## Air-Gapped Installation
 
-<!-- TODO: Plan 02.7-02 fills setup procedure; Plan 02.7-04 cross-references README. PURPLEVOICE_OFFLINE=1 mode per D-08; Pitfall 8 brew limitation; sideload paths. -->
+PurpleVoice supports air-gapped operation via the `PURPLEVOICE_OFFLINE=1` environment variable. In this mode, `setup.sh` does not contact the network; it verifies that the operator has manually pre-staged the binaries and model files at the documented sideload paths.
+
+### Required pre-staging on a connected machine
+
+| Artefact | Sideload path | How to obtain |
+|---|---|---|
+| `ggml-small.en.bin` (~488 MB) | `~/.local/share/purplevoice/models/ggml-small.en.bin` | `curl -L -o ggml-small.en.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin` then `shasum -a 256 ggml-small.en.bin` (must match `c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d`); USB sneakernet to air-gapped machine. |
+| `ggml-silero-v6.2.0.bin` (~885 KB) | `~/.local/share/purplevoice/models/ggml-silero-v6.2.0.bin` | `curl -L -o ggml-silero-v6.2.0.bin https://huggingface.co/ggml-org/whisper-vad/resolve/main/ggml-silero-v6.2.0.bin`; size sanity check ≥ 800,000 bytes; USB sneakernet. |
+| `Hammerspoon.app` | `/Applications/Hammerspoon.app` | Download `.zip` from https://www.hammerspoon.org/ on a connected machine; USB-transfer; drag to `/Applications/`. (See "Known limitation" below.) |
+| `sox` + transcription binary | `/opt/homebrew/bin/sox`, `/opt/homebrew/bin/soxi`, `/opt/homebrew/bin/whisper-cli` | `brew fetch sox whisper-cpp --bottle` on connected machine produces tarballs at `~/Library/Caches/Homebrew/downloads/`; USB-transfer; on target machine: `brew install <local-bottle>.tar.gz` OR direct binary copy from a reference machine. |
+
+### Then on the air-gapped machine
+
+```bash
+PURPLEVOICE_OFFLINE=1 bash setup.sh
+```
+
+The setup script will verify each artefact's presence (and SHA256 for the Whisper model) and exit 0 with `OFFLINE: <component> present` lines. If any artefact is missing, setup.sh exits 1 with an actionable error message indicating the required path + how to obtain.
+
+### Known limitation: Homebrew is not air-gap-friendly (Pitfall 8)
+
+Homebrew's typical install path requires network access for cask + bottle download. PurpleVoice does not bundle a vendored copy of Homebrew binaries — that decision was made to keep the repo size manageable and to inherit Homebrew's security audit trail. Operators in classified environments are expected to have an established cross-domain transfer process for the brew bottles + Hammerspoon `.app`.
+
+The `PURPLEVOICE_OFFLINE=1` mode handles the parts most operators want air-gapped (the ML model files + Silero VAD weights). Hammerspoon and brew binaries are typically a one-time install per machine; the cross-domain effort is amortised. We do not claim that `PURPLEVOICE_OFFLINE=1` is a fully-automated air-gap install — operator sneakernet is part of the procedure.
+
+### Verification
+
+`tests/security/verify_air_gap.sh` exercises 2 invariants:
+
+1. With `PURPLEVOICE_OFFLINE=1` + all sideload artefacts present, `setup.sh` exits 0 with `OFFLINE:` log lines.
+2. With `PURPLEVOICE_OFFLINE=1` + Whisper model missing, `setup.sh` exits 1 with the actionable error message `PURPLEVOICE_OFFLINE=1 set but Whisper model not sideloaded`.
+
+The verify script uses atomic `mv` + trap-restore to safely move and replace the 488 MB model file (Pitfall 12).
 
 ## NIST SP 800-53 Rev 5 / Low-baseline Mapping
 
