@@ -89,6 +89,7 @@ local MENUBAR_COLOR = BRAND.COLOUR_LAVENDER
 -- restore via shared module state. See pasteWithRestore() below.
 local isRecording = false
 local currentTask = nil
+local lastTranscript = nil  -- QOL-01: in-memory cache of last successful transcript (D-03 — lost on Hammerspoon reload by design)
 
 -- ----------------------------------------------------------------
 -- Menubar (FBK-01)
