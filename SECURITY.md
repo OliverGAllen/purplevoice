@@ -14,11 +14,33 @@
 
 ## TL;DR
 
-<!-- TODO: Plan 02.7-04 fills this section (1-page summary for non-technical readers per D-13 / Pitfall 10). -->
+PurpleVoice is a local push-to-talk voice dictation tool for macOS Apple Silicon. It does not connect to the internet during operation. Voice content (audio + transcript) exists only on your machine, only for the duration of a single utterance, and is then deleted.
+
+**What PurpleVoice does:** You hold `cmd+shift+e`, you speak, you release. The transcript appears in the focused window. Total round-trip: ~1-2 seconds. No cloud. No subscription. No telemetry.
+
+**What PurpleVoice does NOT do:** No network calls during operation. No transcript persistence. No telemetry. No cloud STT API. No data sharing.
+
+**Verification:** Every claim in this document is either (a) substantiated by a runnable script in [`tests/security/`](#how-to-verify-these-claims) you can execute on your own machine, or (b) explicitly framed as "compatible with [framework]" / "out of scope, here's why" / "deferred to Phase X". No unsubstantiated claims.
+
+**Audience-specific paths into this document:** see [Audience Entry-Points](#audience-entry-points) below.
+
+**What PurpleVoice is NOT:** audited or accredited against any of the security frameworks discussed below. The framing throughout this document is "compatible with" — PurpleVoice is *compatible with* applicable obligations of those frameworks for in-scope code, never claims to *be* "compliant" or "certified". The discipline is enforced by the [framing lint](#how-to-verify-these-claims) `tests/test_security_md_framing.sh`.
 
 ## Audience Entry-Points
 
-<!-- TODO: Plan 02.7-04 fills this section (table of ToC links per audience: journalist / federal IT auditor / EU institutional buyer / procurement officer per Pitfall 10). -->
+Different readers come to this document with different priorities. Find your entry-point below:
+
+| If you are... | Start here | Then read |
+|---|---|---|
+| A **journalist** evaluating PurpleVoice for sensitive-source dictation | [TL;DR](#tldr) → [Threat Model](#threat-model) | [Egress Verification](#egress-verification) → [How to Verify These Claims](#how-to-verify-these-claims) |
+| A **US federal IT auditor** evaluating PurpleVoice for agency use | [NIST SP 800-53 Rev 5 / Low-baseline Mapping](#nist-sp-800-53-rev-5--low-baseline-mapping) | [Threat Model](#threat-model) → [SBOM](#software-bill-of-materials-sbom) → [FedRAMP-tailored](#fedramp-tailored) |
+| An **EU institutional buyer** (UK / DE / FR / NL gov, university, NGO) | [ISO/IEC 27001:2022 Annex A](#isoiec-270012022-annex-a) | [Threat Model](#threat-model) → [Egress Verification](#egress-verification) → [SBOM](#software-bill-of-materials-sbom) |
+| A **healthcare organisation** (HIPAA Covered Entity / Business Associate) | [HIPAA Security Rule §164.312](#hipaa-security-rule-164312) | [Threat Model](#threat-model) → [Egress Verification](#egress-verification) |
+| A **finance / SOC 2-audited** organisation | [SOC 2 Type II Trust Services Criteria](#soc-2-type-ii-trust-services-criteria) | [Threat Model](#threat-model) → [SBOM](#software-bill-of-materials-sbom) |
+| An **air-gapped operator** (defence, intelligence, classified networks) | [Air-Gapped Installation](#air-gapped-installation) | [Egress Verification](#egress-verification) → [SBOM](#software-bill-of-materials-sbom) |
+| A **procurement officer** | [SBOM](#software-bill-of-materials-sbom) | [Code Signing & Notarisation](#code-signing--notarisation) → [How to Verify These Claims](#how-to-verify-these-claims) |
+| A **security engineer / sysadmin** evaluating for a deployment | [Threat Model](#threat-model) | [NIST 800-53 mapping](#nist-sp-800-53-rev-5--low-baseline-mapping) → [Egress Verification](#egress-verification) → [How to Verify These Claims](#how-to-verify-these-claims) |
+| A **general user** curious about PurpleVoice's privacy posture | [TL;DR](#tldr) | [Threat Model](#threat-model) → [How to Verify These Claims](#how-to-verify-these-claims) |
 
 ## Scope
 
@@ -494,7 +516,55 @@ Useful framing for international (especially EU) institutional buyers: PurpleVoi
 
 ## How to Verify These Claims
 
-<!-- TODO: Plan 02.7-04 fills this section (instructions: bash tests/run_all.sh && bash tests/security/run_all.sh; sudo requirement for verify_egress.sh; release-gate cadence per D-03). -->
+Every claim in this document is either substantiated by a runnable script you can execute on your own machine, or explicitly framed as out-of-scope / deferred / framework-compatible. The verification harness lives in `tests/` and `tests/security/`.
+
+### Quick verification (~30 seconds)
+
+From a clean clone of the PurpleVoice repo:
+
+```bash
+git clone https://github.com/oliverallen/PurpleVoice.git purplevoice
+cd purplevoice
+bash setup.sh                       # Idempotent; ~5-30s if Syft regenerates SBOM
+bash tests/run_all.sh               # Functional suite (8 tests, ~5s)
+bash tests/security/run_all.sh      # Security suite (5 verify_*.sh; ~30s)
+```
+
+### Per-claim → verification script index
+
+| SEC-ID | Claim | Verification script | Sudo? |
+|---|---|---|---|
+| SEC-01 | SECURITY.md framing discipline | `tests/test_security_md_framing.sh` | No |
+| SEC-02 | Zero outbound egress at runtime | `tests/security/verify_egress.sh` | Yes (strongest layer) |
+| SEC-03 | SBOM validity + system context | `tests/security/verify_sbom.sh` | No |
+| SEC-04 | Code signing & notarisation status (documentation-presence) | `tests/security/verify_signing.sh` | No |
+| SEC-05 | Reproducible build status (documentation-presence) | `tests/security/verify_reproducibility.sh` | No |
+| SEC-06 | PURPLEVOICE_OFFLINE=1 air-gap mode | `tests/security/verify_air_gap.sh` | No |
+
+The functional suite (`tests/run_all.sh`) runs:
+
+- `test_brand_consistency.sh` — Phase 2.5 brand discipline (`PurpleVoice` everywhere; no orphaned working-name strings).
+- `test_security_md_framing.sh` — D-17 "compatible with" lint over this document.
+- `test_denylist.sh`, `test_duration_gate.sh`, `test_sigint_cleanup.sh`, `test_tcc_grep.sh`, `test_vad_silence.sh`, `test_wav_cleanup.sh` — Phase 2 hardening regressions.
+
+The security suite (`tests/security/run_all.sh`) runs the 5 `verify_*.sh` scripts above.
+
+### Sudo requirement note
+
+`verify_egress.sh` requires `sudo` for the strongest evidence layer (pf + tcpdump). Run interactively or pre-authenticate sudo (`sudo -v`). If `sudo` is unavailable (CI without secrets, restricted shells), the script gracefully skips layer 3 and prints a "weakened PASS" message — the egress claim then rests on socket-state evidence (lsof + nettop) only.
+
+### Release-gate cadence (D-03)
+
+The PurpleVoice project does NOT run security verification on every commit (per D-03 — release-gate verification preserves zero CI infrastructure cost). Verification scripts run **before tagging a release**. Failures block release. External auditors and security researchers are encouraged to run the full suite on a clean clone at any time.
+
+### What if a verification fails?
+
+- **`verify_egress.sh` reports egress detected**: Open an issue immediately. This would be a critical regression of the SEC-02 claim.
+- **`verify_sbom.sh` fails on system-context**: A new macOS / Xcode CLT version may have changed the dimension format. Update the `inject_system_context()` function in `setup.sh` Step 8 to capture the new format.
+- **`verify_air_gap.sh` fails on Invariant 2**: The actionable error message in `setup.sh` may have drifted from the expected literal. Update either the test's grep target or the setup.sh message — keep them in sync.
+- **`test_security_md_framing.sh` fails on banned phrase**: An edit to this document introduced a banned marketing-prone phrase outside a qualified context. Reword to "compatible with" / "supports" / "consistent with".
+
+All verification failures should produce actionable error messages on stderr.
 
 ***
 
