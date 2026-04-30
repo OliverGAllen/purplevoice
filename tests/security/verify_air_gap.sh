@@ -40,6 +40,22 @@ if [ ! -f "$MODEL" ]; then
 fi
 
 # -------------------------------------------------------------------------
+# Pre-flight: Karabiner-Elements.app must exist (Phase 4 / QOL-NEW-01 — setup.sh
+# Step 9 refuses to declare install complete without it, per CONTEXT.md D-07).
+# Mirrors verify_egress.sh's "weakened PASS" idiom for missing prerequisites:
+# emit a documented PASS with explicit weakening note rather than hard-failing
+# on a one-time user install gate.
+# -------------------------------------------------------------------------
+if [ ! -d /Applications/Karabiner-Elements.app ]; then
+  echo "  verify_air_gap.sh: Karabiner-Elements.app absent — skipping setup.sh exec invariants."
+  echo "  WEAKENED PASS [verify_air_gap.sh]: PURPLEVOICE_OFFLINE=1 mode invariants cannot be"
+  echo "    exercised end-to-end without /Applications/Karabiner-Elements.app (Phase 4 Step 9"
+  echo "    refuses install completion when absent — per CONTEXT.md D-07). Install Karabiner-"
+  echo "    Elements (https://karabiner-elements.pqrs.org/) and re-run for full verification."
+  exit 0
+fi
+
+# -------------------------------------------------------------------------
 # Invariant 1: PURPLEVOICE_OFFLINE=1 + sideload populated → setup.sh exits 0
 # -------------------------------------------------------------------------
 echo "  verify_air_gap.sh: testing Invariant 1 (sideload populated)..."

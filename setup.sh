@@ -310,30 +310,6 @@ ln -sfn "$REPO_ROOT/purplevoice-lua" "$HOME/.hammerspoon/purplevoice"
 echo "OK: symlink ~/.hammerspoon/purplevoice → $REPO_ROOT/purplevoice-lua"
 
 # ---------------------------------------------------------------------------
-# Step 7: Next-step reminders (do NOT auto-edit anything)
-# ---------------------------------------------------------------------------
-cat <<'EOF'
-
-----------------------------------------------------------------------
-PurpleVoice setup complete.
-
-Local voice dictation. Nothing leaves your Mac.
-
-HUD options: PURPLEVOICE_HUD_OFF=1 to disable, PURPLEVOICE_HUD_POSITION=top-right (or top-center, bottom-center, bottom-right, near-cursor, center)
-
-Next manual steps (one-time):
-  - Add to ~/.hammerspoon/init.lua (paste this exact line):
-      require("purplevoice")
-    (If you previously had `require("voice-cc")`, replace it with the line above.)
-  - On first Hammerspoon launch, grant Microphone + Accessibility permissions
-    (System Settings -> Privacy & Security -> Microphone / Accessibility).
-  - Disable the macOS Dictation hotkey to avoid conflicts
-    (System Settings -> Keyboard -> Dictation -> Shortcut -> Off).
-  - Hotkey: cmd+shift+e (push-and-hold).
-----------------------------------------------------------------------
-EOF
-
-# ---------------------------------------------------------------------------
 # Step 8: Regenerate SBOM if Syft is present (D-12, idempotent)
 # ---------------------------------------------------------------------------
 # Syft 1.43.0+ generates SPDX 2.3 JSON. We post-process the output to:
@@ -415,3 +391,73 @@ if command -v syft >/dev/null 2>&1; then
 else
   echo "Syft not found — SBOM regen skipped. Committed SBOM.spdx.json applies."
 fi
+
+# ---------------------------------------------------------------------------
+# Step 9: Karabiner-Elements check (Phase 4 / QOL-NEW-01 / CONTEXT.md D-07)
+# ---------------------------------------------------------------------------
+# Karabiner-Elements is REQUIRED for the F19 hotkey (fn-key remap). PurpleVoice
+# does NOT auto-install third-party kernel-driver software — minimal-deps ethos.
+# We refuse to declare install complete without it, and print actionable
+# instructions. PURPLEVOICE_OFFLINE=1 mode behaves identically (Karabiner is
+# local-only; no network needed for the check itself).
+
+KARABINER_JSON="$REPO_ROOT/assets/karabiner-fn-to-f19.json"
+if [ ! -f "$KARABINER_JSON" ]; then
+  echo "PurpleVoice: $KARABINER_JSON missing from repo (run setup.sh from a Phase-4-or-later checkout)." >&2
+  exit 1
+fi
+
+if [ ! -d /Applications/Karabiner-Elements.app ]; then
+  cat >&2 <<EOF
+
+----------------------------------------------------------------------
+PurpleVoice: Karabiner-Elements is required for the F19 hotkey.
+
+Install Karabiner-Elements (free, open-source — https://karabiner-elements.pqrs.org/):
+  1. Download Karabiner-Elements.dmg from https://karabiner-elements.pqrs.org/
+  2. Drag Karabiner-Elements.app to /Applications/.
+  3. Launch once and grant the driver/extension prompt
+     (System Settings → Privacy & Security → "Allow software from Fumihiko Takayama").
+  4. Open Karabiner-Elements → Preferences → Complex Modifications → Add rule →
+     Import rule from file → choose:
+       $KARABINER_JSON
+     Then click "Enable" next to "Hold fn → F19 (PurpleVoice push-to-talk)".
+  5. Re-run: bash setup.sh
+
+If air-gapped: copy Karabiner-Elements.dmg from a connected machine via USB
+and install manually. The fn→F19 JSON rule is already in this repo at
+$KARABINER_JSON.
+----------------------------------------------------------------------
+EOF
+  exit 1
+fi
+
+echo "OK: Karabiner-Elements detected at /Applications/Karabiner-Elements.app"
+echo "    REMINDER: ensure 'Hold fn → F19 (PurpleVoice push-to-talk)' is enabled in"
+echo "    Karabiner-Elements → Preferences → Complex Modifications. If not yet"
+echo "    imported, see $KARABINER_JSON"
+
+# ---------------------------------------------------------------------------
+# Step 10: Next-step reminders (banner — final step)
+# ---------------------------------------------------------------------------
+cat <<'EOF'
+
+----------------------------------------------------------------------
+PurpleVoice setup complete.
+
+Local voice dictation. Nothing leaves your Mac.
+
+HUD options: PURPLEVOICE_HUD_OFF=1 to disable, PURPLEVOICE_HUD_POSITION=top-right (or top-center, bottom-center, bottom-right, near-cursor, center)
+
+Next manual steps (one-time):
+  - Add to ~/.hammerspoon/init.lua (paste this exact line):
+      require("purplevoice")
+    (If you previously had `require("voice-cc")`, replace it with the line above.)
+  - On first Hammerspoon launch, grant Microphone + Accessibility permissions
+    (System Settings -> Privacy & Security -> Microphone / Accessibility).
+  - Disable the macOS Dictation hotkey to avoid conflicts
+    (System Settings -> Keyboard -> Dictation -> Shortcut -> Off).
+  - Hotkey: F19 push-and-hold (Karabiner remaps fn → F19 — see Step 9 reminder above).
+  - Re-paste last transcript: cmd+shift+v.
+----------------------------------------------------------------------
+EOF
