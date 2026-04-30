@@ -46,6 +46,7 @@ The Phase 2.7 `SECURITY.md` document substantiates these claims with a threat mo
 - [x] Latency from key release to text appearing is under ~2 seconds for short utterances on Apple Silicon *(Phase 1 — observational; formal hyperfine numbers in Phase 3)*
 - [x] Stack runs entirely from local binaries — no API keys, no signups, no quotas *(Phase 1; ROB-03)*
 - [x] **Auditable security posture for institutional / government / healthcare / legal / finance / journalist / air-gapped audiences — `SECURITY.md` published with threat model + zero-egress proof + SBOM + gap analysis vs 7 frameworks (NIST 800-53, FIPS 140-3, FedRAMP, Common Criteria, HIPAA §164.312, SOC 2 TSC, ISO/IEC 27001 Annex A) using "compatible with" framing** *(Phase 2.7 — completed 2026-04-30; SEC-01..06 — see `.planning/phases/02.7-security-posture/`)*
+- [x] **Floating recording-state HUD** — translucent lavender pill with `● Recording` text appears at top-center of active screen during press-hold, hidden when idle. Six named positions configurable via `PURPLEVOICE_HUD_POSITION`. Disable via `PURPLEVOICE_HUD_OFF=1`. Honest framing about ScreenCaptureKit screen-recording limitation in README + SECURITY.md (no over-claims about hide-from-recording behaviour) *(Phase 3.5 — completed 2026-04-30; HUD-01..04 — see `.planning/phases/03.5-hover-ui-hud/`)*
 
 ### Active
 
@@ -53,7 +54,7 @@ The Phase 2.7 `SECURITY.md` document substantiates these claims with a threat mo
 - [x] **Public-facing product name (rebrand from working name "voice-cc")** *(Phase 2.5 — completed 2026-04-29; BRD-01..03 — see `.planning/phases/02.5-branding/`)*
 - [ ] Setup is reproducible from a single install script / README *(Phase 3; DST-01..04)*
 - [ ] **Public one-line installer (`curl ... | bash`) so others can install voice-cc** *(Phase 3 extension — added 2026-04-27; DST-05)*
-- [ ] **Small floating recording-state HUD (hideable)** *(Phase 3.5 — added 2026-04-27; HUD-01..04)*
+- ~~**Small floating recording-state HUD (hideable)** *(Phase 3.5 — added 2026-04-27; HUD-01..04)*~~ — **VALIDATED in Phase 3.5 (2026-04-30); see Validated section above.**
 
 ### Out of Scope
 
@@ -121,3 +122,4 @@ This document evolves at phase transitions and milestone boundaries.
 *Last updated: 2026-04-27 — Phase 1 validated; roadmap extended with Phase 2.5 Branding, Phase 3 Public Install, Phase 3.5 Hover UI (per user); "Distribution to other users" reversed from Out-of-Scope to Active.*
 *Updated: 2026-04-29 — Phase 2.5 Branding closed; PurpleVoice name + broadened privacy-first positioning (6 audience segments) recorded; Phase 2.7 SECURITY.md forward-referenced; BRD-01..03 marked complete.*
 *Updated: 2026-04-30 — Phase 2.7 Security Posture & Government Readiness closed; SECURITY.md (751 lines, 18 sections) published as authoritative document substantiating institutional audience claims; SEC-01..06 marked complete; tests/security/ verification suite (5 PASS / 0 FAIL) + real Syft SBOM.spdx.json + PURPLEVOICE_OFFLINE=1 air-gap mode. 4 pre-release human-review items deferred to v1 release-gate (HUMAN-UAT.md).*
+*Updated: 2026-04-30 — Phase 3.5 Hover UI / HUD closed; floating lavender translucent pill (alpha 0.70, no backdrop blur, "● Recording" text) wired into onPress / resetState lifecycle in purplevoice-lua/init.lua; six named positions via PURPLEVOICE_HUD_POSITION env var; PURPLEVOICE_HUD_OFF=1 disable; honest D-14 framing about ScreenCaptureKit limitation (does NOT pursue NSWindowSharingNone exclusion) in README + SECURITY.md + REQUIREMENTS.md; HUD-01..04 marked complete; functional suite 10/0; security suite 5/0; 5 manual walkthroughs signed off live by user. DST-06 (Hammerspoon-as-PurpleVoice wrapping decision; A/B/C trade-off) added to Phase 3 backlog per user direction.*
