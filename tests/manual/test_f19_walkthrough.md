@@ -36,10 +36,10 @@ Five PASS markers signal F19 push-to-talk works, fn-tap preserves macOS native b
 
 ## Sign-off
 
-- [ ] PASS-1 (fn-hold triggers recording; release stops; transcript pastes)
-- [ ] PASS-2 (quick fn-tap routes to macOS native behaviour, not PurpleVoice)
-- [ ] PASS-3 (cmd+shift+e is silent — no recording, no menubar change, no HUD)
-- [ ] PASS-4 (cmd+shift+e in VS Code/Cursor opens "Show Explorer" normally)
-- [ ] PASS-5 (200 ms threshold feels right across 5 record cycles)
+- [x] PASS-1 (fn-hold triggers recording; release stops; transcript pastes)
+- [x] PASS-2 (quick fn-tap routes to macOS native behaviour, not PurpleVoice)
+- [x] PASS-3 (cmd+shift+e is silent — no recording, no menubar change, no HUD)
+- [x] PASS-4 (cmd+shift+e in VS Code/Cursor opens "Show Explorer" normally)
+- [x] PASS-5 (200 ms threshold feels right across 5 record cycles)
 
-**Tester:** _____________  **Date:** _____________  **200 ms threshold notes:** _____________
+**Tester:** Oliver  **Date:** 2026-04-30  **200 ms threshold notes:** none — feels right out of the box
