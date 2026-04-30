@@ -17,14 +17,14 @@ PurpleVoice is a push-to-talk voice input system for Claude Code (and any focuse
 - **Journalists** handling sensitive sources whose confidentiality is operational, not aspirational
 - **Air-gapped or restricted-network operators** where cloud STT is technically impossible
 
-The forthcoming `SECURITY.md` (Phase 2.7) substantiates these claims with a threat model, an auditable zero-egress verification methodology, an SBOM, and gap analysis against NIST SP 800-53 / FIPS 140-3 / FedRAMP / Common Criteria expectations.
+[`SECURITY.md`](SECURITY.md) substantiates these claims with a threat model, framework gap analysis (NIST SP 800-53 + 6 framed frameworks: FIPS 140-3 / FedRAMP-tailored / Common Criteria / HIPAA / SOC 2 / ISO/IEC 27001), an auditable zero-egress verification methodology, an SBOM, and runnable verification scripts. See [Security & Privacy](#security--privacy) below.
 
 ## Status
 
 - **Phase 1: Spike** — ✅ Complete (end-to-end loop validated on Apple Silicon)
 - **Phase 2: Hardening** — ✅ Complete (TCC silent-deny detection, hallucination guards, clipboard preserve/restore, re-entrancy guard, failure notifications)
 - **Phase 2.5: Branding** — ✅ Complete (this rebrand)
-- **Phase 2.7: Security Posture** — ⏳ Queued (SECURITY.md, SBOM, zero-egress verification)
+- **Phase 2.7: Security Posture** — ✅ Complete (SECURITY.md + SBOM.spdx.json + 5 runnable verify scripts)
 - **Phase 3.5: Hover UI / HUD** — ⏳ Queued
 - **Phase 4: Quality of Life** — ⏳ Queued
 - **Phase 3: Distribution + Public Install** — ⏳ Queued (final v1 phase — installer + hyperfine benchmarks)
@@ -70,6 +70,60 @@ open -a Hammerspoon
 ```
 
 Then re-grant when prompted.
+
+## Security & Privacy
+
+PurpleVoice is **auditable, verifiably-private dictation**. Voice content does not leave your machine during operation. The full security posture — threat model, framework gap analysis, runnable verification scripts — is documented in [`SECURITY.md`](SECURITY.md).
+
+Audience-specific entry-points:
+
+- **General readers / privacy-conscious users**: [SECURITY.md TL;DR](SECURITY.md#tldr)
+- **Security engineers / sysadmins**: [SECURITY.md Threat Model](SECURITY.md#threat-model)
+- **US federal IT auditors**: [SECURITY.md NIST 800-53 mapping](SECURITY.md#nist-sp-800-53-rev-5--low-baseline-mapping)
+- **EU institutional buyers**: [SECURITY.md ISO/IEC 27001 framing](SECURITY.md#isoiec-270012022-annex-a)
+- **Healthcare organisations**: [SECURITY.md HIPAA framing](SECURITY.md#hipaa-security-rule-164312)
+- **Air-gapped operators**: [SECURITY.md Air-Gapped Installation](SECURITY.md#air-gapped-installation)
+
+### Verifying the security claims
+
+Run the verification suite from a clean clone:
+
+```bash
+bash tests/run_all.sh                       # Functional suite (~5s)
+bash tests/security/run_all.sh              # Security suite (~30s)
+```
+
+The security suite verifies:
+
+- **SEC-02 zero-egress** (`verify_egress.sh`) — 3-layer evidence chain: lsof + nettop + pf+tcpdump. **Requires `sudo`** for the strongest evidence layer (pf + tcpdump). Without sudo, lsof + nettop layers carry the claim with a "weakened PASS" message.
+- **SEC-03 SBOM** (`verify_sbom.sh`) — `SBOM.spdx.json` validity + system-context annotations.
+- **SEC-06 air-gap** (`verify_air_gap.sh`) — `PURPLEVOICE_OFFLINE=1` mode honoured.
+- SEC-04 + SEC-05 documentation-presence stubs.
+
+The framing lint (`tests/test_security_md_framing.sh`) enforces D-17 "compatible with" discipline across SECURITY.md edits — runs as part of `tests/run_all.sh` per commit.
+
+### Air-gapped installation
+
+PurpleVoice supports air-gapped operation. Set `PURPLEVOICE_OFFLINE=1` before running `setup.sh`:
+
+```bash
+PURPLEVOICE_OFFLINE=1 bash setup.sh
+```
+
+Required pre-staging on a connected machine (USB sneakernet to the air-gapped target):
+
+1. Download `ggml-small.en.bin` (~488 MB) from `https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin`. Verify SHA256 = `c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d`. Place at `~/.local/share/purplevoice/models/ggml-small.en.bin`.
+2. Download `ggml-silero-v6.2.0.bin` (~885 KB) from `https://huggingface.co/ggml-org/whisper-vad/resolve/main/ggml-silero-v6.2.0.bin`. Place at `~/.local/share/purplevoice/models/ggml-silero-v6.2.0.bin`.
+3. Download Hammerspoon `.zip` from `https://www.hammerspoon.org/`; drag `Hammerspoon.app` to `/Applications/`.
+4. Sneakernet `sox` + the transcription binary brew bottles (run `brew fetch sox whisper-cpp --bottle` on the connected machine; tarballs land at `~/Library/Caches/Homebrew/downloads/`).
+
+The repo also publishes an SBOM at `SBOM.spdx.json` (SPDX 2.3 JSON) for procurement officers and auditors who need to enumerate the trusted compute base.
+
+See [SECURITY.md Air-Gapped Installation](SECURITY.md#air-gapped-installation) for the full procedure with verification steps.
+
+### Reporting a security issue
+
+Email **oliver@olivergallen.com** with subject prefix `[PurpleVoice security]`. See [SECURITY.md Vulnerability Disclosure](SECURITY.md#vulnerability-disclosure).
 
 ## Visual identity
 
