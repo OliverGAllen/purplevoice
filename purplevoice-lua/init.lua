@@ -397,6 +397,7 @@ local function pasteWithRestore(transcript)
 
   -- 3. PASTE — synthesise cmd+v into the focused app.
   hs.eventtap.keyStroke({"cmd"}, "v", 0)
+  lastTranscript = transcript  -- QOL-01: cache for cmd+shift+v re-paste (after paste fires; gated on non-empty by guard at line 377)
 
   -- 4. RESTORE prior clipboard after 250ms — but ONLY if the clipboard still
   --    contains our transcript (defends against user copying something else
