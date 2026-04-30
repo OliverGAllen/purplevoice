@@ -509,6 +509,17 @@ local function onRelease()
 end
 
 -- ----------------------------------------------------------------
+-- Re-paste hotkey callback (QOL-01 / D-04 — brief-alert nil-state)
+-- ----------------------------------------------------------------
+local function repaste()
+  if lastTranscript then
+    pasteWithRestore(lastTranscript)
+  else
+    hs.alert.show("PurpleVoice: nothing to re-paste yet", 1.5)
+  end
+end
+
+-- ----------------------------------------------------------------
 -- Bind cmd+shift+e (push-and-hold)
 -- ----------------------------------------------------------------
 local hk = hs.hotkey.bind({"cmd", "shift"}, "e", onPress, onRelease)
