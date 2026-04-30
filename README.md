@@ -31,9 +31,11 @@ PurpleVoice is a push-to-talk voice input system for Claude Code (and any focuse
 
 ## Hotkey
 
-`cmd+shift+e` (push-and-hold). Locked decision; see `.planning/phases/01-spike/01-CONTEXT.md` D-01.
+**Primary trigger: F19 (push-and-hold).** Karabiner-Elements remaps the `fn` key — hold fn for >200 ms to start recording, release to stop. A quick tap of fn (under 200 ms) preserves macOS's native fn behaviour (Globe / emoji popup, function-key row, dictation). Locked decision per `.planning/phases/04-quality-of-life-v1-x/04-CONTEXT.md` D-05 (replaces the original Cmd+Shift+E binding to eliminate the VS Code / Cursor "Show Explorer" collision).
 
-(Known minor conflict: VS Code / Cursor "Show Explorer" sidebar — accepted.)
+**Re-paste last transcript: `cmd+shift+v`.** Pastes the most recent successful transcript into the focused window. Useful when focus shifted mid-paste and the transcript landed in the wrong app. In-memory only — lost on Hammerspoon reload (privacy-first; per CONTEXT.md D-03).
+
+> **VS Code / Cursor users:** the `cmd+shift+v` re-paste binding hijacks the IDE's default "Markdown Preview" shortcut whenever Hammerspoon is running. Workaround: use **`Cmd+K V`** for split-pane Markdown preview instead. The collision is documented and accepted per CONTEXT.md D-02.
 
 ## Setup
 
@@ -44,6 +46,22 @@ bash setup.sh
 `setup.sh` is idempotent — safe to re-run. It installs Homebrew dependencies (Hammerspoon, sox, whisper-cpp), creates the XDG directory layout (`~/.config/purplevoice/`, `~/.local/share/purplevoice/models/`, `~/.cache/purplevoice/`, `~/.local/bin/`, `~/.hammerspoon/purplevoice/`), downloads the Whisper `small.en` model with SHA256 verification, downloads the Silero VAD weights, seeds a default vocabulary file, and seeds the hallucination-denylist. If you're upgrading from the working name `voice-cc`, `setup.sh` migrates the old paths idempotently (only-old → mv; both → warn+skip; only-new → no-op).
 
 After running `setup.sh`, paste the printed `require("purplevoice")` line into your `~/.hammerspoon/init.lua` and reload Hammerspoon.
+
+### Karabiner-Elements (required for the F19 hotkey)
+
+PurpleVoice's F19 push-to-talk hotkey is produced by remapping the `fn` key with [Karabiner-Elements](https://karabiner-elements.pqrs.org/) (free, open-source). `setup.sh` Step 9 checks for `/Applications/Karabiner-Elements.app` and refuses to declare install complete without it.
+
+One-time installation:
+
+1. Download `Karabiner-Elements.dmg` from <https://karabiner-elements.pqrs.org/>.
+2. Drag `Karabiner-Elements.app` to `/Applications/`.
+3. Launch Karabiner-Elements once. macOS will prompt for the driver / system-extension grant — open System Settings → Privacy & Security and enable **"Allow software from Fumihiko Takayama"** (the Karabiner author). Restart Karabiner-Elements when prompted.
+4. Import the `fn → F19` rule: Karabiner-Elements → **Preferences → Complex Modifications → Add rule → Import rule from file** → select `assets/karabiner-fn-to-f19.json` from this repository. Click **Enable** next to **"Hold fn → F19 (PurpleVoice push-to-talk)"**.
+5. Re-run `bash setup.sh` — Step 9 should now print `OK: Karabiner-Elements detected at /Applications/Karabiner-Elements.app`.
+
+Air-gapped users: copy `Karabiner-Elements.dmg` from a connected machine via USB sneakernet. The `fn → F19` JSON rule is already bundled in this repo at `assets/karabiner-fn-to-f19.json` — no additional download needed for the rule itself.
+
+The recommended hold threshold is 200 ms (configured in the JSON rule via `basic.to_if_alone_timeout_milliseconds` and `basic.to_if_held_down_threshold_milliseconds`). If the threshold feels wrong on your hardware (false-positive recording on quick taps OR perceived lag on intentional holds), edit both values in the JSON file in 50 ms increments and re-import in Karabiner.
 
 ## Permissions to grant manually after first Hammerspoon launch
 
