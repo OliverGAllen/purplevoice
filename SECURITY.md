@@ -2,7 +2,7 @@
 
 > Local voice dictation. Nothing leaves your Mac.
 
-**Status: SKELETON (Phase 2.7 in progress).** This file is being authored across Phase 2.7 plans 02.7-01..02.7-04. Sections without content are placeholders.
+**Status: Phase 2.7 complete.** Authored across Phase 2.7 plans 02.7-01..02.7-04 (2026-04-29..2026-04-30).
 
 **Audience:** Technical IT auditors at government / defence / healthcare / legal / finance / journalism / air-gapped operator organisations evaluating PurpleVoice. (D-13)
 
@@ -609,15 +609,90 @@ Useful framing for international (especially EU) institutional buyers: PurpleVoi
 
 ## Code Signing & Notarisation
 
-<!-- TODO: Plan 02.7-04 fills this section (Phase 3 deferral; $99/yr Apple Developer Program; entitlements list; current "no signable artifact" framing). -->
+**Status: deferred to Phase 3 — applies when an installer artifact ships.**
+
+PurpleVoice's current architecture (Hammerspoon Spoon + bash glue + brew-installed binaries + GGML model files) does not produce a signable PurpleVoice artifact:
+
+- `Hammerspoon.app` is signed and notarised by the Hammerspoon project (Apple Developer ID).
+- `sox`, the transcription binary, and `soxi` are signed/notarised per Homebrew's formula maintainers.
+- The PurpleVoice repo itself ships text files (bash, Lua, configuration, model metadata) — not a signable bundle.
+
+Phase 3 (Distribution & Public Install) introduces a public one-line installer (`curl -fsSL .../install | bash`). The installer payload itself is not a `.app` bundle, but the **decision** of whether to wrap PurpleVoice as a notarised `.app` is open at Phase 3 planning time.
+
+### If PurpleVoice ever ships as a notarised `.app` (Phase 3 scope)
+
+- **Apple Developer Program enrolment**: $99/year (individual) or $299/year (organisation). Includes Apple Developer ID certificate.
+- **Notarisation**: no per-submission fee.
+- **Hardened Runtime**: required for notarisation. Sets `com.apple.security.cs.*` entitlements.
+- **Microphone entitlement**: `com.apple.security.device.audio-input` + explicit `NSMicrophoneUsageDescription` in `Info.plist` with rationale.
+- **Lua framework loading**: `com.apple.security.cs.disable-library-validation` (likely needed for Hammerspoon-style architectures).
+- **Notarisation pipeline**: `xcrun notarytool submit` + stapling.
+
+### Trade-off accepted in v1
+
+For v1 (Hammerspoon-Spoon distribution), the user inherits Hammerspoon's notarisation; PurpleVoice itself is reviewable plain text. This is a deliberate trade-off: accept slightly higher install friction (manually `require("purplevoice")` in `~/.hammerspoon/init.lua`) in exchange for **zero opaque-binary surface** — every line of PurpleVoice code is auditable as text.
+
+### Verification
+
+`tests/security/verify_signing.sh` is a **stub** asserting that this section exists with Phase 3 deferral language and the $99 cost reference. It will be replaced by real `codesign --verify` + `xcrun stapler validate` checks in Phase 3 if the architecture changes.
 
 ## Reproducible Build
 
-<!-- TODO: Plan 02.7-04 fills this section (best-effort; Pitfall 14 toolchain-version-sensitive caveat; what we DO have: SHA256-pinned model + git-tracked source + brew bottle SHA256). -->
+**Status: best-effort, with documented caveats. Full byte-identical reproducibility is not currently achievable.**
+
+Full byte-identical reproducibility for whisper.cpp Metal-compiled artefacts is **not currently achievable** — Whisper.cpp Metal compilation is sensitive to:
+
+- Xcode CLT (Command Line Tools) version
+- macOS SDK version
+- Compiler revision (clang version)
+
+A re-run of `setup.sh` on a different machine — even one with the same brew formula versions — produces a transcription binary with a different SHA256 because the upstream Homebrew bottle is rebuilt against the bottle-builder's toolchain, not the user's. This is acknowledged honestly here rather than papered over (Pitfall 14 toolchain-version-sensitive caveat).
+
+### What reproducibility we DO have
+
+1. **Source code** — All PurpleVoice source (bash glue + Lua module + setup.sh + tests + this document) is git-tracked. Every line has a commit hash and authorship trail.
+2. **Brew bottle SHA256 verification** — Homebrew verifies bottle SHA256s on download. The version of `sox` and `whisper-cpp` installed by `brew install sox whisper-cpp` matches the SHA256 published in the formula. Tampering at the bottle download step is detected.
+3. **Whisper model SHA256 pinned** — `setup.sh` Step 5 verifies `ggml-small.en.bin` against the constant `MODEL_SHA256` (`c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d`). Mismatch aborts the install.
+4. **Plain-text reviewability** — `purplevoice-record` (~150 lines bash) and `purplevoice-lua/init.lua` (~315 lines Lua) are text files, reviewable by any reader. No opaque binaries authored by PurpleVoice.
+
+### What's deferred (v2 candidate)
+
+- **Toolchain pinning**: `setup.sh` could pin a specific Xcode CLT version + brew bottle revision to enable byte-identical reproduction. This is a v2 candidate if a sponsoring institution requires it.
+- **From-source whisper.cpp build**: building whisper.cpp from source with `-DWHISPER_COREML=1` (Core ML encoder) would give us reproducibility *for the build flags PurpleVoice chose* but at the cost of disposing of Homebrew's audit trail.
+- **Reproducible-build CI**: Phase 3 territory; would require pinning the CI runner's macOS + Xcode version.
+
+### Verification
+
+`tests/security/verify_reproducibility.sh` is a documentation-presence stub that asserts this section exists with the toolchain-version caveat acknowledgement. A future v2 stub would re-run setup.sh on a clean machine and diff installed file SHAs against a reference manifest.
 
 ## Vulnerability Disclosure
 
-<!-- TODO: Plan 02.7-04 fills this section (email contact stub: oliver@olivergallen.com; no CVE authority / bounty programme; community-evolution note). -->
+**Status: single-developer tool. Email contact only. No bounty programme. No CVE-issuance authority. No PGP key infrastructure.**
+
+PurpleVoice is currently maintained by a single developer ([Oliver Allen](https://github.com/oliverallen)). The vulnerability disclosure process is correspondingly simple:
+
+### How to report a vulnerability
+
+Email **oliver@olivergallen.com** with:
+
+1. A clear description of the vulnerability.
+2. Reproduction steps (as concrete as possible).
+3. The macOS version, hardware variant, and PurpleVoice commit SHA where you observed it.
+4. (Optional) Your suggested mitigation.
+
+Subject line prefix `[PurpleVoice security]` for routing. No PGP key infrastructure currently; if encryption is required, send an initial unencrypted message requesting a key exchange.
+
+### What this project does NOT have (yet)
+
+- **CVE-issuance authority** — PurpleVoice does not own a CVE Numbering Authority (CNA). If an issued CVE is appropriate, the reporter is asked to coordinate with MITRE's CVE assignment process.
+- **Bug bounty programme** — No financial reward for reports.
+- **Coordinated Disclosure SLA** — Best-effort response. Acknowledgement target: 7 days. Fix target: 30 days for high-severity, 90 days for medium-severity.
+- **Public security advisories archive** — Until a community emerges, security fixes are documented in commit messages + this section's revision history.
+- **PGP key infrastructure** — No published key. Encrypted communication is available on request.
+
+### Community evolution
+
+If a community of contributors and users emerges around PurpleVoice (Phase 3+ post-public-release), this section will be revised to include a published responsible-disclosure policy, advisories archive, and (potentially) GitHub Security Advisories integration.
 
 ## How to Verify These Claims
 
@@ -673,4 +748,4 @@ All verification failures should produce actionable error messages on stderr.
 
 ***
 
-*Phase 2.7 in progress. Last updated: 2026-04-29.*
+*Phase 2.7 complete. Last updated: 2026-04-29.*
