@@ -750,6 +750,12 @@ The PurpleVoice project does NOT run security verification on every commit (per 
 
 All verification failures should produce actionable error messages on stderr.
 
+### HUD visibility in screen recordings
+
+Phase 3.5 ships an optional floating HUD (`● Recording` pill) that appears while the dictation hotkey is held. **Visibility in screen recordings is limited.** PurpleVoice does not pursue `NSWindowSharingNone` exclusion in v1. Even if applied, Apple has stated that ScreenCaptureKit on macOS 15+ ignores window-level sharing flags ([Apple Developer Forums thread 792152, 2025](https://developer.apple.com/forums/thread/792152)) — modern capture tools (QuickTime, OBS, Zoom share-screen, Discord, Loom, Microsoft Teams) capture the HUD regardless. The legacy `screencapture` CLI and CGWindowList-based tools may still honour sharing flags, but this is incidental, not pursued.
+
+**For sensitive recording sessions, set `PURPLEVOICE_HUD_OFF=1` — that is the only privacy guarantee.** The menubar indicator is independent of HUD configuration. See [`README.md` §"HUD privacy and screen-recording visibility"](README.md#hud-privacy-and-screen-recording-visibility) for the user-facing configuration table.
+
 ***
 
-*Phase 2.7 complete. Last updated: 2026-04-29.*
+*Phase 2.7 complete. Phase 3.5 HUD limitation acknowledgement added 2026-04-30.*
