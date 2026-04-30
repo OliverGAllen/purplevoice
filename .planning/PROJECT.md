@@ -45,6 +45,7 @@ The Phase 2.7 `SECURITY.md` document substantiates these claims with a threat mo
 - [x] Transcript injected into the currently focused window (clipboard + paste) *(Phase 1; INJ-01)*
 - [x] Latency from key release to text appearing is under ~2 seconds for short utterances on Apple Silicon *(Phase 1 — observational; formal hyperfine numbers in Phase 3)*
 - [x] Stack runs entirely from local binaries — no API keys, no signups, no quotas *(Phase 1; ROB-03)*
+- [x] **Auditable security posture for institutional / government / healthcare / legal / finance / journalist / air-gapped audiences — `SECURITY.md` published with threat model + zero-egress proof + SBOM + gap analysis vs 7 frameworks (NIST 800-53, FIPS 140-3, FedRAMP, Common Criteria, HIPAA §164.312, SOC 2 TSC, ISO/IEC 27001 Annex A) using "compatible with" framing** *(Phase 2.7 — completed 2026-04-30; SEC-01..06 — see `.planning/phases/02.7-security-posture/`)*
 
 ### Active
 
@@ -119,3 +120,4 @@ This document evolves at phase transitions and milestone boundaries.
 ---
 *Last updated: 2026-04-27 — Phase 1 validated; roadmap extended with Phase 2.5 Branding, Phase 3 Public Install, Phase 3.5 Hover UI (per user); "Distribution to other users" reversed from Out-of-Scope to Active.*
 *Updated: 2026-04-29 — Phase 2.5 Branding closed; PurpleVoice name + broadened privacy-first positioning (6 audience segments) recorded; Phase 2.7 SECURITY.md forward-referenced; BRD-01..03 marked complete.*
+*Updated: 2026-04-30 — Phase 2.7 Security Posture & Government Readiness closed; SECURITY.md (751 lines, 18 sections) published as authoritative document substantiating institutional audience claims; SEC-01..06 marked complete; tests/security/ verification suite (5 PASS / 0 FAIL) + real Syft SBOM.spdx.json + PURPLEVOICE_OFFLINE=1 air-gap mode. 4 pre-release human-review items deferred to v1 release-gate (HUMAN-UAT.md).*
