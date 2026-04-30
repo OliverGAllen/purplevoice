@@ -68,10 +68,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Hover UI / HUD
 
-- [ ] **HUD-01**: Floating canvas widget appears within ~50ms of hotkey press and disappears within ~250ms of release. Implemented as `hs.canvas` overlay in `purplevoice-lua/init.lua`; lifecycle hooked into existing `onPress` (line 266) and `resetState()` (line 116) alongside `setMenubarRecording()`/`setMenubarIdle()`. Verified by `tests/manual/test_hud_appearance.md`.
-- [ ] **HUD-02**: User-toggleable visibility via `PURPLEVOICE_HUD_OFF=1` env var read once at module load (mirrors existing `PURPLEVOICE_NO_SOUNDS` line 99 idiom; default-ON per D-09). Verified by `tests/test_hud_env_off.sh` (string-level wiring) + `tests/manual/test_hud_disable.md` (live end-to-end).
-- [ ] **HUD-03**: Effectively zero CPU when idle — no animation loops, no timers; `hs.canvas` `:hide()` orders the NSWindow out and stops compositing; `wantsLayer(true)` engages Core Animation GPU compositing during visible state. Verified by `tests/manual/test_hud_idle_cpu.md` (documentation-driven `top -pid` baseline measurement; no specific pass/fail threshold).
-- [ ] **HUD-04**: Position configurable via `PURPLEVOICE_HUD_POSITION` env var with six locked named positions (`top-center` (default) | `top-right` | `bottom-center` | `bottom-right` | `near-cursor` | `center`); invalid values fall back to `top-center` with a single warning to the Hammerspoon console at module load (D-07). HUD does not steal focus (`hs.canvas` defaults `ignoresMouseEvents=YES`, `canBecomeKeyWindow=NO`). HUD visibility in screen recordings is **limited** — `NSWindowSharingNone` is honoured by legacy `screencapture` CLI but ignored by ScreenCaptureKit on macOS 15+ (Apple Developer Forums thread 792152, 2025); for sensitive sessions, run with `PURPLEVOICE_HUD_OFF=1`. Verified by `tests/test_hud_position_validation.sh` + `tests/manual/test_hud_focus.md` + `tests/manual/test_hud_screen_capture.md` (documentation-only).
+- [x] **HUD-01**: Floating canvas widget (`hs.canvas` overlay) appears within ~50ms of hotkey press and disappears within ~250ms of release. Implemented in `purplevoice-lua/init.lua` as a single `hs.canvas.new()` instance created at module load (hidden); `:show(0)` instant on press, `:hide(0.15)` on release. Lifecycle hooked into `onPress` (line ~272) and `resetState()` (line ~123) alongside `setMenubarRecording()`/`setMenubarIdle()`. Verified by `tests/manual/test_hud_appearance.md` (live walkthrough — sign-off in `03.5-03-SUMMARY.md`).
+- [x] **HUD-02**: User-toggleable visibility via `PURPLEVOICE_HUD_OFF=1` env var (default-ON per D-09; mirrors `PURPLEVOICE_NO_SOUNDS` line 99 idiom). Read once at module load; reload Hammerspoon to apply changes. Verified by `tests/test_hud_env_off.sh` (string-level wiring) + `tests/manual/test_hud_disable.md` (live end-to-end walkthrough).
+- [x] **HUD-03**: Effectively zero CPU when idle — hidden `hs.canvas` orders the NSWindow out (`[NSWindow orderOut:]`); no animation loops, no timers; `:wantsLayer(true)` engages Core Animation GPU compositing during visible state. Verified by `tests/manual/test_hud_idle_cpu.md` (documentation-driven `top -pid` baseline; no specific pass/fail threshold — empirical baseline + active CPU recorded in walkthrough sign-off).
+- [x] **HUD-04**: Position configurable via `PURPLEVOICE_HUD_POSITION` env var (six locked named positions per D-07: `top-center` (default) | `top-right` | `bottom-center` | `bottom-right` | `near-cursor` | `center`). Invalid values fall back to `top-center` with a single warning to the Hammerspoon console at module load. HUD does not steal focus (`hs.canvas` defaults `ignoresMouseEvents = YES` and `canBecomeKeyWindow = NO` — verified in libcanvas.m source). HUD visibility in screen recordings is **limited**: PurpleVoice does not pursue `NSWindowSharingNone` exclusion in v1; even if applied, Apple has stated ScreenCaptureKit on macOS 15+ ignores window-level sharing flags (Apple Developer Forums thread 792152, 2025). Legacy `screencapture` CLI and CGWindowList-based tools may still honour sharing flags, but this is incidental, not pursued. For sensitive recording sessions, run with `PURPLEVOICE_HUD_OFF=1` — that is the only privacy guarantee. Verified by `tests/test_hud_position_validation.sh` + `tests/manual/test_hud_focus.md` (live walkthrough) + `tests/manual/test_hud_screen_capture.md` (documentation-only walkthrough capturing empirical outcomes).
 
 ## v2 Requirements
 
@@ -154,10 +154,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEC-04 | Phase 2.7: Security Posture & Government Readiness | Complete |
 | SEC-05 | Phase 2.7: Security Posture & Government Readiness | Complete |
 | SEC-06 | Phase 2.7: Security Posture & Government Readiness | Complete |
-| HUD-01 | Phase 3.5: Hover UI / HUD | Pending |
-| HUD-02 | Phase 3.5: Hover UI / HUD | Pending |
-| HUD-03 | Phase 3.5: Hover UI / HUD | Pending |
-| HUD-04 | Phase 3.5: Hover UI / HUD | Pending |
+| HUD-01 | Phase 3.5: Hover UI / HUD | Complete |
+| HUD-02 | Phase 3.5: Hover UI / HUD | Complete |
+| HUD-03 | Phase 3.5: Hover UI / HUD | Complete |
+| HUD-04 | Phase 3.5: Hover UI / HUD | Complete |
 | QOL-01 | Phase 4 (v1.x): Quality of Life | Deferred |
 | QOL-02 | Phase 4 (v1.x): Quality of Life | Deferred |
 | QOL-03 | Phase 4 (v1.x): Quality of Life | Deferred |
@@ -178,8 +178,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 - Phase 2.5: Branding — 3 requirements (BRD-01..03) — Complete 2026-04-29
 - Phase 2.7: Security Posture & Government Readiness — 6 requirements (SEC-01..06) — Pending
 - Phase 3: Distribution & Benchmarking — 4 requirements (DST-01..04)
-- Phase 3.5: Hover UI / HUD — 4 requirements (HUD-01..04) — Pending
+- Phase 3.5: Hover UI / HUD — 4 requirements (HUD-01..04) — Complete
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-30 — four HUD requirements added for Phase 3.5 (Pending); traceability table extended.*
+*Last updated: 2026-04-30 — four HUD requirements completed for Phase 3.5 (Complete); traceability table extended.*
