@@ -265,6 +265,14 @@ The only cryptographic primitive in use is **SHA-256 for model file integrity** 
 
 Organisations that require FIPS-validated cryptography for the broader system in which PurpleVoice runs should verify that their macOS version's Common Crypto module has a current FIPS 140-3 validation certificate via the [NIST CMVP search](https://csrc.nist.gov/projects/cryptographic-module-validation-program).
 
+**Toolchain caveat:** PurpleVoice does not itself invoke FIPS-mode-only APIs, nor does it disable non-approved algorithms — it simply consumes whatever `shasum -a 256` provides on the host. If an organisation's policy mandates that all cryptographic operations on a managed Mac run through a FIPS-mode-locked module, that policy is enforced at the OS / MDM layer, not by PurpleVoice. The boundary is: PurpleVoice asks macOS for a SHA-256; macOS's Common Crypto module computes it; the answer is correct regardless of whether the host is in FIPS mode (SHA-256 itself is FIPS-approved). What FIPS mode controls is the *exclusion* of non-approved algorithms — PurpleVoice doesn't use any non-approved algorithms anywhere in its pipeline, so FIPS mode is a no-op for PurpleVoice.
+
+**Out-of-scope FIPS topics, with rationale:**
+
+- **FIPS 140-3 Level 2 / 3 / 4** — These higher security levels invoke physical tamper-evidence, role-based authentication, and identity-based authentication for the cryptographic module itself. PurpleVoice has no cryptographic module to apply these levels to.
+- **Random number generation (FIPS 186-5 / SP 800-90A DRBG)** — PurpleVoice does not generate random numbers. The only randomness in the recording pipeline is whatever entropy the OS injects into temporary file names, which is OS-managed.
+- **Key derivation (FIPS 198-1 HMAC, SP 800-108 KDFs)** — Not applicable; no keys.
+
 ## FedRAMP-tailored
 
 **Status: Compatible with applicable FedRAMP-tailored Low-baseline obligations for in-scope code. Not FedRAMP-authorised. Authorisation requires a sponsoring federal agency.**
@@ -292,6 +300,17 @@ Two structural realities make FedRAMP authorisation impractical for PurpleVoice 
 | Sponsoring agency | N/A — no agency sponsor |
 
 **PurpleVoice will support an agency-sponsored authorisation effort** by maintaining the security artefacts in this document (threat model, SBOM, verification scripts, gap analysis) — but the path to authorisation is owned by the sponsoring agency, not by the PurpleVoice project.
+
+**FedRAMP-tailored vs full FedRAMP:** The "tailored" Low-baseline is the realistic frame for a tool like PurpleVoice — it omits continuous-monitoring and incident-response controls that don't apply to a per-utterance one-shot CLI. Full FedRAMP Low / Moderate / High would invoke the broader 800-53 baselines (Moderate = ~325 controls; High = ~421 controls), most of which are organisational. The tailored framing keeps the gap analysis honest for a tool of this shape.
+
+**What an agency-sponsored authorisation would require from the PurpleVoice project:**
+
+1. A signed System Security Plan (SSP) using the NIST 800-53 mapping above as the technical-control baseline.
+2. A 3PAO (Third-Party Assessment Organization) engagement contracted by the sponsoring agency.
+3. Continuous-monitoring infrastructure (FedRAMP-specific) — automated configuration scanning, monthly vulnerability scans, annual assessment. This is the load-bearing reason FedRAMP is impractical for a free tool: the continuous-monitoring overhead is recurring, not one-time.
+4. A Plan of Action and Milestones (POA&M) for any control gaps identified during 3PAO assessment.
+
+The PurpleVoice project will provide artefacts (1) on request and supply technical-control evidence (this document, the verification scripts, the SBOM) for items (2)-(4) — the rest belongs to the sponsoring agency's authorisation budget and timeline.
 
 ## Common Criteria
 
@@ -322,17 +341,144 @@ PurpleVoice has not undergone Common Criteria evaluation. Out of scope for v1 be
 
 Institutions that require Common Criteria evaluation for tools in their environment should treat PurpleVoice as a **not-evaluated** component and apply organisational risk-acceptance accordingly.
 
+**Why a custom Security Target (rather than an existing Protection Profile)?** Existing PPs cover specific product classes — operating systems, mobile devices, network firewalls, cryptographic modules, USB drives, etc. None of these classes cleanly fits a one-shot dictation CLI that consumes mic input, runs a local ML model, and writes to the pasteboard. A future evaluation would either author a custom ST referencing the technical-control families documented in this `SECURITY.md` (Access Control, System and Communications Protection, System and Information Integrity, PII Processing and Transparency) or extend an existing General-Purpose Computing PP with PurpleVoice-specific functional requirements.
+
+**ISO/IEC 15408 vs ISO/IEC 27001:** Common Criteria (15408) evaluates *products*; ISO 27001 evaluates *organisational ISMSs*. The two are complementary, not substitutes — an organisation can hold a 27001 certificate that includes a not-evaluated CC component (PurpleVoice) in its Statement of Applicability with a documented risk acceptance.
+
 ## HIPAA Security Rule §164.312
 
-<!-- TODO: Plan 02.7-03b fills this section (framed; per-clause check-list 164.312(a)(1)/(b)/(c)(1)/(d)/(e)(1) with Met/N/A/Not Pursued; Pitfall 11 "issued to organisations" disclaimer first). -->
+**Status: PurpleVoice's design is consistent with §164.312 obligations for in-scope technical safeguards. PurpleVoice is a tool, not a HIPAA Covered Entity or Business Associate.**
+
+The HIPAA Security Rule (45 CFR Part 164 Subpart C) establishes Administrative, Physical, and Technical Safeguards for Electronic Protected Health Information (ePHI). HIPAA obligations are owned by Covered Entities (healthcare providers, health plans, healthcare clearinghouses) and their Business Associates. PurpleVoice is **a tool**, not a HIPAA-regulated entity — it can only be a *supporting safeguard* (Tailscale-style framing) that an organisation deploys as part of their HIPAA programme.
+
+The framing below describes how PurpleVoice's design supports the **§164.312 Technical Safeguards** specifically. Administrative (§164.308) and Physical (§164.310) Safeguards are organisational responsibilities outside PurpleVoice's scope.
+
+| §164.312 Clause | Standard | PurpleVoice Status | Rationale |
+|---|---|---|---|
+| §164.312(a)(1) | Access Control | Met | macOS TCC (Microphone + Accessibility) enforces access on the Hammerspoon bundle-id. User-keyboard physical access required to invoke. Cross-references NIST AC-3 in [NIST mapping](#nist-sp-800-53-rev-5--low-baseline-mapping). |
+| §164.312(a)(2)(i) | Unique User Identification | Met | macOS user session = unique identification; PurpleVoice inherits. Cross-references NIST IA-2. |
+| §164.312(a)(2)(ii) | Emergency Access Procedure | N/A | No persistent state; loss of PurpleVoice does not block access to ePHI in other systems. |
+| §164.312(a)(2)(iii) | Automatic Logoff | N/A | No PurpleVoice session to time out; one-shot per utterance. |
+| §164.312(a)(2)(iv) | Encryption and Decryption | N/A | No ePHI at rest in PurpleVoice; ephemeral WAV deleted on EXIT. |
+| §164.312(b) | Audit Controls | Not Pursued | By design (privacy > accountability for personal tool). Cross-reference STRIDE §Repudiation row in the [Threat Model](#threat-model) and NIST AU-2 / AU-12 rows. v1.x QOL-04 history log is the opt-in mitigation if a deploying organisation requires audit. |
+| §164.312(c)(1) | Integrity | Met | Whisper model SHA256 verification at install time (`setup.sh` Step 5). Cross-references NIST SI-7. |
+| §164.312(c)(2) | Mechanism to authenticate ePHI | N/A | No ePHI authentication mechanism (no ePHI persisted by PurpleVoice). |
+| §164.312(d) | Person or Entity Authentication | Met | macOS user session authentication; PurpleVoice inherits. Cross-references NIST IA-2. |
+| §164.312(e)(1) | Transmission Security | N/A | No transmission. PurpleVoice runtime is local-only — verified by [Egress Verification](#egress-verification). Cross-references NIST SC-7. |
+| §164.312(e)(2)(i) | Integrity Controls (in transit) | N/A | No transmission. |
+| §164.312(e)(2)(ii) | Encryption (in transit) | N/A | No transmission. |
+
+**Use of PurpleVoice in a HIPAA Covered Entity or Business Associate context** requires the deploying organisation to:
+
+1. Implement complementary Administrative Safeguards (§164.308 — workforce training, access management, incident-response procedures).
+2. Implement complementary Physical Safeguards (§164.310 — facility access, workstation security, device disposal).
+3. Maintain a **Business Associate Agreement (BAA)** with any party that handles ePHI on the organisation's behalf — note that PurpleVoice does NOT handle ePHI on the organisation's behalf because no data leaves the user's machine; the BAA scope is the *organisation's* deployment, not the tool itself.
+4. Conduct an organisational HIPAA risk assessment that includes PurpleVoice's deployment.
+
+PurpleVoice's design (zero egress, ephemeral WAV, no transcript persistence) makes it **a supporting safeguard** for HIPAA-aligned systems handling voice notes / dictation workflows — never a substitute for the organisation's own HIPAA programme.
+
+**Tailscale-style precedent for the framing:** Tailscale's HIPAA documentation explicitly states that Tailscale itself is not a HIPAA-regulated entity, but describes how Tailscale's design supports a Covered Entity's HIPAA programme through specific technical safeguards (encryption-in-transit, access control, audit logging where applicable). PurpleVoice adopts the same posture: this section is a *gap analysis for the deploying organisation*, not a self-issued attestation. A Covered Entity's auditor would read this section as evidence of the technical-safeguards baseline PurpleVoice provides; the organisation's BAA, HIPAA training, and risk-assessment artefacts cover the rest.
+
+**Why §164.312(b) Audit Controls is "Not Pursued":** The HIPAA Security Rule §164.312(b) requires that mechanisms be implemented to record and examine activity in information systems that contain or use ePHI. For a personal-tool one-shot dictation CLI, persistent audit logging would itself be a privacy regression — the very voice content the user wants to keep ephemeral would land in an audit log. The engineering choice (privacy > accountability) is documented honestly here, with the v1.x QOL-04 opt-in history log identified as the mitigation path for organisations that prioritise audit over privacy. A deploying Covered Entity that requires §164.312(b) for compliance reasons should either (a) deploy v1.x with QOL-04 history-log enabled when it ships, or (b) accept the residual risk in their organisational risk assessment.
+
+**HIPAA Privacy Rule §164.502 considerations** (out of §164.312 scope but worth noting): PurpleVoice's pasteboard-write pathway means voice transcripts traverse the macOS pasteboard before reaching the focused window. The pasteboard is governed by the user's own session and OS protections; transcripts are written with the `org.nspasteboard.TransientType` UTI which honoring clipboard managers (1Password 8+, Maccy, Raycast, Pastebot) skip on capture. A Covered Entity using PurpleVoice in clinical workflows should either (a) ensure the clinician's clipboard manager honours the transient UTI, or (b) disable third-party clipboard managers on the workstation as part of organisational policy. PurpleVoice does not — and cannot — enforce this from inside the tool.
 
 ## SOC 2 Type II Trust Services Criteria
 
-<!-- TODO: Plan 02.7-03b fills this section (framed; CC6.x / C1.x / P1-P8 partial; Pitfall 11 disclaimer first). -->
+**Status: PurpleVoice is a tool, not an organisation, and does not undergo a SOC 2 audit. PurpleVoice's design is compatible with applicable SOC 2 Trust Services Criteria for in-scope code.**
+
+SOC 2 (Service Organization Control 2) Type II reports are issued to **organisations** by independent CPA firms after a 6-12 month observation period. The AICPA's Trust Services Criteria cover five categories: Security (CC1-CC9), Availability (A1.x), Processing Integrity (PI1.x), Confidentiality (C1.x), Privacy (P1.x-P8.x).
+
+**A tool does not hold a SOC 2 report — only the organisation operating it can.** Confusing the two is the #1 misframing risk in this section (Pitfall 11). The framing below describes how PurpleVoice's design supports an organisation's SOC 2 posture — not how PurpleVoice itself is SOC 2 anything.
+
+| TSC Category | PurpleVoice Design Property | Status |
+|---|---|---|
+| **Security CC6.1** Logical Access — Access Control | macOS TCC (Microphone + Accessibility) gates invocation | Met |
+| **Security CC6.6** External Threats — Boundary Protection | Zero outbound network egress at runtime ([verified](#egress-verification)) | Met |
+| **Security CC6.7** Restriction of Information Transmission | No transmission of voice content; pasteboard write is local-only | Met |
+| **Security CC6.8** Malicious Software Prevention | Brew bottle SHA256 verification + Whisper model SHA256 pinning | Partial |
+| **Confidentiality C1.1** Identification and Maintenance of Confidential Information | Voice content treated as user-owned; ephemeral WAV deleted on EXIT | Met |
+| **Confidentiality C1.2** Disposal of Confidential Information | EXIT trap cleanup of `/tmp/purplevoice/*.wav` covers all exit paths including SIGINT | Met |
+| **Privacy P1.1** Notice About Privacy | This document + README + setup.sh banner | Met |
+| **Privacy P3.1** Personal Information Collection | No voice content collected by PurpleVoice (ephemeral, never leaves machine) | Met |
+| **Privacy P5.1** Personal Information Access | User has full access to their own voice content (it never leaves their machine) | Met |
+| **Privacy P6.1** Personal Information Disclosure to Third Parties | None — no transmission | Met |
+| **Privacy P8.1** Personal Information Quality | Whisper transcription accuracy is the limiting factor; user reviews before paste-context use | Partial |
+
+**An organisation deploying PurpleVoice retains full responsibility for their own SOC 2 posture.** PurpleVoice provides a supporting design that aligns with Security and Confidentiality criteria; the organisation's audit scope must include PurpleVoice's deployment as part of the system being assessed.
+
+PurpleVoice does NOT cover:
+
+- **Availability (A1.x)** — N/A; PurpleVoice has no SLA (it's a personal tool). Deploying organisation owns their own availability claims.
+- **Processing Integrity (PI1.x)** — Limited; Whisper transcription has documented limitations (hallucinations on silence — mitigated by VAD + denylist; accuracy varies with audio quality).
+
+**SOC 2 Type I vs Type II:** Type I is a point-in-time design assessment ("did the organisation describe its controls accurately on date X?"); Type II is an operating-effectiveness assessment over a 6-12 month observation window ("did the controls work continuously?"). Either way, the report is issued to the organisation, not to PurpleVoice. An organisation building a SOC 2 Type II report can include PurpleVoice within the system boundary; the auditor will examine PurpleVoice's documented controls (this section + the NIST 800-53 mapping above) as evidence of the underlying technical baseline, but the operating-effectiveness assertion belongs to the organisation's monitoring and incident-response procedures — not to PurpleVoice itself.
+
+**SOC 2 Type II report scope considerations for organisations deploying PurpleVoice:**
+
+- The audit's system boundary should explicitly include the workstation(s) running PurpleVoice; auditor engagement letters typically require a network diagram + asset inventory that lists endpoint dictation tooling.
+- PurpleVoice's lack of audit logging (CC4.1) is a documented residual risk to call out in the management's response section; the v1.x QOL-04 history-log opt-in is the available mitigation if the organisation's risk appetite requires logging.
+- The deployed PurpleVoice version's git commit hash (visible in `SBOM.spdx.json` `versionInfo`) is the artefact-level identifier the auditor would tie to the SoC report's system description.
 
 ## ISO/IEC 27001:2022 Annex A
 
-<!-- TODO: Plan 02.7-03b fills this section (framed; A.5/A.8/A.13/A.14 technical-controls subset; Pitfall 11 "issued to organisations" disclaimer first). -->
+**Status: PurpleVoice is a tool, not an organisation operating an ISMS. PurpleVoice's design is compatible with applicable Annex A technical controls.**
+
+ISO/IEC 27001:2022 certification is issued to **organisations** operating an Information Security Management System (ISMS), not to tools. The 2022 revision restructured Annex A into 93 controls across 4 themes: A.5 Organizational, A.6 People, A.7 Physical, A.8 Technological.
+
+PurpleVoice's design **is compatible with** the technical-control subset of Annex A. The framing below maps PurpleVoice's properties to specific A.5 + A.8 controls — these are the controls a 27001-evaluated organisation's auditor would examine when evaluating PurpleVoice's role in the organisation's ISMS.
+
+| Annex A Control | Title | PurpleVoice Status | Rationale |
+|---|---|---|---|
+| **A.5.10** | Information classification | Met | Transcripts treated as user-owned; classification is the organisation's responsibility. |
+| **A.5.15** | Access control | Met | macOS TCC gates Microphone + Accessibility per bundle-id. |
+| **A.5.23** | Information security for use of cloud services | N/A | PurpleVoice does not use cloud services (zero egress). |
+| **A.5.24** | Information security incident management planning | Not Pursued | No PurpleVoice incident-response programme; deploying organisation owns. |
+| **A.5.30** | ICT readiness for business continuity | N/A | Personal tool; no business continuity claim. |
+| **A.5.34** | Privacy and protection of PII | Met | This document substantiates; no PII transmission. |
+| **A.8.2** | Privileged access rights | Met | No SUID; no privileged operations. |
+| **A.8.3** | Information access restriction | Met | TCC enforces; user-keyboard physical access required. |
+| **A.8.5** | Secure authentication | Met | macOS user session inheritance. |
+| **A.8.7** | Protection against malware | Partial | Brew bottle SHA256 verification + model SHA256 pinning. |
+| **A.8.16** | Monitoring activities | Not Pursued | No PurpleVoice monitoring infrastructure (privacy by design). |
+| **A.8.20** | Networks security | Met | Zero outbound network egress at runtime ([verified](#egress-verification)). |
+| **A.8.21** | Security of network services | N/A | No network services. |
+| **A.8.23** | Web filtering | N/A | No web access. |
+| **A.8.24** | Use of cryptography | N/A | No cryptographic operations on user data; SHA-256 for model integrity only. |
+| **A.8.25** | Secure development life cycle | Partial | Git-tracked source, code review via PR (when public), threat model + SBOM; missing: SDL training programme (organisational). |
+| **A.8.26** | Application security requirements | Met | Documented in this file + REQUIREMENTS.md. |
+| **A.8.28** | Secure coding | Met | bash strict mode, signal-handling discipline, Pattern 2 boundary enforcement, brand-consistency tests. |
+| **A.8.30** | Outsourced development | N/A | Single-developer tool. |
+
+**An organisation seeking ISO/IEC 27001 evaluation can include PurpleVoice in their Statement of Applicability** with attached residual-risk acceptance. The organisation's ISMS audit (by a UKAS-accredited evaluation body or equivalent national scheme) is the path to a formal certificate — PurpleVoice supports the audit but does not itself hold a certificate.
+
+Useful framing for international (especially EU) institutional buyers: PurpleVoice's zero-egress design + ephemeral data handling is consistent with **GDPR data minimisation principles (Article 5(1)(c))** by design — PurpleVoice processes voice content for the documented purpose only (transcription), retains nothing beyond the utterance lifecycle, and transfers nothing to third parties.
+
+**Annex A 2022 controls intentionally NOT mapped above** (with rationale):
+
+- **A.6 People controls** (A.6.1 Screening through A.6.8 Information security event reporting) — All organisational controls covering personnel security; not applicable to a single-binary tool.
+- **A.7 Physical controls** (A.7.1 Physical security perimeter through A.7.14 Secure disposal or re-use of equipment) — All organisational / facility controls; PurpleVoice has no physical infrastructure.
+- **A.8.1 User endpoint devices** — Inherits from the organisation's MDM / endpoint management posture; not a tool-level concern.
+- **A.8.4 Access to source code** — Source is open and git-tracked (organisation chooses whether to fork / mirror).
+- **A.8.6 Capacity management** — Personal tool; no capacity SLA.
+- **A.8.8 Management of technical vulnerabilities** — Inherits from brew + macOS update cadence; PurpleVoice has no separate vulnerability-management programme yet (see [Vulnerability Disclosure](#vulnerability-disclosure)).
+- **A.8.9 Configuration management** — Configuration files are user-owned dotfiles in `~/.config/purplevoice/`; no centralised configuration management.
+- **A.8.10 Information deletion** — Ephemeral WAV deletion via EXIT trap is the closest tool-level analogue; A.8.10 broader "secure data destruction" is organisational.
+- **A.8.11 Data masking** — N/A for a transcription tool.
+- **A.8.12 Data leakage prevention** — Zero outbound egress at runtime is the load-bearing DLP property; verified by `tests/security/verify_egress.sh`.
+- **A.8.13 Information backup** — Personal tool; no backup obligation. Voice content is ephemeral by design.
+- **A.8.14 Redundancy of information processing facilities** — N/A; personal tool.
+- **A.8.15 Logging** — Aligned with A.8.16 Monitoring activities — both Not Pursued by privacy-by-design choice.
+- **A.8.17 Clock synchronisation** — Inherits from macOS time services.
+- **A.8.18 Use of privileged utility programs** — N/A; PurpleVoice does not invoke privileged utilities.
+- **A.8.19 Installation of software on operational systems** — Inherits from organisation's MDM policy; `setup.sh` is the install surface.
+- **A.8.22 Segregation of networks** — N/A for a tool with no network footprint.
+- **A.8.27 Secure system architecture and engineering principles** — Documented in this file (Pattern 2 boundary, defence-in-depth EXIT trap, signal-driven lifecycle); aligned with secure-coding principles.
+- **A.8.29 Security testing in development and acceptance** — `tests/run_all.sh` (functional suite) + `tests/security/run_all.sh` (verification suite) provide release-gate testing; aligned at the tool level.
+- **A.8.31 Separation of development, test and production environments** — N/A; single-developer tool. Git branch / tag separation is the closest analogue.
+- **A.8.32 Change management** — Git history + ROADMAP.md + REQUIREMENTS.md + per-plan SUMMARY.md trail in `.planning/` substantiates the change-management trail.
+- **A.8.33 Test information** — `tests/lib/sample_audio.sh` synthesises test audio (no real voice data used in tests).
+- **A.8.34 Protection of information systems during audit testing** — Auditor runs verification scripts; no production data involved.
 
 ## Code Signing & Notarisation
 
