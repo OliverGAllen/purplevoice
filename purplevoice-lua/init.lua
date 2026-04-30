@@ -1,5 +1,5 @@
 -- purplevoice — Phase 2 hardened Hammerspoon module (PurpleVoice)
--- Wires cmd+shift+e (push-and-hold) to ~/.local/bin/purplevoice-record.
+-- Wires F19 (push-and-hold; Karabiner-remapped from fn) to ~/.local/bin/purplevoice-record.
 --
 -- Phase 2 additions over Phase 1:
 --   - hs.accessibilityState(true) on load (Phase-1 TODO a — surface prompt)
@@ -520,11 +520,28 @@ local function repaste()
 end
 
 -- ----------------------------------------------------------------
--- Bind cmd+shift+e (push-and-hold)
+-- Bind F19 (push-and-hold) — QOL-NEW-01 / D-05 replaces the prior hotkey
+-- F19 is emitted by Karabiner-Elements remapping fn -> F19 via
+-- assets/karabiner-fn-to-f19.json (Plan 04-02). Empty modifier table {}
+-- is documented in hs.hotkey.bind; lowercase "f19" is canonical in
+-- hs.keycodes.map. Carbon RegisterEventHotKey precedence (system-global,
+-- fires before app shortcuts) means F19 reaches Hammerspoon before any
+-- focused app sees it.
 -- ----------------------------------------------------------------
-local hk = hs.hotkey.bind({"cmd", "shift"}, "e", onPress, onRelease)
+local hk = hs.hotkey.bind({}, "f19", onPress, onRelease)
 if not hk then
-  hs.alert.show("PurpleVoice: cmd+shift+e binding failed (in use?)", 4)
+  hs.alert.show("PurpleVoice: F19 binding failed (Karabiner fn→F19 rule active?)", 4)
+end
+
+-- ----------------------------------------------------------------
+-- Bind cmd+shift+v (re-paste last transcript) — QOL-01 / D-02
+-- Collides with VS Code/Cursor "Markdown Preview" by default — accepted
+-- per CONTEXT.md D-02. Hammerspoon's Carbon hotkey wins precedence over
+-- the IDE shortcut; user workaround for IDE Markdown preview is Cmd+K V.
+-- ----------------------------------------------------------------
+local repasteHk = hs.hotkey.bind({"cmd", "shift"}, "v", repaste)
+if not repasteHk then
+  hs.alert.show("PurpleVoice: cmd+shift+v binding failed (in use?)", 4)
 end
 
 -- Initialise menubar to idle BEFORE returning so idle dot is visible immediately.
@@ -555,7 +572,7 @@ if not accessibilityOk then
 end
 
 -- Confirmation message on load
-hs.alert.show("PurpleVoice loaded — local dictation, cmd+shift+e", 1.5)
+hs.alert.show("PurpleVoice loaded — F19 to record, ⌘⇧V to re-paste", 1.5)
 
 M.BRAND = BRAND
 return M
