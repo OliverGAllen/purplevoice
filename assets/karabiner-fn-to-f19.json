@@ -1,0 +1,31 @@
+{
+  "title": "PurpleVoice — fn → F19",
+  "rules": [
+    {
+      "description": "Hold fn → F19 (PurpleVoice push-to-talk). Quick tap → native macOS fn behaviour (Globe popup, function-key row, dictation).",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "fn"
+          },
+          "to_if_alone": [
+            {
+              "key_code": "fn",
+              "halt": true
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "f19"
+            }
+          ],
+          "parameters": {
+            "basic.to_if_alone_timeout_milliseconds": 200,
+            "basic.to_if_held_down_threshold_milliseconds": 200
+          }
+        }
+      ]
+    }
+  ]
+}
