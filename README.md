@@ -125,6 +125,23 @@ See [SECURITY.md Air-Gapped Installation](SECURITY.md#air-gapped-installation) f
 
 Email **oliver@olivergallen.com** with subject prefix `[PurpleVoice security]`. See [SECURITY.md Vulnerability Disclosure](SECURITY.md#vulnerability-disclosure).
 
+### HUD privacy and screen-recording visibility
+
+When recording, PurpleVoice shows a small lavender pill (`● Recording`) at the top-center of the active screen. The HUD complements the menubar indicator and disappears within ~250ms of releasing the hotkey. By default, no HUD is visible when idle.
+
+**Visibility in screen recordings is limited.** PurpleVoice does not pursue `NSWindowSharingNone` exclusion in v1. Even if applied, Apple has stated that ScreenCaptureKit on macOS 15+ ignores window-level sharing flags ([Apple Developer Forums thread 792152, 2025](https://developer.apple.com/forums/thread/792152)) — modern capture tools (QuickTime, OBS, Zoom share-screen, Discord, Loom, Microsoft Teams) capture the HUD regardless. The legacy `screencapture` CLI and CGWindowList-based tools may still honour sharing flags, but this is incidental, not pursued.
+
+**For sensitive sessions** (recorded demos, screen-shared meetings, journalist source-handling), run with `PURPLEVOICE_HUD_OFF=1` and rely on the menubar indicator alone — that is the only privacy guarantee. The Phase 2 menubar indicator is unaffected by HUD configuration.
+
+Configuration:
+
+| Env var | Effect | Default |
+|---|---|---|
+| `PURPLEVOICE_HUD_OFF=1` | Disable HUD entirely (menubar indicator unchanged) | unset (HUD enabled) |
+| `PURPLEVOICE_HUD_POSITION` | One of: `top-center` (default) / `top-right` / `bottom-center` / `bottom-right` / `near-cursor` / `center` | `top-center` |
+
+Both env vars are read once at module load — reload Hammerspoon (menubar → Reload Config) to apply changes. Note: changing an env var via `launchctl setenv` followed by `hs.reload()` does **not** propagate into Hammerspoon's existing `os.getenv` view (the process's `environ` array is exec-time-frozen). To apply env-var changes live, fully quit Hammerspoon and relaunch from a shell that already has the env var set, e.g. `PURPLEVOICE_HUD_POSITION=bottom-right open -a Hammerspoon`.
+
 ## Visual identity
 
 Lavender (`#B388EB`) menubar indicator; the same lavender plus a white lips silhouette form the 256×256 icon at `assets/icon-256.png`. The icon's source SVG (`assets/icon.svg`) is committed for reproducibility — `assets/README.md` documents the regeneration command (`sips`).
