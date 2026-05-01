@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "PurpleVoice",
-  "documentNamespace": "https://github.com/oliverallen/PurpleVoice/sbom/43518f948a2ca8d38947002ba080aa06c63c7301",
+  "documentNamespace": "https://github.com/OliverGAllen/purplevoice/sbom/b52606b032d17a3cfda143e49e5a440586a109e8",
   "creationInfo": {
     "licenseListVersion": "3.28",
     "creators": [
@@ -16,7 +16,7 @@
     {
       "name": "PurpleVoice",
       "SPDXID": "SPDXRef-DocumentRoot-Directory-PurpleVoice",
-      "versionInfo": "43518f9",
+      "versionInfo": "b52606b",
       "supplier": "Organization: PurpleVoice Project",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
@@ -37,25 +37,25 @@
     {
       "annotationDate": "2026-04-29T00:00:00Z",
       "annotationType": "OTHER",
-      "annotator": "Tool: PurpleVoice-setup.sh",
+      "annotator": "Tool: PurpleVoice-install.sh",
       "comment": "system-context: macOS-version=15.7.5 (24G624)"
     },
     {
       "annotationDate": "2026-04-29T00:00:00Z",
       "annotationType": "OTHER",
-      "annotator": "Tool: PurpleVoice-setup.sh",
+      "annotator": "Tool: PurpleVoice-install.sh",
       "comment": "system-context: hardware-platform=arm64 (Apple Silicon)"
     },
     {
       "annotationDate": "2026-04-29T00:00:00Z",
       "annotationType": "OTHER",
-      "annotator": "Tool: PurpleVoice-setup.sh",
+      "annotator": "Tool: PurpleVoice-install.sh",
       "comment": "system-context: xcode-clt-version=26.2.0.0.1.1764812424"
     },
     {
       "annotationDate": "2026-04-29T00:00:00Z",
       "annotationType": "OTHER",
-      "annotator": "Tool: PurpleVoice-setup.sh",
+      "annotator": "Tool: PurpleVoice-install.sh",
       "comment": "system-context: brew-version=5.1.8"
     }
   ]
