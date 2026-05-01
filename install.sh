@@ -474,7 +474,7 @@ deterministicise_sbom() {
   # Replace creationInfo.created with constant + documentNamespace with deterministic URI.
   jq --arg head "$repo_head" \
      '.creationInfo.created = "2026-04-29T00:00:00Z"
-      | .documentNamespace = ("https://github.com/oliverallen/PurpleVoice/sbom/" + $head)' \
+      | .documentNamespace = ("https://github.com/OliverGAllen/purplevoice/sbom/" + $head)' \
      "$sbom" > "$sbom.tmp" && mv "$sbom.tmp" "$sbom"
 }
 

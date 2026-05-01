@@ -707,7 +707,7 @@ Every claim in this document is either substantiated by a runnable script you ca
 From a clean clone of the PurpleVoice repo:
 
 ```bash
-git clone https://github.com/oliverallen/PurpleVoice.git purplevoice
+git clone https://github.com/OliverGAllen/purplevoice.git purplevoice
 cd purplevoice
 bash setup.sh                       # Idempotent; ~5-30s if Syft regenerates SBOM
 bash tests/run_all.sh               # Functional suite (8 tests, ~5s)
