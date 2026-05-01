@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "PurpleVoice",
-  "documentNamespace": "https://github.com/OliverGAllen/purplevoice/sbom/b52606b032d17a3cfda143e49e5a440586a109e8",
+  "documentNamespace": "https://github.com/OliverGAllen/purplevoice/sbom/86b2a50aa91f544e5fb3ca7036b8dfddd9c63ed3",
   "creationInfo": {
     "licenseListVersion": "3.28",
     "creators": [
@@ -16,7 +16,7 @@
     {
       "name": "PurpleVoice",
       "SPDXID": "SPDXRef-DocumentRoot-Directory-PurpleVoice",
-      "versionInfo": "b52606b",
+      "versionInfo": "86b2a50",
       "supplier": "Organization: PurpleVoice Project",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
