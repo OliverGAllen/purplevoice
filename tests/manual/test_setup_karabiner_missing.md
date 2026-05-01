@@ -16,17 +16,17 @@
 3. Verify the move: `ls -la /Applications/Karabiner-Elements.app` should report "No such file or directory"; `ls -la /tmp/Karabiner-Elements.app.parked` should show the bundle directory.
 4. Run setup: `bash setup.sh; echo "EXIT=$?"`
 5. Expected: setup.sh runs prior steps to completion, then at Step 9 prints a multi-line actionable error to stderr containing:
-   - `PurpleVoice: Karabiner-Elements is required for the F19 hotkey.`
+   - `PurpleVoice: Karabiner-Elements is required for the F19 record + F18 re-paste hotkeys.`
    - URL `https://karabiner-elements.pqrs.org/`
-   - 5-step numbered install procedure (Download / Drag to /Applications / Launch + grant / Import JSON / Re-run setup.sh)
-   - Reference to `assets/karabiner-fn-to-f19.json` (the bundled JSON rule path)
+   - 5-step numbered install procedure (Download / Drag to /Applications / Launch + grant / Import BOTH JSONs / Re-run setup.sh)
+   - References to BOTH bundled JSON rule paths (`assets/karabiner-fn-to-f19.json` AND `assets/karabiner-backtick-to-f18.json`)
    - Air-gap note: `If air-gapped: copy Karabiner-Elements.dmg from a connected machine via USB`
    - Exit code: `EXIT=1`
    **PASS-1:** actionable error printed; exit code is non-zero.
 6. Restore Karabiner: `sudo mv /tmp/Karabiner-Elements.app.parked /Applications/Karabiner-Elements.app`
 7. Verify restore: `ls -la /Applications/Karabiner-Elements.app` shows the bundle directory; Karabiner-Elements menubar icon returns (may need to launch the .app once if the daemon was killed during the move).
 8. Re-run setup: `bash setup.sh; echo "EXIT=$?"`
-9. Expected: setup.sh runs to completion (exit 0); Step 9 prints `OK: Karabiner-Elements detected at /Applications/Karabiner-Elements.app` followed by the import-rule REMINDER. **PASS-2:** restore returns to baseline OK.
+9. Expected: setup.sh runs to completion (exit 0); Step 9 prints `OK: Karabiner-Elements detected at /Applications/Karabiner-Elements.app` followed by the BOTH-rules import REMINDER. **PASS-2:** restore returns to baseline OK.
 
 ## Expected Outcome
 
@@ -47,4 +47,6 @@
 - [ ] PASS-1 (Karabiner-parked run prints actionable error; EXIT=1)
 - [ ] PASS-2 (Karabiner-restored run exits 0; baseline returned)
 
-**Tester:** _____________  **Date:** _____________
+**Tester:** Oliver  **Date:** DEFERRED 2026-05-01
+
+**Deferral rationale:** The destructive sudo-move-and-restore felt risky to run mid-flow when the F18/F19 hotkeys are now production-active. Unit-level coverage via `tests/test_karabiner_check.sh` checks 4-5 confirms `setup.sh` contains the Karabiner detection logic + actionable-error text + exit-1 guard. End-to-end runtime verification deferred to a deliberate safe break — surface in `/gsd:audit-uat` until signed off.
