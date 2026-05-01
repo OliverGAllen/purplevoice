@@ -160,7 +160,12 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
      - **Option B — Bundled installer (no fork)**: ship `install.sh` (or `.pkg`) that downloads stock Hammerspoon, places `purplevoice-lua/` in `~/.hammerspoon/`, writes the `require("purplevoice")` line. App stays "Hammerspoon" in Privacy & Security; user sees PurpleVoice everywhere else (menubar, HUD, README, setup.sh banner). *Effort: ~1 day; no upstream tracking burden.* Honest about its substrate; downside is users see "Hammerspoon" in TCC settings + Activity Monitor + Dock if launched standalone.
      - **Option C — Hybrid: rename signed Hammerspoon binary**: copy stock `Hammerspoon.app` → `PurpleVoice.app`, rewrite Info.plist strings (CFBundleName, CFBundleIdentifier, CFBundleIconFile), re-sign with PurpleVoice Developer ID. Functionally stock Hammerspoon, branded as PurpleVoice. *Effort: ~3-5 days.* Same TCC re-grant + notarisation requirements as A. Some Gatekeeper risk with renamed binaries.
      The chosen option must produce a public installer compatible with success criterion 5 (one-line `curl ... | bash`) and inherit the Phase 2.7 honest-framing discipline (no over-claims about what wrapping does for security; the audit-the-fork story matters for institutional adopters).
-**Plans**: 4 plans
+**Plans:** 5 plans
+  - [ ] 03-00-PLAN.md — Wave 0 staging: 5 unit tests + 4 manual walkthrough scaffolds + tests/benchmark/HOW-TO-REGENERATE.md (no requirements; foundation)
+  - [ ] 03-01-PLAN.md — Wave 1: setup.sh → install.sh rename + curl-vs-clone detection + bootstrap_clone_then_re_exec + D-13 typo sweep + brand-consistency exemption update + DST-01 walkthrough sign-off (DST-01, DST-02, DST-05, DST-06)
+  - [ ] 03-02-PLAN.md — Wave 2: LICENSE (MIT) + uninstall.sh + README.md rewrite (Quickstart + Detailed Install + Recovery + Uninstalling) + DST-03 walkthrough sign-off (DST-03)
+  - [ ] 03-03-PLAN.md — Wave 3: 3 reference WAVs + tests/benchmark/run.sh + quantiles.sh + BENCHMARK.md template + populated numbers + Phase 5 verdict + DST-04 walkthrough sign-off (DST-04)
+  - [ ] 03-04-PLAN.md — Wave 4: SECURITY.md "Distribution model" subsection + pre-flip checklist + public flip + anonymous smoke test + DST-05 walkthrough sign-off + REQUIREMENTS/ROADMAP closure (DST-05, DST-06)
 
 ### Phase 5: Warm-Process Upgrade (v1.1, CONDITIONAL)
 **Goal**: Cut latency below 1 second by replacing per-utterance `whisper-cli` invocation with a long-running `whisper-server` over localhost HTTP, managed by a LaunchAgent. **CONDITIONAL: only triggered if Phase 3 hyperfine measurements show p50 > 2.0 s OR p95 > 3.0 s on Oliver's hardware.**
