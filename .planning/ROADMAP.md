@@ -1,7 +1,7 @@
 # Roadmap: voice-cc
 
 **Created:** 2026-04-23
-**Updated:** 2026-04-29 (Phase 2.7 Security Posture & Government Readiness added per user direction; positioning broadened to include institutional / government audiences)
+**Updated:** 2026-05-01 (Phase 4 (v1.x) Quality of Life closed 3/3 — F19 push-to-talk + F18-via-backtick-hold re-paste shipped; Karabiner-Elements documented runtime dep; D-02 cmd+shift+v superseded mid-walkthrough; CHECKPOINT-3 deferred per Oliver)
 **Granularity:** standard
 **Coverage:** 26/26 original v1 requirements mapped; new branding/HUD/public-install requirements TBD during planning
 **Build-order constraint:** manual pipeline → bash glue → Hammerspoon wiring (non-negotiable per ARCHITECTURE.md)
@@ -199,7 +199,7 @@ Listed in **execution order** (Phase 3 reordered to come last in v1; phase numbe
 | 3 | Phase 2.5: Branding | 3/4 | Wave 2 done — Plan 02.5-01, 02.5-02, 02.5-03 complete 2026-04-29; Wave 3 (02.5-04 docs closure) unblocked | 2026-04-29 |
 | 4 | Phase 2.7: Security Posture & Government Readiness | 6/6 | Complete 2026-04-29..2026-04-30 — Plan 02.7-00 (skeleton + Syft hard dep + OFFLINE guards), Plan 02.7-01 (threat model + D-17 framing lint), Plan 02.7-02 (verify scripts + SBOM regen), Plan 02.7-03a (NIST SP 800-53 Rev 5 deep mapping), Plan 02.7-03b (6 framed framework sections), Plan 02.7-04 (closure: SECURITY.md filled to 18 H2 sections / 751 lines / 0 TODOs + verify_reproducibility.sh impl + REQUIREMENTS.md SEC-01..06 + README.md ## Security & Privacy section; security suite 5/0; functional suite 8/0). Awaiting `/gsd:verify-work 2.7` Sonnet sign-off | 2026-04-30 |
 | 5 | Phase 3.5: Hover UI / HUD | 0/4 | Planned 2026-04-30 — context (`0595dd0`), research (`5396ac6`), validation (`7d7d97b`), 4 plans created (03.5-00 through 03.5-03), Plan 00 Task 0-1 complete (`2830e76`). Plans 01/02/03 each contain `checkpoint:human-verify` tasks for live walkthroughs. Auto-advance disabled per user direction. | - |
-| 6 | Phase 4 (v1.x): Quality of Life | 3/3 | Complete — QOL-01 (cmd+shift+v re-paste) + QOL-NEW-01 (F19 alt hotkey via Karabiner) shipped; test_karabiner_check.sh 8/8 GREEN; 3 manual walkthroughs signed off live | 2026-04-30 |
+| 6 | Phase 4 (v1.x): Quality of Life | 3/3 | Complete 2026-05-01 — QOL-01 (re-paste via F18-via-Karabiner-backtick-hold; D-02 cmd+shift+v SUPERSEDED mid-walkthrough after opaque clipboard-manager Carbon RegisterEventHotKey collision) + QOL-NEW-01 (F19 alt hotkey via Karabiner fn-remap) shipped; test_karabiner_check.sh 8/8 GREEN; CHECKPOINT-1 F19 walkthrough 5/5 PASS + CHECKPOINT-2 re-paste walkthrough 3/3 PASS post-deviation signed off live; CHECKPOINT-3 destructive-sudo-mv walkthrough DEFERRED per Oliver (unit-level coverage via test_karabiner_check.sh checks 4-5 substitutes; surface in /gsd:audit-uat) | 2026-05-01 |
 | 7 | Phase 3: Distribution & Benchmarking + Public Install | 0/0 | Queued (final v1 phase) | - |
 | 8 | Phase 5 (v1.1, conditional): Warm-Process Upgrade | 0/0 | Conditional on Phase 3 hyperfine | - |
 
@@ -228,3 +228,4 @@ Listed in **execution order** (Phase 3 reordered to come last in v1; phase numbe
 *Roadmap reordered: 2026-04-28 (Phase 3 Distribution moved to end of v1 per user direction; Phase 3.5 dependency flipped from Phase 3 to Phase 2.5; Phase 2 closed)*
 *Roadmap updated: 2026-04-30 (Phase 2.7 Security Posture closed 6/6; Phase 3.5 Hover UI / HUD planned with 4 plans + research finding on ScreenCaptureKit limitation; HUD-01..04 formalised; coverage 35→39 v1 reqs)*
 *Roadmap updated: 2026-04-30 — Phase 4 Quality of Life closed (3/3 plans; QOL-01 + QOL-NEW-01 Complete; coverage 39 → 41 v1 reqs; F19 push-to-talk + cmd+shift+v re-paste shipped; Karabiner-Elements added as carried-by-reference runtime dep in SBOM scope).*
+*Roadmap updated: 2026-05-01 — Plan 04-02 finalisation: D-02 cmd+shift+v re-paste hotkey SUPERSEDED mid-walkthrough by F18-via-Karabiner-backtick-hold after live discovery of opaque clipboard-manager Carbon RegisterEventHotKey collision (Hammerspoon hs.hotkey.bind returned truthy hotkey object yet keystroke unreachable; bare-key F18 has zero collisions). CHECKPOINT-3 destructive-sudo-mv walkthrough DEFERRED per Oliver (risk reduction; unit-level coverage via test_karabiner_check.sh checks 4-5 substitutes). New deviation class added to library: "live-walkthrough surfaces real-world conflict static research couldn't predict". Phase 4 remains 3/3 Complete; date stamped 2026-05-01.*
