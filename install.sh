@@ -1,20 +1,134 @@
 #!/usr/bin/env bash
-# PurpleVoice setup — idempotent installer (Phase 2.5 rebrand of voice-cc).
+# PurpleVoice install — single canonical idempotent installer.
+# (Renamed from setup.sh in Phase 3 per CONTEXT.md D-05.)
+#
+# Two valid invocation modes (Step 0 below detects which):
+#   - Local clone:  bash install.sh  (from a `git clone`d repo)
+#   - One-liner:    curl -fsSL https://raw.githubusercontent.com/OliverGAllen/purplevoice/main/install.sh | bash
+#
+# In curl|bash mode, install.sh git-clones the repo into ~/.local/share/purplevoice/src/
+# and re-execs from that clone. All subsequent steps are mode-agnostic.
 #
 # What this does (each step is safe to re-run):
+#   0. Detect invocation mode (clone vs curl|bash) and bootstrap clone if needed.
 #   1. Sanity-check that we are on Apple Silicon Homebrew (/opt/homebrew).
-#   2. Install Hammerspoon (cask), sox, whisper-cpp via Homebrew if missing.
-#   3. Verify the binaries exist at the expected absolute paths
-#      (Pitfall 2: Hammerspoon hs.task does not see Homebrew binaries via PATH).
-#   4. Create the XDG directory tree from day one (D-03).
-#   5. Download the Whisper small.en GGML model with resumable curl and
-#      verify SHA256 (D-05, D-06). Skip if file is already present and valid.
-#   6. Seed ~/.config/purplevoice/vocab.txt from vocab.txt.default ONLY if absent
-#      (D-08 — never clobber user edits).
-#   7. Print next-step reminders for the user (Hammerspoon perms, macOS
-#      Dictation hotkey conflict). Does NOT auto-edit any user config.
+#   2. Install Hammerspoon (cask), sox, whisper-cpp, syft via Homebrew if missing.
+#   3. Verify the binaries exist at the expected absolute paths.
+#   3b. One-time migration from voice-cc → purplevoice (Phase 2.5).
+#   4. Create the XDG directory tree.
+#   5. Download the Whisper small.en GGML model with resumable curl + SHA256 verify.
+#   5b. Download Silero VAD weights.
+#   6. Seed ~/.config/purplevoice/vocab.txt from vocab.txt.default ONLY if absent.
+#   6b. Install denylist.txt (project-owned; always-overwrite).
+#   6c. Install symlinks (~/.local/bin/purplevoice-record, ~/.hammerspoon/purplevoice).
+#   8. Regenerate SBOM via Syft (idempotent post-process).
+#   9. Karabiner-Elements check (refuse to declare install complete without it).
+#   10. Print next-step reminders for the user (Hammerspoon perms, hotkeys).
 #
-# Locked decisions: see .planning/phases/01-spike/01-CONTEXT.md (D-01..D-08).
+# Locked decisions: see .planning/phases/01-spike/01-CONTEXT.md (D-01..D-08)
+# + .planning/phases/03-distribution-public-install/03-CONTEXT.md (D-01..D-13).
+
+# ---------------------------------------------------------------------------
+# Step 0: curl-vs-clone detection + curl|bash bootstrap (Phase 3 / DST-05 / D-04)
+# ---------------------------------------------------------------------------
+# install.sh has TWO valid invocation modes (per RESEARCH.md §Pattern 1):
+#   - clone:  user has cloned the repo and runs `bash install.sh` from inside it.
+#   - curl:   user runs `curl -fsSL https://raw.githubusercontent.com/OliverGAllen/purplevoice/main/install.sh | bash`.
+# In curl mode we git-clone the repo into ~/.local/share/purplevoice/src/, then
+# `exec` install.sh from there so the rest of the script runs against a real
+# REPO_ROOT.
+#
+# detect_invocation_mode is intentionally idiom-portable: it does NOT use GNU
+# `realpath` (macOS Pitfall 7 — only ships with brew coreutils). Uses POSIX
+# `cd "$(dirname "$path")" && pwd` instead.
+
+detect_invocation_mode() {
+  # Returns "clone" or "curl" by writing to stdout.
+  # Heuristic: $0 / BASH_SOURCE[0] is a real file inside a git checkout → clone.
+  #            otherwise → curl|bash (stdin'd into bash).
+  local script_path="${BASH_SOURCE[0]:-$0}"
+  if [ -f "$script_path" ]; then
+    local script_dir
+    script_dir="$(cd "$(dirname "$script_path")" 2>/dev/null && pwd)" || { echo "curl"; return; }
+    if git -C "$script_dir" rev-parse --git-dir >/dev/null 2>&1; then
+      echo "clone"
+      return
+    fi
+  fi
+  echo "curl"
+}
+
+bootstrap_clone_then_re_exec() {
+  local CLONE_DIR="$HOME/.local/share/purplevoice/src"
+  local REPO_URL="https://github.com/OliverGAllen/purplevoice.git"
+  if ! command -v git >/dev/null 2>&1; then
+    cat >&2 <<'EOF'
+PurpleVoice: git is required for the curl|bash install path.
+  Install Xcode Command Line Tools: xcode-select --install
+  Then re-run the curl one-liner.
+EOF
+    exit 1
+  fi
+  mkdir -p "$(dirname "$CLONE_DIR")" || {
+    echo "PurpleVoice: cannot create $(dirname "$CLONE_DIR"). Check disk + permissions." >&2
+    exit 1
+  }
+  if [ -d "$CLONE_DIR/.git" ]; then
+    echo "PurpleVoice: existing clone at $CLONE_DIR — pulling latest..."
+    if ! git -C "$CLONE_DIR" pull --ff-only 2>&1; then
+      cat >&2 <<EOF
+PurpleVoice: git pull failed (local edits or non-fast-forward). Inspect:
+  cd $CLONE_DIR && git status
+  Or remove and let curl|bash re-clone:  rm -rf $CLONE_DIR
+EOF
+      exit 1
+    fi
+  elif [ -e "$CLONE_DIR" ]; then
+    echo "PurpleVoice: $CLONE_DIR exists but is not a git repo. Bailing." >&2
+    echo "  Remove or rename it, then re-run." >&2
+    exit 1
+  else
+    echo "PurpleVoice: cloning $REPO_URL into $CLONE_DIR..."
+    git clone --depth 1 "$REPO_URL" "$CLONE_DIR" || {
+      echo "PurpleVoice: git clone failed. Network down? Repo private?" >&2
+      echo "  Verify: curl -fsSI $REPO_URL" >&2
+      exit 1
+    }
+  fi
+  echo "PurpleVoice: re-exec'ing install.sh from $CLONE_DIR..."
+  exec bash "$CLONE_DIR/install.sh"
+}
+
+INVOCATION_MODE="$(detect_invocation_mode)"
+case "$INVOCATION_MODE" in
+  clone)
+    REPO_ROOT_BANNER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    cat <<EOF
+----------------------------------------------------------------------
+PurpleVoice installer (local clone at $REPO_ROOT_BANNER)
+
+  Idempotent — safe to re-run.
+  Re-runs preserve user-edited config (~/.config/purplevoice/vocab.txt).
+
+Local voice dictation. Nothing leaves your Mac.
+----------------------------------------------------------------------
+EOF
+    ;;
+  curl)
+    cat <<'EOF'
+----------------------------------------------------------------------
+PurpleVoice installer (via curl | bash)
+
+  Cloning OliverGAllen/purplevoice into ~/.local/share/purplevoice/src/
+  All subsequent install steps run from that local clone.
+  Re-running this one-liner is safe — git pull + idempotent re-install.
+
+Local voice dictation. Nothing leaves your Mac.
+----------------------------------------------------------------------
+EOF
+    bootstrap_clone_then_re_exec
+    ;;
+esac
 
 set -euo pipefail
 
@@ -36,7 +150,7 @@ PurpleVoice: PURPLEVOICE_OFFLINE=1 set but Hammerspoon.app not present at /Appli
 
   Air-gap install: download Hammerspoon-1.1.1.zip from https://www.hammerspoon.org/
   on a connected machine, USB-transfer, drag Hammerspoon.app to /Applications/,
-  then re-run: PURPLEVOICE_OFFLINE=1 bash setup.sh
+  then re-run: PURPLEVOICE_OFFLINE=1 bash install.sh
 
   (Homebrew cask install requires network access — see SECURITY.md "Air-Gapped Installation".)
 EOF
@@ -271,7 +385,7 @@ VOCAB_DEST="$HOME/.config/purplevoice/vocab.txt"
 VOCAB_SRC="$(dirname "$0")/vocab.txt.default"
 if [ ! -f "$VOCAB_DEST" ]; then
   if [ ! -f "$VOCAB_SRC" ]; then
-    echo "Missing source: $VOCAB_SRC (run setup.sh from the PurpleVoice repo root)." >&2
+    echo "Missing source: $VOCAB_SRC (run install.sh from the PurpleVoice repo root)." >&2
     exit 1
   fi
   cp "$VOCAB_SRC" "$VOCAB_DEST"
@@ -289,18 +403,18 @@ fi
 DENYLIST_DEST="$HOME/.config/purplevoice/denylist.txt"
 DENYLIST_SRC="$(dirname "$0")/config/denylist.txt"
 if [ ! -f "$DENYLIST_SRC" ]; then
-  echo "Missing source: $DENYLIST_SRC (run setup.sh from the PurpleVoice repo root)." >&2
+  echo "Missing source: $DENYLIST_SRC (run install.sh from the PurpleVoice repo root)." >&2
   exit 1
 fi
 cp "$DENYLIST_SRC" "$DENYLIST_DEST"
-echo "OK: denylist.txt installed at $DENYLIST_DEST (project-owned, overwritten on every setup.sh run)."
+echo "OK: denylist.txt installed at $DENYLIST_DEST (project-owned, overwritten on every install.sh run)."
 
 # ---------------------------------------------------------------------------
 # Step 6c: Install symlinks (D-03, D-04 — purplevoice-record + purplevoice-lua)
 # ---------------------------------------------------------------------------
 # Idempotent. Recreate even if the source target was renamed (Plan 02.5-01).
 # Uses absolute paths via $(pwd) which is the repo root because Step 0 hasn't
-# changed directory; setup.sh is invoked as `bash setup.sh` from repo root.
+# changed directory; install.sh is invoked as `bash install.sh` from repo root.
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 
 ln -sfn "$REPO_ROOT/purplevoice-record" "$HOME/.local/bin/purplevoice-record"
@@ -346,10 +460,10 @@ inject_system_context() {
      --arg clt "system-context: xcode-clt-version=$clt_version" \
      --arg brew "system-context: brew-version=$brew_version" \
      '.annotations = (.annotations // []) + [
-        {annotationDate: $ts, annotationType: "OTHER", annotator: "Tool: PurpleVoice-setup.sh", comment: $mv},
-        {annotationDate: $ts, annotationType: "OTHER", annotator: "Tool: PurpleVoice-setup.sh", comment: $arch},
-        {annotationDate: $ts, annotationType: "OTHER", annotator: "Tool: PurpleVoice-setup.sh", comment: $clt},
-        {annotationDate: $ts, annotationType: "OTHER", annotator: "Tool: PurpleVoice-setup.sh", comment: $brew}
+        {annotationDate: $ts, annotationType: "OTHER", annotator: "Tool: PurpleVoice-install.sh", comment: $mv},
+        {annotationDate: $ts, annotationType: "OTHER", annotator: "Tool: PurpleVoice-install.sh", comment: $arch},
+        {annotationDate: $ts, annotationType: "OTHER", annotator: "Tool: PurpleVoice-install.sh", comment: $clt},
+        {annotationDate: $ts, annotationType: "OTHER", annotator: "Tool: PurpleVoice-install.sh", comment: $brew}
       ]' "$sbom" > "$sbom.tmp" && mv "$sbom.tmp" "$sbom"
 }
 
@@ -405,7 +519,7 @@ KARABINER_JSON_F19="$REPO_ROOT/assets/karabiner-fn-to-f19.json"
 KARABINER_JSON_F18="$REPO_ROOT/assets/karabiner-backtick-to-f18.json"
 for KJ in "$KARABINER_JSON_F19" "$KARABINER_JSON_F18"; do
   if [ ! -f "$KJ" ]; then
-    echo "PurpleVoice: $KJ missing from repo (run setup.sh from a Phase-4-or-later checkout)." >&2
+    echo "PurpleVoice: $KJ missing from repo (run install.sh from a Phase-4-or-later checkout)." >&2
     exit 1
   fi
 done
@@ -427,7 +541,7 @@ Install Karabiner-Elements (free, open-source — https://karabiner-elements.pqr
        $KARABINER_JSON_F18
      Then click "Enable" next to "Hold fn → F19 (PurpleVoice push-to-talk)"
      AND "Hold \` (backtick) → F18 (PurpleVoice re-paste)".
-  5. Re-run: bash setup.sh
+  5. Re-run: bash install.sh
 
 If air-gapped: copy Karabiner-Elements.dmg from a connected machine via USB
 and install manually. Both JSON rule files are already in this repo at:

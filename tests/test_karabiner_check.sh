@@ -5,15 +5,16 @@
 #   1. assets/karabiner-fn-to-f19.json exists and parses as valid JSON
 #   2. The JSON has the documented top-level structure (title + rules + manipulators)
 #   3. The from.key_code is "fn" and to_if_held_down has key_code "f19"
-#   4. setup.sh contains the Karabiner-Elements check + actionable error
-#   5. setup.sh contains the file-existence guard for the JSON
+#   4. install.sh contains the Karabiner-Elements check + actionable error
+#   5. install.sh contains the file-existence guard for the JSON
 #   6. purplevoice-lua/init.lua binds F19 (no modifiers)
 #   7. purplevoice-lua/init.lua binds F18 for re-paste (Karabiner backtick-hold)
 #   8. purplevoice-lua/init.lua does NOT bind cmd+shift+e (deliberate replacement)
 #
-# RED-at-Wave-0 by design: assets/karabiner-fn-to-f19.json + setup.sh Step 9 +
+# RED-at-Wave-0 by design: assets/karabiner-fn-to-f19.json + install.sh Step 9 +
 # init.lua F19/F18 bindings do not exist yet. Plan 04-01 turns checks
 # 6, 7, 8 GREEN; Plan 04-02 turns checks 1-5 GREEN. Final state: 8/8 GREEN.
+# (Phase 3 / Plan 03-01: setup.sh renamed to install.sh per D-05; references updated.)
 #
 # Exit 0 = wiring intact; exit 1 = drift or missing file.
 set -uo pipefail
@@ -21,7 +22,7 @@ cd "$(dirname "$0")/.."   # repo root
 
 FAIL=0
 KARABINER_JSON="assets/karabiner-fn-to-f19.json"
-SETUP="setup.sh"
+SETUP="install.sh"
 INIT="purplevoice-lua/init.lua"
 
 # 1. JSON file exists and parses

@@ -7,7 +7,8 @@
 # Approved exemptions (preserved per Phase 2.5 decisions):
 #   - .planning/                              - historical record (D-07)
 #   - .git/                                   - git history
-#   - setup.sh                                - migrate_xdg_dir FROM-arg literals + stale-symlink cleanup; required for migration to work
+#   - .claude/                                - tool-managed (worktrees, sessions, scratch) — never committed; pre-existing untracked surface
+#   - install.sh                              - migrate_xdg_dir FROM-arg literals + stale-symlink cleanup; required for migration to work (renamed from setup.sh in Phase 3)
 #   - CLAUDE.md                               - GSD-auto-managed block; deferred to Phase 3 STACK.md update
 #   - README.md                               - legitimate historical mention of working name 'voice-cc'
 #   - tests/test_brand_consistency.sh         - this file (mentions the string in comments and grep patterns)
@@ -28,7 +29,8 @@ HITS=$(grep -rln "voice-cc" \
   . 2>/dev/null \
   | grep -v "^\./\.planning/" \
   | grep -v "^\./\.git/" \
-  | grep -v "^\./setup\.sh$" \
+  | grep -v "^\./\.claude/" \
+  | grep -v "^\./install\.sh$" \
   | grep -v "^\./CLAUDE\.md$" \
   | grep -v "^\./README\.md$" \
   | grep -v "^\./tests/test_brand_consistency\.sh$" \
