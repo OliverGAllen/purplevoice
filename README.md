@@ -19,15 +19,18 @@ PurpleVoice is a push-to-talk voice input system for Claude Code (and any focuse
 
 [`SECURITY.md`](SECURITY.md) substantiates these claims with a threat model, framework gap analysis (NIST SP 800-53 + 6 framed frameworks: FIPS 140-3 / FedRAMP-tailored / Common Criteria / HIPAA / SOC 2 / ISO/IEC 27001), an auditable zero-egress verification methodology, an SBOM, and runnable verification scripts. See [Security & Privacy](#security--privacy) below.
 
-## Status
+## Quickstart
 
-- **Phase 1: Spike** — ✅ Complete (end-to-end loop validated on Apple Silicon)
-- **Phase 2: Hardening** — ✅ Complete (TCC silent-deny detection, hallucination guards, clipboard preserve/restore, re-entrancy guard, failure notifications)
-- **Phase 2.5: Branding** — ✅ Complete (this rebrand)
-- **Phase 2.7: Security Posture** — ✅ Complete (SECURITY.md + SBOM.spdx.json + 5 runnable verify scripts)
-- **Phase 3.5: Hover UI / HUD** — ⏳ Queued
-- **Phase 4: Quality of Life** — ⏳ Queued
-- **Phase 3: Distribution + Public Install** — ⏳ Queued (final v1 phase — installer + hyperfine benchmarks)
+```bash
+curl -fsSL https://raw.githubusercontent.com/OliverGAllen/purplevoice/main/install.sh | bash
+```
+
+After install completes, paste `require("purplevoice")` into `~/.hammerspoon/init.lua` and reload Hammerspoon. Then:
+
+- **Hold `fn`** to start recording, release to transcribe and paste into the focused window.
+- **Hold `` ` ``** (backtick) to re-paste the most recent transcript.
+
+If anything misbehaves, see [Detailed Install](#detailed-install) below — Karabiner-Elements is required, and macOS asks for Microphone + Accessibility permissions on first run.
 
 ## Hotkey
 
@@ -37,48 +40,60 @@ PurpleVoice is a push-to-talk voice input system for Claude Code (and any focuse
 
 > **Note on hotkey choice:** the original plan used `cmd+shift+v` (D-02), but live walkthrough on 2026-04-30 surfaced an opaque clipboard-manager collision (no Hammerspoon binding-failed alert; keystroke silently consumed) plus the documented VS Code / Cursor "Markdown Preview" cost. Switched to F18-via-backtick-hold to dodge both — F18 has zero collisions and the backtick key remains usable for typing.
 
-## Setup
+## Performance
 
-```bash
-bash setup.sh
-```
+Latency benchmarks (whisper-cli transcription, hyperfine 10-run × 3-warmup) on Oliver's machine:
 
-`setup.sh` is idempotent — safe to re-run. It installs Homebrew dependencies (Hammerspoon, sox, whisper-cpp), creates the XDG directory layout (`~/.config/purplevoice/`, `~/.local/share/purplevoice/models/`, `~/.cache/purplevoice/`, `~/.local/bin/`, `~/.hammerspoon/purplevoice/`), downloads the Whisper `small.en` model with SHA256 verification, downloads the Silero VAD weights, seeds a default vocabulary file, and seeds the hallucination-denylist. If you're upgrading from the working name `voice-cc`, `setup.sh` migrates the old paths idempotently (only-old → mv; both → warn+skip; only-new → no-op).
+| Utterance length | p50 | p95 |
+|---|---|---|
+| 2s.wav | _filled by Plan 03-03_ | _filled by Plan 03-03_ |
+| 5s.wav | _filled by Plan 03-03_ | _filled by Plan 03-03_ |
+| 10s.wav | _filled by Plan 03-03_ | _filled by Plan 03-03_ |
 
-After running `setup.sh`, paste the printed `require("purplevoice")` line into your `~/.hammerspoon/init.lua` and reload Hammerspoon.
+**Phase 5 (warm-process upgrade) trigger:** `p50 > 2s OR p95 > 4s on the 5s.wav benchmark`. Currently: _filled by Plan 03-03_. See [BENCHMARK.md](BENCHMARK.md) for full methodology + raw JSON.
 
-### Karabiner-Elements (required for the F19 hotkey)
+## Detailed Install
 
-PurpleVoice's F19 push-to-talk hotkey is produced by remapping the `fn` key with [Karabiner-Elements](https://karabiner-elements.pqrs.org/) (free, open-source). `setup.sh` Step 9 checks for `/Applications/Karabiner-Elements.app` and refuses to declare install complete without it.
+The Quickstart curl one-liner runs `install.sh`, which is idempotent — safe to re-run. It installs Homebrew dependencies (Hammerspoon, sox, whisper-cpp, syft), creates the XDG directory layout (`~/.config/purplevoice/`, `~/.local/share/purplevoice/models/`, `~/.cache/purplevoice/`, `~/.local/bin/`, `~/.hammerspoon/purplevoice/`), downloads the Whisper `small.en` model with SHA256 verification, downloads the Silero VAD weights, seeds a default vocabulary file, seeds the hallucination-denylist, refuses to declare install complete without Karabiner-Elements (Step 9), and prints the `require("purplevoice")` line for you to paste into `~/.hammerspoon/init.lua`. If you're upgrading from the working name `voice-cc`, the migration is automatic (only-old → mv; both → warn+skip; only-new → no-op).
+
+If you cloned the repo locally instead of using the curl one-liner: `bash install.sh` from the repo root does the same thing.
+
+### Karabiner-Elements (required for the F19 + backtick hotkeys)
+
+PurpleVoice's F19 push-to-talk and F18 re-paste hotkeys are produced by remapping the `fn` and backtick keys with [Karabiner-Elements](https://karabiner-elements.pqrs.org/) (free, open-source). `install.sh` Step 9 checks for `/Applications/Karabiner-Elements.app` and refuses to declare install complete without it.
 
 One-time installation:
 
 1. Download `Karabiner-Elements.dmg` from <https://karabiner-elements.pqrs.org/>.
 2. Drag `Karabiner-Elements.app` to `/Applications/`.
 3. Launch Karabiner-Elements once. macOS will prompt for the driver / system-extension grant — open System Settings → Privacy & Security and enable **"Allow software from Fumihiko Takayama"** (the Karabiner author). Restart Karabiner-Elements when prompted.
-4. Import the `fn → F19` rule: Karabiner-Elements → **Preferences → Complex Modifications → Add rule → Import rule from file** → select `assets/karabiner-fn-to-f19.json` from this repository. Click **Enable** next to **"Hold fn → F19 (PurpleVoice push-to-talk)"**.
-5. Re-run `bash setup.sh` — Step 9 should now print `OK: Karabiner-Elements detected at /Applications/Karabiner-Elements.app`.
+4. Import BOTH rules: Karabiner-Elements → **Preferences → Complex Modifications → Add rule → Import rule from file** → select these in turn from your PurpleVoice clone (or from `~/.local/share/purplevoice/src/assets/` if you used the curl one-liner):
+   - `assets/karabiner-fn-to-f19.json` — click **Enable** next to **"Hold fn → F19 (PurpleVoice push-to-talk)"**.
+   - `assets/karabiner-backtick-to-f18.json` — click **Enable** next to **"Hold ` (backtick) → F18 (PurpleVoice re-paste)"**.
+5. Re-run `bash install.sh` — Step 9 should now print `OK: Karabiner-Elements detected at /Applications/Karabiner-Elements.app`.
 
-Air-gapped users: copy `Karabiner-Elements.dmg` from a connected machine via USB sneakernet. The `fn → F19` JSON rule is already bundled in this repo at `assets/karabiner-fn-to-f19.json` — no additional download needed for the rule itself.
+Air-gapped users: copy `Karabiner-Elements.dmg` from a connected machine via USB sneakernet. The JSON rules are bundled in this repo at `assets/karabiner-*.json` — no additional download needed for the rules.
 
-The recommended hold threshold is 200 ms (configured in the JSON rule via `basic.to_if_alone_timeout_milliseconds` and `basic.to_if_held_down_threshold_milliseconds`). If the threshold feels wrong on your hardware (false-positive recording on quick taps OR perceived lag on intentional holds), edit both values in the JSON file in 50 ms increments and re-import in Karabiner.
+The recommended hold threshold is 200 ms (configured in each JSON rule via `basic.to_if_alone_timeout_milliseconds` and `basic.to_if_held_down_threshold_milliseconds`). If the threshold feels wrong on your hardware (false-positive recording on quick taps OR perceived lag on intentional holds), edit both values in the JSON file in 50 ms increments and re-import in Karabiner.
 
-## Permissions to grant manually after first Hammerspoon launch
+### Permissions (granted manually after first Hammerspoon launch)
 
 - **Microphone** — System Settings → Privacy & Security → Microphone → enable Hammerspoon.app
 - **Accessibility** — System Settings → Privacy & Security → Accessibility → enable Hammerspoon.app
 
 Both are required for the press-to-talk loop. Hammerspoon will prompt for Microphone on first sox spawn; Accessibility is surfaced deterministically by `hs.accessibilityState(true)` on module load. If permission is denied, PurpleVoice fires an actionable macOS notification with a deep link to the relevant Privacy & Security pane (no silent failures — this was Phase 2's hardening contract).
 
-## Conflicting macOS feature to disable
+### Conflicting macOS feature to disable
 
 Disable the macOS Dictation hotkey to avoid conflicts:
 
 - System Settings → Keyboard → Dictation → Shortcut → Off
 
-## Recovery
+### Recovery
 
-If permissions get into a bad state, reset them:
+If something stops working, work through these four items in order. Most "lost my hotkeys" reports resolve at item 3.
+
+#### 1. TCC reset (permissions stuck weirdly)
 
 ```bash
 tccutil reset Microphone org.hammerspoon.Hammerspoon
@@ -88,6 +103,72 @@ open -a Hammerspoon
 ```
 
 Then re-grant when prompted.
+
+#### 2. Karabiner rule troubleshoot
+
+Open Karabiner-Elements → **Event Viewer**. Hold `fn` — F19 events should appear. Hold `` ` `` — F18 events should appear.
+
+**Common UK-vs-US gotcha:** the backtick rule uses `non_us_backslash` (UK + most non-US keyboards). On ANSI/US keyboards, edit `assets/karabiner-backtick-to-f18.json` and change both `non_us_backslash` values to `grave_accent_and_tilde`, then re-import.
+
+#### 3. "I lost my hotkeys" — 5-step triage
+
+If holding `fn` no longer triggers PurpleVoice recording (or holding `` ` `` no longer re-pastes):
+
+1. **Reload Hammerspoon.** Menubar → Hammerspoon → Reload Config. If still no response → continue to step 2.
+
+2. **Check the Karabiner-Elements menubar icon is present.** If absent, launch Karabiner-Elements (`open /Applications/Karabiner-Elements.app`); the menubar icon should appear within 5 seconds. If launching produces no menubar icon → reinstall Karabiner-Elements (re-grant the system-extension prompt).
+
+3. **Verify both rules are enabled.** Karabiner-Elements → Preferences → Complex Modifications. Both rules should be present + toggled ON:
+   - "Hold fn → F19 (PurpleVoice push-to-talk)"
+   - "Hold ` (backtick) → F18 (PurpleVoice re-paste)"
+   If absent, re-import via "Add rule → Import rule from file" → select the JSON files in `assets/karabiner-*.json` from your PurpleVoice clone.
+
+4. **Use Karabiner Event Viewer to confirm key codes.** Karabiner-Elements menubar → "Event Viewer".
+   - Hold `fn`. The viewer should show `f19` events flowing.
+   - Hold `` ` ``. The viewer should show `f18` events flowing.
+   - If F19/F18 events are NOT flowing → the Karabiner rule isn't firing → re-check step 3.
+   - If F19/F18 events ARE flowing but PurpleVoice doesn't react → continue to step 5.
+
+5. **Check Hammerspoon console for binding-failed alerts.** Menubar → Hammerspoon → Console. Look for the most recent reload — is there a `PurpleVoice loaded` alert? If NO: `init.lua` failed to load → check `~/.hammerspoon/init.lua` contains `require("purplevoice")` and that no syntax error appears in the console. If YES (PurpleVoice loaded BUT keypresses don't trigger it): another app may be silently consuming the F19 / F18 key (Carbon `RegisterEventHotKey` collision — see Phase 4 D-02 SUPERSEDED notes). Try quitting clipboard managers / global-hotkey daemons one at a time and re-testing.
+
+#### 4. uninstall.sh (full reset)
+
+If the recovery steps above don't resolve the issue, you can fully remove PurpleVoice and re-install:
+
+```bash
+bash uninstall.sh
+bash install.sh
+```
+
+See [Uninstalling](#uninstalling) for what `uninstall.sh` does and doesn't touch.
+
+### Uninstalling
+
+```bash
+bash uninstall.sh
+```
+
+Removes:
+- `~/.config/purplevoice/` (vocab.txt, denylist.txt)
+- `~/.cache/purplevoice/`
+- `~/.local/share/purplevoice/` (models + curl|bash clone destination at `src/`)
+- `~/.local/bin/purplevoice-record` (symlink only)
+- `~/.hammerspoon/purplevoice` (symlink or directory)
+
+Does NOT touch:
+- Hammerspoon, sox, whisper-cpp, Karabiner-Elements binaries (they may serve other tools)
+- Karabiner rule JSONs in `~/.config/karabiner/` (user-owned; toggle off in Karabiner Preferences if you want to disable)
+- The `require("purplevoice")` line in `~/.hammerspoon/init.lua` (manual removal — printed in the uninstall banner)
+- TCC permissions for Hammerspoon (manual `tccutil reset` if desired)
+
+If you want to preserve `vocab.txt` (the only file you may have edited), copy it out before running:
+
+```bash
+cp ~/.config/purplevoice/vocab.txt /tmp/my-vocab.txt
+bash uninstall.sh
+```
+
+A local working clone of the PurpleVoice repo (e.g., at `~/dev/purplevoice/`) is NOT touched — that's a working copy under your control. Only the XDG-managed `~/.local/share/purplevoice/` tree is removed.
 
 ## Security & Privacy
 
@@ -122,10 +203,10 @@ The framing lint (`tests/test_security_md_framing.sh`) enforces D-17 "compatible
 
 ### Air-gapped installation
 
-PurpleVoice supports air-gapped operation. Set `PURPLEVOICE_OFFLINE=1` before running `setup.sh`:
+PurpleVoice supports air-gapped operation. Set `PURPLEVOICE_OFFLINE=1` before running `install.sh`:
 
 ```bash
-PURPLEVOICE_OFFLINE=1 bash setup.sh
+PURPLEVOICE_OFFLINE=1 bash install.sh
 ```
 
 Required pre-staging on a connected machine (USB sneakernet to the air-gapped target):
@@ -133,7 +214,7 @@ Required pre-staging on a connected machine (USB sneakernet to the air-gapped ta
 1. Download `ggml-small.en.bin` (~488 MB) from `https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin`. Verify SHA256 = `c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d`. Place at `~/.local/share/purplevoice/models/ggml-small.en.bin`.
 2. Download `ggml-silero-v6.2.0.bin` (~885 KB) from `https://huggingface.co/ggml-org/whisper-vad/resolve/main/ggml-silero-v6.2.0.bin`. Place at `~/.local/share/purplevoice/models/ggml-silero-v6.2.0.bin`.
 3. Download Hammerspoon `.zip` from `https://www.hammerspoon.org/`; drag `Hammerspoon.app` to `/Applications/`.
-4. Sneakernet `sox` + the transcription binary brew bottles (run `brew fetch sox whisper-cpp --bottle` on the connected machine; tarballs land at `~/Library/Caches/Homebrew/downloads/`).
+4. Sneakernet `sox` + `whisper-cpp` brew bottles (run `brew fetch sox whisper-cpp --bottle` on the connected machine; tarballs land at `~/Library/Caches/Homebrew/downloads/`).
 
 The repo also publishes an SBOM at `SBOM.spdx.json` (SPDX 2.3 JSON) for procurement officers and auditors who need to enumerate the trusted compute base.
 
@@ -169,15 +250,27 @@ Lavender (`#B388EB`) menubar indicator; the same lavender plus a white lips silh
 ```
 purplevoice-record           # bash glue — sox capture + whisper-cli transcribe
 purplevoice-lua/init.lua     # Hammerspoon module — hotkey + paste + notifications
-setup.sh                     # idempotent installer + voice-cc → purplevoice migration
+install.sh                   # idempotent installer (renamed from setup.sh in Phase 3) + voice-cc → purplevoice migration + curl-vs-clone detection
+uninstall.sh                 # idempotent removal of XDG dirs + symlinks
+LICENSE                      # MIT
+BENCHMARK.md                 # hyperfine performance numbers + Phase 5 trigger
+SBOM.spdx.json               # Software Bill of Materials (SPDX 2.3 JSON)
 assets/
-  icon.svg                   # source SVG (lavender + white lips)
-  icon-256.png               # 256×256 PNG, sips-derived from icon.svg
-  README.md                  # icon regeneration instructions
+  icon.svg                          # source SVG (lavender + white lips)
+  icon-256.png                      # 256×256 PNG, sips-derived from icon.svg
+  karabiner-fn-to-f19.json          # Karabiner rule: hold fn → F19 (push-to-talk)
+  karabiner-backtick-to-f18.json    # Karabiner rule: hold ` → F18 (re-paste)
+  README.md                         # icon regeneration instructions
 config/denylist.txt          # canonical Whisper-hallucination phrases (filtered out)
-tests/                       # bash unit tests + manual walkthroughs
+tests/                       # bash unit tests + manual walkthroughs + benchmark harness
 .planning/                   # GSD workflow artifacts (phase plans, requirements, state)
 ```
+
+## Status
+
+PurpleVoice v1 is **complete and shipping** as of Phase 3 close. Detailed phase progress, decisions, and historical context: [ROADMAP.md](.planning/ROADMAP.md).
+
+Current phase coverage: 7 of 7 v1 phases complete (Spike → Hardening → Branding → Security Posture → HUD → Quality of Life → Distribution). Phase 5 (warm-process upgrade) is conditional on the hyperfine numbers in [BENCHMARK.md](BENCHMARK.md).
 
 ## Why "PurpleVoice"
 
