@@ -10,7 +10,7 @@
 
 **Phase 3 IS:**
 - A renamed `install.sh` (was `setup.sh`) — same idempotent steps + Karabiner check + brand migration; single canonical installer
-- A short public-installer entry point on `https://raw.githubusercontent.com/oliverallen/purplevoice/main/install.sh` that git-clones the repo into a sensible location (e.g., `~/.local/share/purplevoice/src/`) and invokes `install.sh` locally
+- A short public-installer entry point on `https://raw.githubusercontent.com/OliverGAllen/purplevoice/main/install.sh` that git-clones the repo into a sensible location (e.g., `~/.local/share/purplevoice/src/`) and invokes `install.sh` locally
 - An `uninstall.sh` script (new) that removes XDG dirs + symlinks + prints manual-removal instructions for the Hammerspoon `require()` line + Karabiner rules (does NOT auto-uninstall Hammerspoon/sox/etc — those may serve other tools)
 - A `BENCHMARK.md` documenting hyperfine methodology + raw numbers + Phase 5 go/no-go decision
 - 3 pre-recorded reference WAVs in `tests/benchmark/` (2s / 5s / 10s) for reproducible transcription-only benchmarks
@@ -35,7 +35,7 @@
 2. `install.sh` finishes by *printing* (never auto-appending) the exact `require("purplevoice")` line.
 3. README walks through Microphone + Accessibility grant for Hammerspoon, macOS Dictation shortcut disable, and `tccutil reset Microphone org.hammerspoon.Hammerspoon` recovery procedure.
 4. `hyperfine` produces p50 + p95 end-to-end latency numbers on Oliver's machine for short (~2s), medium (~5s), long (~10s) utterances; numbers explicitly inform a documented go/no-go decision for Phase 5.
-5. Public one-line installer (`curl -fsSL https://raw.githubusercontent.com/oliverallen/purplevoice/main/install.sh | bash`) clones the repo and invokes the local `install.sh`. Public install is idempotent, prints next steps including the brand-aware `require()` line, and is documented in the README. Repo must be public on GitHub before this can pass.
+5. Public one-line installer (`curl -fsSL https://raw.githubusercontent.com/OliverGAllen/purplevoice/main/install.sh | bash`) clones the repo and invokes the local `install.sh`. Public install is idempotent, prints next steps including the brand-aware `require()` line, and is documented in the README. Repo must be public on GitHub before this can pass.
 6. DST-06 — Hammerspoon-as-PurpleVoice wrapping decision documented (Option B) and implemented (the bundled-installer flow IS the implementation).
 
 </domain>
@@ -51,7 +51,7 @@
 
 ### DST-05 Public Installer (D-04..D-07)
 
-- **D-04: Public installer URL = `https://raw.githubusercontent.com/oliverallen/purplevoice/main/install.sh`.** The script `curl|bash` runs IS `install.sh` itself (not a separate bootstrap). install.sh detects whether it's running from a clone or via curl-pipe; if via curl, it `git clone`s the repo into `~/.local/share/purplevoice/src/` (or equivalent), then proceeds with the install steps locally. Audit-friendly (URL points at versioned source); zero new infra (no DNS, no CDN); standard pattern matching oh-my-zsh, rust-up, etc.
+- **D-04: Public installer URL = `https://raw.githubusercontent.com/OliverGAllen/purplevoice/main/install.sh`.** The script `curl|bash` runs IS `install.sh` itself (not a separate bootstrap). install.sh detects whether it's running from a clone or via curl-pipe; if via curl, it `git clone`s the repo into `~/.local/share/purplevoice/src/` (or equivalent), then proceeds with the install steps locally. Audit-friendly (URL points at versioned source); zero new infra (no DNS, no CDN); standard pattern matching oh-my-zsh, rust-up, etc.
 - **D-05: Rename `setup.sh` → `install.sh`.** Single canonical idempotent installer. `git mv setup.sh install.sh`; update all internal references (README, SECURITY.md mentions, REQUIREMENTS.md, ROADMAP.md, prior phase SUMMARYs may mention setup.sh — leave historical refs intact, only update active surfaces). Roadmap success criterion 1 says `./install.sh` — this is the exact rename.
 - **D-06: Repo flips PRIVATE → PUBLIC after install.sh + DST-06 (Option B implementation) land in Wave 1-2; before DST-05 (curl|bash) is end-to-end tested.** Tightest review window. Pre-flip checklist before the `gh repo edit --visibility public` flip:
   - LICENSE (MIT) added and committed
@@ -85,6 +85,14 @@
 - **install.sh detection of curl-vs-clone** (D-04). Recommendation: check if `$0` resolves to a path inside a git checkout vs `bash -c` invocation. Standard idiom: `if [ -d "$REPO_ROOT/.git" ]; then echo "running from clone"; else echo "running via curl"; git clone ...; fi`. Planner refines.
 - **Whether `uninstall.sh` should also remove the Karabiner rule files** from `~/.config/karabiner/assets/complex_modifications/`. Recommendation: NO (don't touch user's Karabiner config; print instructions to do it manually if desired). Less destructive default.
 - **README "Performance" section presentation** — table vs prose, raw numbers vs ranges. Recommendation: small table with p50/p95 columns for each utterance length, then a one-line "On Oliver's M-series MacBook Pro, all measurements are well under the 2s target — Phase 5 deferred." Planner adapts to actual benchmark results.
+
+### Pre-Existing Bugs Phase 3 Sweeps Up (D-13 — added 2026-05-01 post-research)
+
+- **D-13: GitHub owner casing typo across the codebase.** Research surfaced (via `gh repo view`) that the actual GitHub owner is `OliverGAllen`, not `oliverallen`. Pre-existing wrong-cased references that Phase 3 must sweep:
+  - `setup.sh` line 363 — SBOM `documentNamespace` URL hardcoded to `https://github.com/oliverallen/PurpleVoice/sbom/...` (Phase 2.7 deliverable; pre-dates Phase 3 by ~30 days). Currently produces a non-resolving SBOM URL but doesn't cause functional failure (verify_sbom.sh doesn't HTTP-resolve the namespace).
+  - `SECURITY.md` line 710 — clone instruction `git clone https://github.com/oliverallen/PurpleVoice.git` would 404 on a fresh user's machine (pre-existing).
+  - All Phase 3 deliverables (install.sh, README quickstart, BENCHMARK.md, uninstall.sh, LICENSE) MUST use the correct casing `OliverGAllen/purplevoice`.
+  - Sweep is mechanical; one consolidated commit OR fold into the Wave 1 install.sh rename commit.
 
 ### Folded Todos
 
