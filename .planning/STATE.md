@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
-status: executing
-last_updated: "2026-05-01T01:39:43.000Z"
+status: planning
+last_updated: "2026-05-01T02:00:40.326Z"
 progress:
   total_phases: 8
   completed_phases: 6
@@ -33,9 +33,9 @@ Plan: 3 of 3 (04-00 staging + 04-01 lua-core + 04-02 karabiner-docs all complete
 Next: `/gsd:verify-work 4` (Sonnet sign-off — verifier should treat CHECKPOINT-3 deferral as expected-pending) OR proceed to Phase 3 (Distribution & Public Install — final v1 polish step). Per ROADMAP execution order: Phase 3 is next.
 
 - **Milestone:** v1
-- **Phase:** 04 (COMPLETE)
-- **Plan:** 04-00 + 04-01 + 04-02 all complete
-- **Status:** Phase 04 closed; awaiting next-phase kickoff (Phase 3 Distribution per ROADMAP execution order, OR /gsd:verify-work 4 sign-off first)
+- **Phase:** 5
+- **Plan:** Not started
+- **Status:** Ready to plan
 
 ### Progress
 
