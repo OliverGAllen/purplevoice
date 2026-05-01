@@ -2,7 +2,7 @@
 phase: 03-distribution-public-install
 plan: 01
 subsystem: distribution
-tags: [bash, idempotent-installer, curl-bash, dst-05, dst-06, d-13-typo-sweep, sbom-annotator]
+tags: [bash, idempotent-installer, curl-bash, dst-05, dst-06, d-13-typo-sweep, sbom-annotator, walkthrough-signed-off]
 
 # Dependency graph
 requires:
@@ -22,6 +22,8 @@ provides:
   - tests/test_brand_consistency.sh exemption swept setup.sh -> install.sh + .claude/ exclusion added (Rule 3 — sibling worktrees were leaking voice-cc strings into the lint)
   - tests/test_install_sh_detection.sh rewritten so it actually exercises the function (Rule 1 — original test couldn't override BASH_SOURCE[0] because bash treats it specially)
   - tests/test_karabiner_check.sh + tests/security/verify_air_gap.sh updated to reference install.sh (Rule 3 — direct downstream of rename)
+  - SBOM.spdx.json regenerated post-rename + post-D-13-sweep (commit f8cebb3) so on-disk SBOM matches install.sh's new annotator + corrected documentNamespace
+  - DST-01 idempotency walkthrough signed off live by Oliver 2026-05-01 (5/6 PASS, criterion 8 DEFERRED-structural — see Deviations)
 affects: [03-02-PLAN, 03-03-PLAN, 03-04-PLAN]
 
 # Tech tracking
@@ -33,16 +35,19 @@ tech-stack:
     - "Dual-mode banner block via `case $INVOCATION_MODE in clone) ... ;; curl) ... bootstrap ;; esac` so the rest of install.sh only runs in clone mode (re-exec'd from the local clone)"
     - "BASH_SOURCE override unreliable in bash subshells — to test clone-mode detection, use a real file via mktemp + git init + bash <real-file>; for curl-mode, use stdin pipe (printf | bash)"
     - ".claude/ untracked tool surface added to brand-consistency exemption list — sibling worktrees can otherwise leak historical voice-cc strings into the lint and block GREEN"
+    - "Live walkthrough as authoritative gate for installer idempotency — sandbox cannot replicate user's actual ~/.hammerspoon/init.lua + edited vocab.txt + on-disk SBOM commit chain; only Oliver running install.sh twice on his real machine validates DST-01 end-to-end"
 
 key-files:
   created: []
   modified:
     - install.sh  # renamed from setup.sh; Step 0 detection + bootstrap inserted
     - SECURITY.md  # D-13 typo fix (line 710 git clone URL)
+    - SBOM.spdx.json  # regenerated post-rename + post-D-13 (commit f8cebb3)
     - tests/test_brand_consistency.sh  # exemption swept setup.sh -> install.sh + .claude/ added
     - tests/test_install_sh_detection.sh  # rewritten to use real subshell contexts
     - tests/test_karabiner_check.sh  # SETUP="setup.sh" -> SETUP="install.sh"
     - tests/security/verify_air_gap.sh  # 4 setup.sh -> install.sh references in invariant invocations
+    - tests/manual/test_install_idempotent.md  # walkthrough signed off live by Oliver 2026-05-01 + criterion-8 deviation documented inline
   removed:
     - setup.sh  # via git mv (history preserved on the renamed file)
 
@@ -52,21 +57,25 @@ key-decisions:
   - ".claude/ added to brand-consistency exemption (Rule 3 unblock): sibling agent worktrees at .claude/worktrees/agent-{a097d9ba,aaf0eadb} contain pre-2.5-rebrand snapshots full of voice-cc strings. Without exemption, lint hits 100+ unrelated files. .claude/ is untracked tooling surface (analogous to .git/.planning/) — strict exemption is correct."
   - "Internal install.sh user-facing setup.sh references (PURPLEVOICE_OFFLINE retry hint, missing-source error messages, REPO_ROOT comment, Karabiner step-5 reminder) swept to install.sh — accuracy in error output. Single audit-trail comment retained at line 3 (`# Renamed from setup.sh in Phase 3 per CONTEXT.md D-05.`)."
   - "test_karabiner_check.sh + tests/security/verify_air_gap.sh both directly invoked `setup.sh` — required Rule 3 follow-up to keep them GREEN after the rename. Both now reference install.sh; both back to PASS."
+  - "SBOM regeneration after rename + D-13 was missing from the original task chain — orchestrator caught during walkthrough (Run 1 vs HEAD diff showed annotator + documentNamespace stale). Landed as f8cebb3 mid-walkthrough; pre-walkthrough state of repo had install.sh saying \"Tool: PurpleVoice-install.sh\" while SBOM.spdx.json on disk still said \"Tool: PurpleVoice-setup.sh\" — same plan-prose-vs-implementation pattern documented across Phase 2.7 / 02.5 / 04 deviation library. Surfaced as Rule 1 deviation (D-01 below)."
+  - "Walkthrough criterion 8 (SBOM zero git diff) is mathematically unsatisfiable due to install.sh:472-478 deriving documentNamespace from `git rev-parse HEAD` (circular self-reference: committing the regenerated SBOM moves HEAD, making the just-committed SBOM 1-commit stale). Run 1 ↔ Run 2 byte-identity (md5 a48aae374ddb…) proves idempotency intent is upheld; literal git-diff check is over-strict for the underlying invariant. Deferred to Phase 5 / v1.1 follow-on (BACKLOG entry filed). Documented as Rule 1 STRUCTURAL deviation (D-02 below). Same latent issue existed in Phase 2.7 — hidden because no one re-ran setup.sh after the SBOM commit during 2.7's walkthrough."
 
 patterns-established:
   - "When `git mv` renames a script, sweep the active downstream surfaces in a single commit: tests that grep the script's content (test_karabiner_check), tests that exec the script (verify_air_gap), brand-consistency exemption rules, internal user-facing error messages within the script. Keeps the rename atomic — no split GREEN/RED state across commits."
   - "When a Wave-0 test was authored from RESEARCH text without being run against a real implementation, expect a small re-test-of-the-test pass during Wave 1: the test design may have brittle mock idioms (BASH_SOURCE override) that look correct on paper but fail in practice. Fix the test, document as Rule 1 deviation, move on."
+  - "When install.sh regenerates SBOM as part of its run, regenerate-and-commit SBOM in the SAME commit as any rename or annotator-string change (otherwise on-disk SBOM goes stale relative to install.sh's regen logic, which surfaces as a 'phantom diff' the moment anyone runs install.sh post-merge). Treat SBOM as a derived artifact synchronised by install.sh — and remember to re-derive it whenever its inputs change."
+  - "Mathematically-unsatisfiable walkthrough criteria are NOT walkthrough failures — they are validation-contract design defects. When the criterion's underlying intent (idempotency) is provably upheld by an alternative measurement (Run 1 ↔ Run 2 byte-identity), accept the criterion as DEFERRED-structural and file a backlog item to fix the underlying derivation. Do not pretend the criterion failed; do not over-claim it passed; document the structural reason inline in the walkthrough sign-off."
 
 requirements-completed: [DST-01, DST-02, DST-05, DST-06]
 
 # Metrics
-duration: ~30min
+duration: ~30min wall-clock (executor + checkpoint + orchestrator-driven walkthrough + continuation)
 completed: 2026-05-01
 ---
 
 # Phase 3 Plan 01: Install.sh Rename + Curl|Bash Bootstrap Summary
 
-**setup.sh -> install.sh rename + Step 0 curl-vs-clone detection + bootstrap_clone_then_re_exec inserted; D-13 typo sweep; brand-consistency exemption updated; Wave-0 RED tests turn GREEN; functional suite at exact 14/2 plan target — checkpoint reached at LIVE idempotency walkthrough (Task 1-3).**
+**setup.sh -> install.sh rename + Step 0 curl-vs-clone detection + bootstrap_clone_then_re_exec inserted; D-13 typo sweep; brand-consistency exemption updated; Wave-0 RED tests turn GREEN; functional suite at exact 14/2 plan target; DST-01 idempotency walkthrough signed off live by Oliver 2026-05-01 with one structural deviation accepted.**
 
 ## What was built
 
@@ -99,7 +108,25 @@ Two typos eradicated from active surfaces (the actual GitHub owner is `OliverGAl
 - **`tests/test_karabiner_check.sh`** — `SETUP="setup.sh"` -> `SETUP="install.sh"` (test grepped the renamed file's content for Karabiner-check + JSON ref).
 - **`tests/security/verify_air_gap.sh`** — 4 occurrences of `setup.sh` (in invariant invocations + error-message references) updated to `install.sh`.
 
-## Suite state at plan close (pre-walkthrough)
+### 4. SBOM regeneration (orchestrator-applied mid-walkthrough — D-01)
+
+- **`SBOM.spdx.json`** — regenerated by running install.sh once post-rename + post-D-13; committed at `f8cebb3` so on-disk SBOM matches install.sh's new annotator strings ("Tool: PurpleVoice-install.sh" — 4 occurrences) and corrected documentNamespace (`OliverGAllen/purplevoice/sbom/...`). This step was missing from the original task chain (plan-prose-vs-implementation gap) and was caught by the orchestrator during walkthrough Run 1 (the diff between regenerated-SBOM and on-disk SBOM showed annotator + documentNamespace stale).
+
+### 5. DST-01 walkthrough sign-off (commit 191e4af)
+
+`tests/manual/test_install_idempotent.md` signed off live by Oliver 2026-05-01:
+
+| Criterion | Result | Detail |
+|-----------|--------|--------|
+| 1. Run 1 exit 0 + banner correct | PASS | Banner: "PurpleVoice installer (local clone at <REPO_ROOT>)"; `OK: SBOM regenerated` printed |
+| 2. Run 2 exit 0 + skip lines | PASS | Hammerspoon already present, sox/whisper-cpp/syft already installed, Model present + checksum OK, Silero VAD weights present, vocab.txt preserved |
+| 3-6. No-clobber check | PASS | `diff vocab.txt /tmp/vocab-pre-install.txt` = zero |
+| 7. Pattern 2 invariant | PASS | `grep -c WHISPER_BIN purplevoice-record == 2`; `! grep -q whisper-cli purplevoice-lua/init.lua` |
+| 8. SBOM zero git diff | DEFERRED — STRUCTURAL | Mathematically unsatisfiable (see D-02 below) — intent verified via Run 1 ↔ Run 2 byte-identity (md5 a48aae374ddb2ff908f6eade99282be8) |
+
+**Run 1 vs Run 2 byte-identity:** both runs produced byte-identical install.sh logs; both regenerated SBOM at the same commit (b52606b); md5 a48aae374ddb2ff908f6eade99282be8 confirms DST-01 idempotency intent is upheld.
+
+## Suite state at plan close (post-walkthrough)
 
 | Suite | Result | Notes |
 |-------|--------|-------|
@@ -162,25 +189,58 @@ Wave-0 RED tests covering install.sh structure all turned GREEN as designed:
 - **Files modified:** tests/test_brand_consistency.sh
 - **Commit:** 9d68635
 
+### Deviations Surfaced During Walkthrough
+
+**D-01. [Rule 1 - Plan-prose-vs-implementation gap] SBOM regeneration was missing from the original task chain**
+
+- **Found during:** Walkthrough Run 1 (orchestrator running install.sh on Oliver's machine).
+- **Issue:** Plan 03-01 changed install.sh's SBOM annotator strings (Task 1-1) and the documentNamespace URL (Task 1-2), but did not include a step to regenerate `SBOM.spdx.json` after those changes. Result: pre-walkthrough state had install.sh saying `"Tool: PurpleVoice-install.sh"` while the on-disk SBOM still said `"Tool: PurpleVoice-setup.sh"` — the moment install.sh ran (which it does on every install) the SBOM regen logic correctly updated the annotators, producing a phantom git diff.
+- **Why this is the same pattern as Phase 2.7 / 02.5 / 04:** plans frequently specify "what install.sh's logic outputs should be" without specifying "regenerate the on-disk artifact whose generation install.sh now controls". Each plan rediscovers this as a Rule 1 deviation.
+- **Fix:** Orchestrator ran install.sh once on Oliver's real machine (which regenerated SBOM.spdx.json deterministically) and committed the result as `fix(03-01): regenerate SBOM after install.sh rename + D-13 typo fix` (f8cebb3).
+- **Files modified:** SBOM.spdx.json
+- **Commit:** f8cebb3
+- **Pattern entry:** Treat SBOM as a derived artifact synchronised by install.sh — re-derive whenever its inputs change. Bake into future plans that touch install.sh's annotator/namespace logic.
+
+**D-02. [Rule 1 - STRUCTURAL] Walkthrough criterion 8 (SBOM zero git diff) is mathematically unsatisfiable**
+
+- **Found during:** Walkthrough criterion 8 final check (after Run 1 + Run 2 + the D-01 SBOM commit).
+- **Issue:** install.sh:472-478 (`deterministicise_sbom()`) derives `documentNamespace` from `git rev-parse HEAD`. This creates a circular self-reference:
+  1. Regen at HEAD `b52606b` → SBOM file references `b52606b` (matches HEAD).
+  2. Commit SBOM → HEAD becomes `f8cebb3`; SBOM-in-HEAD still references `b52606b` (now stale by 1 commit).
+  3. Re-run install.sh → regen at HEAD `f8cebb3` → working-tree SBOM references `f8cebb3` → `git diff` shows documentNamespace + versionInfo updated by 1 commit.
+  There is no commit chain that satisfies criterion 8 with current install.sh derivation logic. Phase 2.7 had the same latent issue, hidden because no one re-ran setup.sh after the SBOM commit during 2.7's walkthrough.
+- **Why intent is upheld:** running install.sh twice on the same HEAD is provably a no-op — Run 1 / Run 2 logs both produced md5 `a48aae374ddb2ff908f6eade99282be8`; both regenerated SBOM at the same commit `b52606b`. DST-01 idempotency contract holds. The literal `git diff` check in criterion 8 is over-strict for the underlying invariant.
+- **Decision:** Accept criterion 8 as DEFERRED-structural, not as a walkthrough failure. Document the structural reason inline in `tests/manual/test_install_idempotent.md` (commit 191e4af) and file a follow-on backlog item.
+- **Backlog entry:** `Fix install.sh deterministicise_sbom() documentNamespace circular reference` — rewrite documentNamespace derivation to use `git rev-list -1 HEAD -- ':!SBOM.spdx.json'` (last non-SBOM commit) or a static milestone tag, so post-commit re-runs of install.sh produce zero diff. Defer to Phase 5 / v1.1; does NOT block v1 ship.
+- **Files modified:** tests/manual/test_install_idempotent.md (criterion-8 deviation block + sign-off)
+- **Commit:** 191e4af
+- **Pattern entry:** Mathematically-unsatisfiable walkthrough criteria are validation-contract design defects, not walkthrough failures. When the criterion's underlying intent is provably upheld by an alternative measurement, accept as DEFERRED-structural and file a backlog item.
+
 ### Plan executed otherwise as written
 
-No Rule 4 deviations. Walkthrough task remains pending — see "Live walkthrough sign-off" section below.
+No Rule 4 deviations. Walkthrough signed off with one structural deviation explicitly accepted by Oliver ("approved"). All tasks complete; functional + security suites at exact plan targets; Pattern 2 invariant intact; brand + framing lints GREEN.
 
-## Live walkthrough sign-off (Task 1-3 — PENDING USER ACTION)
+## Authentication gates
 
-`tests/manual/test_install_idempotent.md` — **Status:** unsigned at this commit.
-
-The walkthrough is a **`checkpoint:human-action`** gate — Oliver must execute install.sh twice on his real machine to validate DST-01 idempotency end-to-end (no sandbox can replicate his real ~/.hammerspoon/init.lua + user-edited vocab.txt + the actual SBOM regen idempotency on his exact hardware).
-
-Continuation agent will:
-1. Read `tests/manual/test_install_idempotent.md` for the verbatim Run 1 / Run 2 / no-clobber check / Pattern 2 invariant final-check / sign-off block.
-2. Confirm Oliver completed the walkthrough successfully.
-3. Either commit the sign-off (`test(03-01): DST-01 install.sh idempotency walkthrough signed off`) and finalise this SUMMARY, OR record the failure mode and replan.
+None — no auth flows in scope for this plan.
 
 ## Plan 03-02 unblock signal
 
-After Task 1-3 sign-off lands, Plan 03-02 (LICENSE + README rewrite + uninstall.sh) can begin:
+Plan 03-02 (LICENSE + README rewrite + uninstall.sh) is now unblocked:
 - `bash tests/test_license_present.sh` — currently RED (Plan 03-02 creates `LICENSE`).
 - `bash tests/test_uninstall_dryrun.sh` — currently RED (Plan 03-02 creates `uninstall.sh`).
 
-## Self-Check: PENDING (finalised by continuation agent post-walkthrough)
+## Self-Check: PASSED
+
+Verifications run at plan-close:
+
+- `[ -f install.sh ] && ! [ -f setup.sh ]` — PASS (rename intact)
+- `git log --oneline | grep -E '^(9d68635|da95dda|b52606b|f8cebb3|191e4af)'` — all 5 commits FOUND on main HEAD chain
+- `bash tests/run_all.sh` — 14 PASS / 2 FAIL (exact plan target; the 2 RED are 03-02 contract)
+- `bash tests/security/run_all.sh` — 5 PASS / 0 FAIL
+- `bash tests/test_brand_consistency.sh` — PASS (exit 0)
+- `bash tests/test_security_md_framing.sh` — PASS
+- Pattern 2 invariant — `grep -c WHISPER_BIN purplevoice-record == 2`; `! grep -q whisper-cli purplevoice-lua/init.lua` — INTACT
+- `grep -q "signed off 2026-05-01 by Oliver" tests/manual/test_install_idempotent.md` — PASS
+- `grep -q "Status: unsigned" tests/manual/test_install_idempotent.md` — FAIL-as-expected (sign-off replaced "unsigned")
+- DST-01, DST-02, DST-05, DST-06 marked complete in REQUIREMENTS.md (this plan + closing metadata commit)

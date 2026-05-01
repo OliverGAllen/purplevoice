@@ -46,10 +46,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Distribution
 
-- [ ] **DST-01**: A single `install.sh` script installs all dependencies (Hammerspoon, sox, whisper-cpp), creates required directories, downloads the model file, links binaries, and is fully idempotent (safe to re-run)
-- [ ] **DST-02**: `install.sh` never auto-edits the user's `~/.hammerspoon/init.lua` — instead prints the one-line `require("voice-cc")` for the user to paste themselves
+- [x] **DST-01**: A single `install.sh` script installs all dependencies (Hammerspoon, sox, whisper-cpp, syft, Karabiner-Elements check), creates required XDG directories under `~/.config/purplevoice/` + `~/.local/share/purplevoice/` + `~/.cache/purplevoice/`, downloads the Whisper small.en model + Silero VAD weights with SHA256 verification, installs `~/.local/bin/purplevoice-record` + `~/.hammerspoon/purplevoice/` symlinks, regenerates SBOM via Syft, and is fully idempotent (safe to re-run; preserves user-edited `vocab.txt`). Renamed from `setup.sh` in Phase 3 per CONTEXT.md D-05. Verified by Wave-0 GREEN tests (`test_install_sh_detection.sh`, `test_install_sh_no_init_lua_edit.sh`, `test_install_sh_dst06_option_b.sh`) + live walkthrough sign-off `tests/manual/test_install_idempotent.md` (commit 191e4af; 5/6 PASS, criterion 8 DEFERRED-structural per documented `documentNamespace` circular self-reference, intent upheld via Run 1 ↔ Run 2 byte-identity md5 a48aae374ddb…). Plan 03-01 SUMMARY for full audit trail.
+- [x] **DST-02**: `install.sh` never auto-edits the user's `~/.hammerspoon/init.lua` — instead prints the brand-aware one-line `require("purplevoice")` for the user to paste themselves (Phase 2.5 BRD-02 brand sweep already replaced the original `require("voice-cc")` form). Verified by `tests/test_install_sh_no_init_lua_edit.sh` GREEN; banner verified during DST-01 walkthrough (commit 191e4af).
 - [ ] **DST-03**: README documents permission grants required (Microphone + Accessibility for Hammerspoon), how to disable conflicting macOS Dictation shortcut, and `tccutil reset` recovery procedure
 - [ ] **DST-04**: `hyperfine` benchmark on the install machine produces p50 / p95 latency numbers for short, medium, and long utterances — gates the v1.1 warm-process upgrade decision
+- [x] **DST-05**: Public one-line installer flow — `curl -fsSL https://raw.githubusercontent.com/OliverGAllen/purplevoice/main/install.sh | bash` runs `install.sh`, which detects curl|bash invocation mode (Step 0 `detect_invocation_mode`), git-clones `OliverGAllen/purplevoice` into `~/.local/share/purplevoice/src/` via `bootstrap_clone_then_re_exec`, then `exec`s the freshly-cloned `install.sh` so all subsequent install steps run from a real REPO_ROOT. Detection uses POSIX `cd $(dirname) && pwd` (no GNU `realpath` per Pitfall 7); curl-mode determined by `${BASH_SOURCE[0]:-$0}` not resolving to a real file inside a git checkout. Verified by `tests/test_install_sh_detection.sh` GREEN (rewritten in Plan 03-01 to use real subshell contexts after Wave-0 BASH_SOURCE-mock design bug — see deviation D-01 in Plan 03-01 SUMMARY). End-to-end live test of the public one-liner deferred to Plan 03-04 after the public-flip lands. (Formalised by Phase 3 — added 2026-04-27 per ROADMAP extension; DST-13 typo sweep landed alongside per CONTEXT.md D-13 to ensure the URL resolves to a real GitHub repo.)
+- [x] **DST-06**: Hammerspoon-as-PurpleVoice wrapping — Option B (bundled installer, no fork). PurpleVoice ships as a Hammerspoon module dropped into `~/.hammerspoon/purplevoice/` by `install.sh` Step 6c; Hammerspoon stays as stock Hammerspoon (installed via `brew install --cask hammerspoon`, branded as Hammerspoon in TCC + Activity Monitor + Dock). README + install.sh openly disclose: PurpleVoice runs on Hammerspoon (free, open-source, BSD-3 / MIT licensed). SEC-04 (Apple Developer ID + notarisation) STAYS DEFERRED indefinitely per Phase 3 D-02 — Option B does not need it. Verified by `tests/test_install_sh_dst06_option_b.sh` GREEN (presence of `brew install --cask hammerspoon` + zero Option-A `Hammerspoon.app` rename + zero Option-C re-sign signatures). (Formalised by Phase 3 — added 2026-04-30 during Phase 3.5 testing per CONTEXT.md D-01.)
 
 ### Branding
 
@@ -145,10 +147,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ROB-03 | Phase 1: Spike | Complete |
 | ROB-04 | Phase 2: Hardening | Pending |
 | ROB-05 | Phase 1: Spike | Complete |
-| DST-01 | Phase 3: Distribution & Benchmarking | Pending |
-| DST-02 | Phase 3: Distribution & Benchmarking | Pending |
-| DST-03 | Phase 3: Distribution & Benchmarking | Pending |
-| DST-04 | Phase 3: Distribution & Benchmarking | Pending |
+| DST-01 | Phase 3: Distribution & Benchmarking + Public Install | Complete |
+| DST-02 | Phase 3: Distribution & Benchmarking + Public Install | Complete |
+| DST-03 | Phase 3: Distribution & Benchmarking + Public Install | Pending |
+| DST-04 | Phase 3: Distribution & Benchmarking + Public Install | Pending |
+| DST-05 | Phase 3: Distribution & Benchmarking + Public Install | Complete (curl|bash detection + bootstrap landed Plan 03-01; public-flip end-to-end test deferred to Plan 03-04) |
+| DST-06 | Phase 3: Distribution & Benchmarking + Public Install | Complete (Option B bundled installer; verified Plan 03-01) |
 | BRD-01 | Phase 2.5: Branding | Complete |
 | BRD-02 | Phase 2.5: Branding | Complete |
 | BRD-03 | Phase 2.5: Branding | Complete |
@@ -172,8 +176,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERF-02 | Phase 5 (v1.1, conditional): Warm-Process Upgrade | Conditional |
 
 **Coverage:**
-- v1 requirements: 41 total (39 prior + QOL-01 promoted from v2 + QOL-NEW-01 new in Phase 4 2026-04-30)
-- Mapped to phases: 41 / 41 (100%)
+- v1 requirements: 43 total (41 prior + DST-05 + DST-06 formalised in Plan 03-01 closure 2026-05-01)
+- Mapped to phases: 43 / 43 (100%)
 - Unmapped: 0
 - v2 requirements: 6 total (4 QOL deferred — QOL-02 Esc, QOL-03 replacements.txt, QOL-04 history.log, QOL-05 PURPLEVOICE_MODEL — paths/vars use `purplevoice` namespace per Phase 2.5 D-05; 2 PERF → Phase 5 conditional)
 
@@ -182,7 +186,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 - Phase 2: Hardening — 12 requirements (TRA-04..06, INJ-02..04, FBK-01..03, ROB-01, ROB-02, ROB-04)
 - Phase 2.5: Branding — 3 requirements (BRD-01..03) — Complete 2026-04-29
 - Phase 2.7: Security Posture & Government Readiness — 6 requirements (SEC-01..06) — Pending
-- Phase 3: Distribution & Benchmarking — 4 requirements (DST-01..04)
+- Phase 3: Distribution & Benchmarking + Public Install — 6 requirements (DST-01..06) — Plan 03-01 (DST-01, DST-02, DST-05, DST-06 Complete 2026-05-01); Plans 03-02..04 cover DST-03, DST-04 + final DST-05 public-flip live test
 - Phase 3.5: Hover UI / HUD — 4 requirements (HUD-01..04) — Complete
 - Phase 4 (v1.x): Quality of Life — 2 requirements (QOL-01, QOL-NEW-01) — Complete
 
@@ -191,3 +195,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 *Last updated: 2026-04-30 — Phase 4 staging (Plan 04-00): QOL-01 promoted from v2 stub to v1 with concrete language; QOL-NEW-01 added (F19 alt hotkey via Karabiner); v2 QOL stubs rebranded to `purplevoice` paths/vars per D-10. v1 coverage 39 → 41.*
 *Last updated: 2026-04-30 — four HUD requirements completed for Phase 3.5 (Complete); traceability table extended.*
 *Last updated: 2026-05-01 — Phase 4 Quality of Life closed: QOL-01 (F18 re-paste via backtick-hold; superseded original cmd+shift+v plan after live-walkthrough collision discovery) + QOL-NEW-01 (F19 alt hotkey via Karabiner fn-hold) marked Complete; v1 coverage stays at 41/41 (100%); 12 manual walkthroughs swept cmd+shift+e → F19; SECURITY.md SBOM scope updated to enumerate Karabiner-Elements as carried-by-reference runtime dep alongside Hammerspoon. Karabiner now ships TWO complex-modification rule files: assets/karabiner-fn-to-f19.json (push-to-talk) + assets/karabiner-backtick-to-f18.json (re-paste).*
+*Last updated: 2026-05-01 — Phase 3 Plan 03-01 closure: DST-01 + DST-02 + DST-05 + DST-06 marked [x] Complete in v1 subsection AND traceability table. DST-05 + DST-06 added as new entries (TBD-formalised → Complete in one step per ROADMAP §3 success criteria). v1 coverage 41 → 43 (100%). install.sh renamed from setup.sh; curl|bash bootstrap path live; D-13 owner-casing typos eradicated from active surfaces; SBOM regenerated; DST-01 idempotency walkthrough signed off live by Oliver (5/6 PASS, criterion 8 DEFERRED-structural per documentNamespace circular self-reference — backlog item filed). Plan 03-02 unblocked (LICENSE + uninstall + README rewrite); Plan 03-03 (hyperfine) and Plan 03-04 (public flip + DST-05 end-to-end live test) follow.*
