@@ -1,0 +1,31 @@
+{
+  "title": "PurpleVoice — ` (backtick) → F18",
+  "rules": [
+    {
+      "description": "Hold ` (backtick) → F18 (PurpleVoice re-paste). Quick tap → types backtick normally (preserved for code blocks, shell, etc).",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "non_us_backslash"
+          },
+          "to_if_alone": [
+            {
+              "key_code": "non_us_backslash",
+              "halt": true
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "f18"
+            }
+          ],
+          "parameters": {
+            "basic.to_if_alone_timeout_milliseconds": 200,
+            "basic.to_if_held_down_threshold_milliseconds": 200
+          }
+        }
+      ]
+    }
+  ]
+}

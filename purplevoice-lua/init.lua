@@ -534,14 +534,18 @@ if not hk then
 end
 
 -- ----------------------------------------------------------------
--- Bind cmd+shift+v (re-paste last transcript) — QOL-01 / D-02
--- Collides with VS Code/Cursor "Markdown Preview" by default — accepted
--- per CONTEXT.md D-02. Hammerspoon's Carbon hotkey wins precedence over
--- the IDE shortcut; user workaround for IDE Markdown preview is Cmd+K V.
+-- Bind F18 (re-paste last transcript) — QOL-01
+-- F18 emitted by Karabiner when ` (backtick) is held >200ms (per
+-- assets/karabiner-backtick-to-f18.json). Quick tap of ` types backtick
+-- normally. Bare-key bind (no modifier table) — Carbon RegisterEventHotKey
+-- registers globally so other apps can't hijack it.
+-- Supersedes the original cmd+shift+v plan (D-02) after live walkthrough
+-- 2026-04-30 surfaced an opaque clipboard-manager collision and the
+-- VS Code/Cursor Markdown Preview cost. F18 has zero collisions.
 -- ----------------------------------------------------------------
-local repasteHk = hs.hotkey.bind({"cmd", "shift"}, "v", repaste)
+local repasteHk = hs.hotkey.bind({}, "f18", repaste)
 if not repasteHk then
-  hs.alert.show("PurpleVoice: cmd+shift+v binding failed (in use?)", 4)
+  hs.alert.show("PurpleVoice: F18 binding failed (Karabiner ` rule active?)", 4)
 end
 
 -- Initialise menubar to idle BEFORE returning so idle dot is visible immediately.
@@ -572,7 +576,7 @@ if not accessibilityOk then
 end
 
 -- Confirmation message on load
-hs.alert.show("PurpleVoice loaded — F19 to record, ⌘⇧V to re-paste", 1.5)
+hs.alert.show("PurpleVoice loaded — hold fn (F19) to record, hold ` (F18) to re-paste", 1.5)
 
 M.BRAND = BRAND
 return M

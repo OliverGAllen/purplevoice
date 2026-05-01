@@ -8,11 +8,11 @@
 #   4. setup.sh contains the Karabiner-Elements check + actionable error
 #   5. setup.sh contains the file-existence guard for the JSON
 #   6. purplevoice-lua/init.lua binds F19 (no modifiers)
-#   7. purplevoice-lua/init.lua binds cmd+shift+v for re-paste
+#   7. purplevoice-lua/init.lua binds F18 for re-paste (Karabiner backtick-hold)
 #   8. purplevoice-lua/init.lua does NOT bind cmd+shift+e (deliberate replacement)
 #
 # RED-at-Wave-0 by design: assets/karabiner-fn-to-f19.json + setup.sh Step 9 +
-# init.lua F19/cmd+shift+v bindings do not exist yet. Plan 04-01 turns checks
+# init.lua F19/F18 bindings do not exist yet. Plan 04-01 turns checks
 # 6, 7, 8 GREEN; Plan 04-02 turns checks 1-5 GREEN. Final state: 8/8 GREEN.
 #
 # Exit 0 = wiring intact; exit 1 = drift or missing file.
@@ -79,9 +79,9 @@ if ! grep -qE 'hs\.hotkey\.bind\(\{\}, ?"f19"' "$INIT"; then
   FAIL=1
 fi
 
-# 7. init.lua binds cmd+shift+v for re-paste
-if ! grep -qE 'hs\.hotkey\.bind\(\{"cmd", ?"shift"\}, ?"v"' "$INIT"; then
-  echo "FAIL: $INIT missing cmd+shift+v re-paste binding"
+# 7. init.lua binds F18 for re-paste (emitted by Karabiner backtick-hold rule)
+if ! grep -qE 'hs\.hotkey\.bind\(\{\}, ?"f18"' "$INIT"; then
+  echo "FAIL: $INIT missing F18 re-paste binding (hs.hotkey.bind({}, \"f18\", ...))"
   FAIL=1
 fi
 

@@ -401,17 +401,20 @@ fi
 # instructions. PURPLEVOICE_OFFLINE=1 mode behaves identically (Karabiner is
 # local-only; no network needed for the check itself).
 
-KARABINER_JSON="$REPO_ROOT/assets/karabiner-fn-to-f19.json"
-if [ ! -f "$KARABINER_JSON" ]; then
-  echo "PurpleVoice: $KARABINER_JSON missing from repo (run setup.sh from a Phase-4-or-later checkout)." >&2
-  exit 1
-fi
+KARABINER_JSON_F19="$REPO_ROOT/assets/karabiner-fn-to-f19.json"
+KARABINER_JSON_F18="$REPO_ROOT/assets/karabiner-backtick-to-f18.json"
+for KJ in "$KARABINER_JSON_F19" "$KARABINER_JSON_F18"; do
+  if [ ! -f "$KJ" ]; then
+    echo "PurpleVoice: $KJ missing from repo (run setup.sh from a Phase-4-or-later checkout)." >&2
+    exit 1
+  fi
+done
 
 if [ ! -d /Applications/Karabiner-Elements.app ]; then
   cat >&2 <<EOF
 
 ----------------------------------------------------------------------
-PurpleVoice: Karabiner-Elements is required for the F19 hotkey.
+PurpleVoice: Karabiner-Elements is required for the F19 record + F18 re-paste hotkeys.
 
 Install Karabiner-Elements (free, open-source — https://karabiner-elements.pqrs.org/):
   1. Download Karabiner-Elements.dmg from https://karabiner-elements.pqrs.org/
@@ -419,23 +422,30 @@ Install Karabiner-Elements (free, open-source — https://karabiner-elements.pqr
   3. Launch once and grant the driver/extension prompt
      (System Settings → Privacy & Security → "Allow software from Fumihiko Takayama").
   4. Open Karabiner-Elements → Preferences → Complex Modifications → Add rule →
-     Import rule from file → choose:
-       $KARABINER_JSON
-     Then click "Enable" next to "Hold fn → F19 (PurpleVoice push-to-talk)".
+     Import rule from file → choose BOTH of these in turn:
+       $KARABINER_JSON_F19
+       $KARABINER_JSON_F18
+     Then click "Enable" next to "Hold fn → F19 (PurpleVoice push-to-talk)"
+     AND "Hold \` (backtick) → F18 (PurpleVoice re-paste)".
   5. Re-run: bash setup.sh
 
 If air-gapped: copy Karabiner-Elements.dmg from a connected machine via USB
-and install manually. The fn→F19 JSON rule is already in this repo at
-$KARABINER_JSON.
+and install manually. Both JSON rule files are already in this repo at:
+  $KARABINER_JSON_F19
+  $KARABINER_JSON_F18
 ----------------------------------------------------------------------
 EOF
   exit 1
 fi
 
 echo "OK: Karabiner-Elements detected at /Applications/Karabiner-Elements.app"
-echo "    REMINDER: ensure 'Hold fn → F19 (PurpleVoice push-to-talk)' is enabled in"
-echo "    Karabiner-Elements → Preferences → Complex Modifications. If not yet"
-echo "    imported, see $KARABINER_JSON"
+echo "    REMINDER: ensure BOTH rules are enabled in Karabiner-Elements →"
+echo "    Preferences → Complex Modifications:"
+echo "      - 'Hold fn → F19 (PurpleVoice push-to-talk)'"
+echo "      - 'Hold \` (backtick) → F18 (PurpleVoice re-paste)'"
+echo "    If not yet imported, see:"
+echo "      $KARABINER_JSON_F19"
+echo "      $KARABINER_JSON_F18"
 
 # ---------------------------------------------------------------------------
 # Step 10: Next-step reminders (banner — final step)
@@ -458,6 +468,6 @@ Next manual steps (one-time):
   - Disable the macOS Dictation hotkey to avoid conflicts
     (System Settings -> Keyboard -> Dictation -> Shortcut -> Off).
   - Hotkey: F19 push-and-hold (Karabiner remaps fn → F19 — see Step 9 reminder above).
-  - Re-paste last transcript: cmd+shift+v.
+  - Re-paste last transcript: hold ` (backtick) (Karabiner remaps backtick-hold → F18 — see Step 9 reminder above).
 ----------------------------------------------------------------------
 EOF

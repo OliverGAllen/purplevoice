@@ -33,9 +33,9 @@ PurpleVoice is a push-to-talk voice input system for Claude Code (and any focuse
 
 **Primary trigger: F19 (push-and-hold).** Karabiner-Elements remaps the `fn` key — hold fn for >200 ms to start recording, release to stop. A quick tap of fn (under 200 ms) preserves macOS's native fn behaviour (Globe / emoji popup, function-key row, dictation). Locked decision per `.planning/phases/04-quality-of-life-v1-x/04-CONTEXT.md` D-05 (replaces the original Cmd+Shift+E binding to eliminate the VS Code / Cursor "Show Explorer" collision).
 
-**Re-paste last transcript: `cmd+shift+v`.** Pastes the most recent successful transcript into the focused window. Useful when focus shifted mid-paste and the transcript landed in the wrong app. In-memory only — lost on Hammerspoon reload (privacy-first; per CONTEXT.md D-03).
+**Re-paste last transcript: hold `` ` `` (backtick).** Pastes the most recent successful transcript into the focused window. Useful when focus shifted mid-paste and the transcript landed in the wrong app. The backtick key is remapped via Karabiner-Elements (`assets/karabiner-backtick-to-f18.json`): tap `` ` `` types a backtick normally; hold `` ` `` for ~200 ms emits F18, which Hammerspoon binds to the re-paste action. In-memory only — lost on Hammerspoon reload (privacy-first; per CONTEXT.md D-03).
 
-> **VS Code / Cursor users:** the `cmd+shift+v` re-paste binding hijacks the IDE's default "Markdown Preview" shortcut whenever Hammerspoon is running. Workaround: use **`Cmd+K V`** for split-pane Markdown preview instead. The collision is documented and accepted per CONTEXT.md D-02.
+> **Note on hotkey choice:** the original plan used `cmd+shift+v` (D-02), but live walkthrough on 2026-04-30 surfaced an opaque clipboard-manager collision (no Hammerspoon binding-failed alert; keystroke silently consumed) plus the documented VS Code / Cursor "Markdown Preview" cost. Switched to F18-via-backtick-hold to dodge both — F18 has zero collisions and the backtick key remains usable for typing.
 
 ## Setup
 
