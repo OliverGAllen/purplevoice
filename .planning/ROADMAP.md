@@ -163,7 +163,7 @@ Speak → text appears in Claude Code, instantly and reliably, with no recurring
 **Plans:** 5 plans
   - [x] 03-00-PLAN.md — Wave 0 staging: 5 unit tests + 4 manual walkthrough scaffolds + tests/benchmark/HOW-TO-REGENERATE.md (no requirements; foundation)
   - [x] 03-01-PLAN.md — Wave 1: setup.sh → install.sh rename + curl-vs-clone detection + bootstrap_clone_then_re_exec + D-13 typo sweep + brand-consistency exemption update + DST-01 walkthrough sign-off (DST-01, DST-02, DST-05, DST-06)
-  - [ ] 03-02-PLAN.md — Wave 2: LICENSE (MIT) + uninstall.sh + README.md rewrite (Quickstart + Detailed Install + Recovery + Uninstalling) + DST-03 walkthrough sign-off (DST-03)
+  - [x] 03-02-PLAN.md — Wave 2: LICENSE (MIT) + uninstall.sh + README.md rewrite (Quickstart + Detailed Install + Recovery + Uninstalling) + DST-03 walkthrough sign-off (DST-03)
   - [ ] 03-03-PLAN.md — Wave 3: 3 reference WAVs + tests/benchmark/run.sh + quantiles.sh + BENCHMARK.md template + populated numbers + Phase 5 verdict + DST-04 walkthrough sign-off (DST-04)
   - [ ] 03-04-PLAN.md — Wave 4: SECURITY.md "Distribution model" subsection + pre-flip checklist + public flip + anonymous smoke test + DST-05 walkthrough sign-off + REQUIREMENTS/ROADMAP closure (DST-05, DST-06)
 

@@ -2,8 +2,8 @@
 phase: 03-distribution-public-install
 plan: 02
 subsystem: distribution
-tags: [mit-license, uninstall-idempotent, readme-d11-d12, dst-03, walkthrough-pending]
-status: pre-walkthrough-draft
+tags: [mit-license, uninstall-idempotent, readme-d11-d12, dst-03, walkthrough-signed-off]
+status: complete
 
 # Dependency graph
 requires:
@@ -23,7 +23,7 @@ provides:
   - tests/test_brand_consistency.sh exemption row for uninstall.sh (legitimate `*purplevoice*|*voice-cc*` symlink-target case-pattern)
   - SBOM.spdx.json regenerated post-Wave-2 (mirrors Plan 03-01 f8cebb3 pre-walkthrough fix)
   - README.md rewritten per D-11/D-12 — Quickstart-top + Detailed-Install + 4-item Recovery (TCC reset + Karabiner troubleshoot incl. UK-vs-US gotcha + "I lost my hotkeys" 5-step + uninstall.sh full reset) + Uninstalling subsection
-  - DST-03 walkthrough sign-off pending (live README recovery walkthrough on Oliver's machine)
+  - DST-03 walkthrough signed off live by Oliver 2026-05-04 — all 4 items PASS (commit e8bd7bf); README diagnostic flow validated end-to-end on Oliver's machine
 affects: [03-03-PLAN, 03-04-PLAN]
 
 # Tech tracking
@@ -61,13 +61,13 @@ patterns-established:
 requirements-completed: [DST-03]
 
 # Metrics
-duration: TBD-pre-walkthrough
-completed: TBD-pending-walkthrough-sign-off
+duration: ~3 days wall-clock (commits 2026-05-01 → walkthrough sign-off 2026-05-04)
+completed: 2026-05-04
 ---
 
-# Phase 3 Plan 02: LICENSE + uninstall.sh + README D-11/D-12 Rewrite Summary (PRE-WALKTHROUGH DRAFT)
+# Phase 3 Plan 02: LICENSE + uninstall.sh + README D-11/D-12 Rewrite Summary
 
-**Wave 2 deliverables landed via 4 atomic commits (c347ea8 LICENSE / d18a02d uninstall.sh + brand-exemption / 98c0018 README rewrite / 026c247 pre-walkthrough SBOM regen); functional suite 14 PASS / 2 FAIL → 16 PASS / 0 FAIL; security suite 5/0 unchanged; brand + framing lints GREEN; Pattern 2 invariant intact. DST-03 README recovery walkthrough on Oliver's machine pending — this draft will be finalised by the continuation agent after Oliver signs off.**
+**Wave 2 deliverables landed via 4 pre-walkthrough commits (c347ea8 LICENSE / d18a02d uninstall.sh + brand-exemption / 98c0018 README rewrite / 026c247 pre-walkthrough SBOM regen) + walkthrough sign-off commit (e8bd7bf, 2026-05-04). Functional suite 14 PASS / 2 FAIL → 16 PASS / 0 FAIL; security suite 5/0 unchanged; brand + framing lints GREEN; Pattern 2 invariant intact. DST-03 README recovery walkthrough signed off live by Oliver — all 4 items PASS (TCC reset, Karabiner Event Viewer, "I lost my hotkeys" 5-step, uninstall.sh + reinstall destructive run). Plans 03-03..04 unblocked.**
 
 ## What was built
 
@@ -213,7 +213,26 @@ This section will be expanded by the continuation agent if any deviations surfac
 
 ### Walkthrough-surfaced deviations
 
-*To be filled by continuation agent post-walkthrough sign-off.*
+**(none — walkthrough surfaced 4 informational findings, all of which the README diagnostic flow correctly handles. No README, uninstall.sh, or LICENSE edits required post-walkthrough.)**
+
+Findings (recorded in `tests/manual/test_readme_recovery_walkthrough.md` § Live findings):
+
+1. **Post-TCC-reset F18 half-bound state.** After Item 1 (TCC reset + Hammerspoon relaunch), F19 push-to-talk worked once Mic + Accessibility re-grant prompts fired and were granted, but F18 backtick re-paste was silent until a separate Reload Config (menubar → Hammerspoon → Reload Config). Plausible cause: init.lua loaded before Accessibility was granted; F19 path picks up the grant on first push-to-talk via natural rebind, but F18 binding requires a fresh init.lua load. README Item 3 ("I lost my hotkeys") Step 1 (Reload Hammerspoon) catches this exact symptom — diagnostic flow validated in real life. **No README fix needed.**
+
+2. **HUD env var change recipe verified.** `osascript -e 'tell application "Hammerspoon" to quit'` followed by `PURPLEVOICE_HUD_POSITION=top-right open -a Hammerspoon` successfully repositioned the HUD; confirms the README §HUD privacy table's "fully quit Hammerspoon and relaunch from a shell that already has the env var set" recipe is accurate. Env var persisted across the install.sh module-symlink rotation in Item 4 (Hammerspoon process stayed alive — Reload Config sufficient post-reinstall).
+
+3. **vocab.txt loss confirms README preserve recipe is load-bearing.** Item 4's destructive uninstall removed `~/.config/purplevoice/vocab.txt`; install.sh re-seeded a fresh default. README's `### Uninstalling` `cp ~/.config/purplevoice/vocab.txt /tmp/my-vocab.txt` recipe is accurate and necessary for users with edited vocab. **No README fix needed; recipe already prominent.**
+
+4. **install.sh Step 9 Karabiner check passed without re-import after destructive uninstall.** Karabiner-Elements rules (PurpleVoice — fn → F19 + PurpleVoice — backtick → F18) survived the uninstall — uninstall.sh correctly does NOT touch `~/.config/karabiner/` or Karabiner Preferences. Reinstall picked up the existing rules cleanly. Validates the uninstall.sh "Does NOT remove" contract.
+
+### Walkthrough commands run by orchestrator on Oliver's machine
+
+| Command | Item | Outcome |
+|---------|------|---------|
+| `tccutil reset Microphone org.hammerspoon.Hammerspoon` + Accessibility variant + osascript quit + open -a Hammerspoon | Item 1 | All 4 commands ran exactly as documented; Mic + Accessibility re-grant prompts fired on first push-to-talk; F19 restored. |
+| `osascript -e 'tell application "Hammerspoon" to quit'` + `PURPLEVOICE_HUD_POSITION=top-right open -a Hammerspoon` | (config tweak surfaced mid-walkthrough — not part of DST-03 sign-off scope but exercises the README §HUD env var recipe) | First attempt hit transient `_LSOpenURLsWithCompletionHandler` error -600 (LaunchServices race between osascript-quit and open-a-relaunch); retry of `open -a` resolved. PID 26587 confirmed running with new env. **Worth noting in README §HUD section as a known transient — but low-priority since the natural workaround is the same as the error recovery (just retry `open -a`).** |
+| `bash uninstall.sh` | Item 4 (destructive uninstall) | Exit 0; 5 surfaces removed exactly per documented contract; manual-cleanup banner printed verbatim. |
+| `bash install.sh` (from local clone) | Item 4 (reinstall) | Exit 0; ~488MB ggml-small.en.bin re-downloaded with SHA256 verification (~27s); Silero VAD downloaded; symlinks recreated; SBOM regenerated; Karabiner-Elements detected at Step 9 (existing rules picked up cleanly). |
 
 ## Authentication gates
 
@@ -228,14 +247,19 @@ Plan 03-03 (hyperfine benchmarks + BENCHMARK.md + DST-04 walkthrough) is now unb
 
 ## Self-Check
 
-*Self-check will be appended after walkthrough sign-off lands.*
+| Plan success criterion | Status | Evidence |
+|---|---|---|
+| 1. LICENSE exists at repo root with canonical MIT text + correct copyright | PASS | `LICENSE` file at repo root since c347ea8; verified by `tests/test_license_present.sh` GREEN |
+| 2. uninstall.sh exists at repo root, idempotent in sandbox, manual-cleanup banner printed | PASS | `uninstall.sh` mode 0755 since d18a02d; `tests/test_uninstall_dryrun.sh` GREEN; live walkthrough Item 4 confirmed all 5 surfaces removed + 4-item banner printed verbatim |
+| 3. README has Quickstart at top + Detailed Install + 4-item Recovery + Uninstalling subsection | PASS | `## Quickstart` (top), `## Detailed Install` H2 wrapping Karabiner / Permissions / Conflicting feature / `### Recovery` (4 items) / `### Uninstalling` — all present; walkthrough Items 1-4 PASS |
+| 4. README quickstart curl one-liner uses production URL | PASS | `curl -fsSL https://raw.githubusercontent.com/OliverGAllen/purplevoice/main/install.sh \| bash` present; awaits Plan 03-04 public-flip live test |
+| 5. Functional suite: 16 PASS / 0 FAIL | PASS | Wave-0 RED tests (test_uninstall_dryrun.sh + test_license_present.sh) both GREEN post-Wave-2 deliverables; verified at commit-time |
+| 6. Security suite: 5 PASS / 0 FAIL | PASS | Plan 03-02 doesn't touch security surface; baseline 5/0 unchanged |
+| 7. Brand-consistency + framing lints GREEN; Pattern 2 invariant intact | PASS | uninstall.sh exemption added unconditionally per plan; `! grep -q whisper-cli purplevoice-lua/init.lua` + `grep -c WHISPER_BIN purplevoice-record == 2` |
+| 8. tests/manual/test_readme_recovery_walkthrough.md signed off live by Oliver (item 4 may be DEFERRED) | PASS | Signed off 2026-05-04, all 4 items PASS (no DEFERRED — Oliver chose the destructive run) — commit e8bd7bf |
+
+8/8 PASS.
 
 ## Status
 
-**PRE-WALKTHROUGH DRAFT** — orchestrator returned structured checkpoint after the 4 pre-walkthrough commits landed. Continuation agent will:
-1. Confirm Oliver's walkthrough sign-off in `tests/manual/test_readme_recovery_walkthrough.md`.
-2. Append walkthrough-surfaced deviations (if any) to `## Deviations from Plan` § Walkthrough-surfaced deviations.
-3. Run final verification battery + Self-Check.
-4. Mark `requirements-completed: [DST-03]` definitively (already pre-set above).
-5. Update STATE.md + ROADMAP.md + REQUIREMENTS.md (DST-03 [ ] → [x]).
-6. Final metadata commit + completion-format return.
+**COMPLETE** — DST-03 walkthrough signed off live by Oliver 2026-05-04 (commit e8bd7bf). All 4 README recovery items PASS; no walkthrough-surfaced deviations requiring code/doc fixes. Functional suite 16/0; security 5/0; brand + framing GREEN; Pattern 2 invariant intact. REQUIREMENTS.md DST-03 [ ] → [x] in v1 subsection AND traceability table; v1 coverage stays 43/43 (100%). Plan 03-03 (hyperfine + DST-04) and Plan 03-04 (public flip + DST-05 end-to-end) unblocked.
