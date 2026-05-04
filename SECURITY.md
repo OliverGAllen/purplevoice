@@ -633,6 +633,8 @@ PurpleVoice is **distributed as source-available code** under the MIT license (s
 
 This distribution model is a deliberate trade-off: zero opaque-binary surface in exchange for slightly higher install friction (the user manually adds `require("purplevoice")` to `~/.hammerspoon/init.lua`). For audiences whose threat model includes "distrust signed binaries and prefer reviewable source", source-available distribution is the load-bearing posture.
 
+**Install gate (`INSTALL_TOKEN`):** the v1 installer requires `INSTALL_TOKEN=<value>` in the environment before it proceeds; the value's SHA256 is baked into `install.sh`. This is a deliberate **soft signal**, not access control: because the repository source is public, anyone reading `install.sh` on GitHub can see the gate and remove it locally before running. The gate's actual purposes are (1) filtering casual / accidental installs (a one-liner without the token simply prints a request-channel message and exits), and (2) creating a "ping Oliver before installing" channel that lets the project understand who is using it without adding telemetry. Tokens are issued per request to oliver@olivergallen.com with subject prefix `[PurpleVoice install token]`. Treat it as the internet-friendly equivalent of a "members only" sign on an unlocked door — useful as a request norm, not as a control surface.
+
 Operators who require a notarised binary distribution should consult the deferred Phase 3 path documented in [If PurpleVoice ever ships as a notarised .app](#if-purplevoice-ever-ships-as-a-notarised-app-phase-3-scope) below.
 
 

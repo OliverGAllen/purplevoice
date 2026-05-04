@@ -22,8 +22,10 @@ PurpleVoice is a push-to-talk voice input system for Claude Code (and any focuse
 ## Quickstart
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/OliverGAllen/purplevoice/main/install.sh | bash
+INSTALL_TOKEN=xxx curl -fsSL https://raw.githubusercontent.com/OliverGAllen/purplevoice/main/install.sh | bash
 ```
+
+`INSTALL_TOKEN` is required — this installer is gated. To request a token, email **oliver@olivergallen.com** with subject prefix `[PurpleVoice install token]`. The repo source is fully public and reviewable; the token is a soft request-channel signal (see [Distribution model](SECURITY.md#distribution-model-phase-3-v1) in SECURITY.md for the honest framing — a determined party reading `install.sh` can bypass the gate, so its purpose is filtering casual installs and creating a "ping Oliver before installing" channel, not access control).
 
 After install completes, paste `require("purplevoice")` into `~/.hammerspoon/init.lua` and reload Hammerspoon. Then:
 
@@ -46,11 +48,11 @@ Latency benchmarks (whisper-cli transcription, hyperfine 10-run × 3-warmup) on 
 
 | Utterance length | p50 | p95 |
 |---|---|---|
-| 2s.wav | _filled by Plan 03-03_ | _filled by Plan 03-03_ |
-| 5s.wav | _filled by Plan 03-03_ | _filled by Plan 03-03_ |
-| 10s.wav | _filled by Plan 03-03_ | _filled by Plan 03-03_ |
+| 2s.wav | _pending DST-04 walkthrough_ | _pending DST-04 walkthrough_ |
+| 5s.wav | _pending DST-04 walkthrough_ | _pending DST-04 walkthrough_ |
+| 10s.wav | _pending DST-04 walkthrough_ | _pending DST-04 walkthrough_ |
 
-**Phase 5 (warm-process upgrade) trigger:** `p50 > 2s OR p95 > 4s on the 5s.wav benchmark`. Currently: _filled by Plan 03-03_. See [BENCHMARK.md](BENCHMARK.md) for full methodology + raw JSON.
+**Phase 5 (warm-process upgrade) trigger:** `p50 > 2s OR p95 > 4s on the 5s.wav benchmark`. Currently: _pending DST-04 walkthrough — Phase 5 verdict deferred until benchmark numbers are produced (see [BACKLOG.md](.planning/BACKLOG.md) item 2 for the resume recipe)._ The harness, reference WAVs, and BENCHMARK.md template all ship in this release; running `bash tests/benchmark/run.sh` on Apple Silicon with AC power produces the numbers and Phase 5 verdict in ~3 minutes. See [BENCHMARK.md](BENCHMARK.md) for full methodology + raw JSON.
 
 ## Detailed Install
 

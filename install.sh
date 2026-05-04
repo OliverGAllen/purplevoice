@@ -99,6 +99,67 @@ EOF
   exec bash "$CLONE_DIR/install.sh"
 }
 
+# ---------------------------------------------------------------------------
+# Step 0a: INSTALL_TOKEN gate — soft access-control signal (Phase 3 v1)
+# ---------------------------------------------------------------------------
+# This installer is published in a public GitHub repository and is therefore
+# world-readable. The INSTALL_TOKEN gate is a SOFT access-control signal — it
+# filters casual / accidental installs and creates a "request access from
+# Oliver" channel. A determined party can read install.sh on GitHub, see the
+# expected SHA256 hash, and remove the gate; that is acknowledged in
+# SECURITY.md §Distribution model.
+#
+# To request a token: email oliver@olivergallen.com with subject prefix
+# "[PurpleVoice install token]".
+#
+# Usage once you have a token:
+#   INSTALL_TOKEN=xxx curl -fsSL https://raw.githubusercontent.com/OliverGAllen/purplevoice/main/install.sh | bash
+#   INSTALL_TOKEN=xxx bash install.sh
+#
+# Test-suite bypass: tests/security/verify_air_gap.sh sets
+# PURPLEVOICE_TEST_BYPASS_TOKEN_CHECK=1 so the air-gap invariant tests can run
+# without baking the token into the test suite. The bypass is documented; it
+# does not weaken the gate beyond what the public-source readability already
+# implies.
+
+verify_install_token() {
+  if [ "${PURPLEVOICE_TEST_BYPASS_TOKEN_CHECK:-0}" = "1" ]; then
+    return
+  fi
+  local expected_hash="5b7e4cb039c83f6ebd2be83d618ccf7056f0e368aede366a0e438303073a7907"
+  if [ -z "${INSTALL_TOKEN:-}" ]; then
+    cat >&2 <<'EOF'
+----------------------------------------------------------------------
+PurpleVoice install: INSTALL_TOKEN required.
+
+This installer is gated. To request a token, email
+oliver@olivergallen.com with subject "[PurpleVoice install token]".
+
+Usage once you have a token:
+  INSTALL_TOKEN=xxx curl -fsSL https://raw.githubusercontent.com/OliverGAllen/purplevoice/main/install.sh | bash
+  # or, from a local clone:
+  INSTALL_TOKEN=xxx bash install.sh
+----------------------------------------------------------------------
+EOF
+    exit 1
+  fi
+  local actual_hash
+  actual_hash="$(printf '%s' "$INSTALL_TOKEN" | shasum -a 256 | awk '{print $1}')"
+  if [ "$actual_hash" != "$expected_hash" ]; then
+    cat >&2 <<'EOF'
+----------------------------------------------------------------------
+PurpleVoice install: INSTALL_TOKEN does not match.
+
+Verify you copied the token correctly. If you believe this is wrong,
+email oliver@olivergallen.com with subject "[PurpleVoice install token]".
+----------------------------------------------------------------------
+EOF
+    exit 1
+  fi
+}
+
+verify_install_token
+
 INVOCATION_MODE="$(detect_invocation_mode)"
 case "$INVOCATION_MODE" in
   clone)

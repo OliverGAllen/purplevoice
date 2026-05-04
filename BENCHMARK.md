@@ -10,12 +10,14 @@
 
 ## Latest results
 
-**Environment:** _filled by Plan 03-03 walkthrough sign-off_
-- macOS version: ____
-- Apple Silicon: M__ (cores: ___ E + ___ P)
+**Status:** _pending DST-04 walkthrough — deferred 2026-05-04 by Oliver per [BACKLOG.md](.planning/BACKLOG.md) item 2. Harness, reference WAVs, and this template all ship in v1; running `bash tests/benchmark/run.sh` on the install machine with AC power produces the populated table + Phase 5 verdict in ~3 minutes._
+
+**Environment:** _to be populated by walkthrough run_
+- macOS version: _____
+- Apple Silicon: M_ (cores: ___ E + ___ P)
 - Power state: AC adapter (battery throttles aggressively per RESEARCH §Pitfall 10)
 - Date: 2026-__-__
-- hyperfine version: ____
+- hyperfine version: _____
 
 | Utterance length | min | mean | median (p50) | p95 | max | stddev |
 |---|---|---|---|---|---|---|
@@ -27,10 +29,10 @@
 
 **Trigger rule (Phase 3 CONTEXT D-09):** Phase 5 (warm-process upgrade) becomes active scope IF the 5s.wav benchmark shows `p50 > 2s OR p95 > 4s`.
 
-**Result:** _filled by run.sh / Oliver post-walkthrough_
-- 5s.wav p50 = __ s
-- 5s.wav p95 = __ s
-- Phase 5: **DEFERRED** (delete one) / **ACTIVE** (delete one)
+**Result:** _pending DST-04 walkthrough_
+- 5s.wav p50 = __ s (pending)
+- 5s.wav p95 = __ s (pending)
+- Phase 5: **PENDING DST-04** (verdict computed when walkthrough runs; ROADMAP.md row stays "Conditional" until then)
 
 ## Raw JSON
 

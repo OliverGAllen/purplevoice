@@ -59,7 +59,7 @@ fi
 # Invariant 1: PURPLEVOICE_OFFLINE=1 + sideload populated → install.sh exits 0
 # -------------------------------------------------------------------------
 echo "  verify_air_gap.sh: testing Invariant 1 (sideload populated)..."
-if PURPLEVOICE_OFFLINE=1 bash install.sh > "$LOG_OFFLINE_OK" 2>&1; then
+if PURPLEVOICE_OFFLINE=1 PURPLEVOICE_TEST_BYPASS_TOKEN_CHECK=1 bash install.sh > "$LOG_OFFLINE_OK" 2>&1; then
   if ! grep -q "OFFLINE:" "$LOG_OFFLINE_OK"; then
     fail "Invariant 1: install.sh ran but produced no OFFLINE log lines (guards may not be wired)"
   fi
@@ -75,7 +75,7 @@ fi
 echo "  verify_air_gap.sh: testing Invariant 2 (model missing — atomic mv per Pitfall 12)..."
 mv "$MODEL" "$SAVED_MODEL"   # atomic same-fs mv
 set +e
-PURPLEVOICE_OFFLINE=1 bash install.sh > "$LOG_OFFLINE_MISSING" 2>&1
+PURPLEVOICE_OFFLINE=1 PURPLEVOICE_TEST_BYPASS_TOKEN_CHECK=1 bash install.sh > "$LOG_OFFLINE_MISSING" 2>&1
 EXIT_CODE=$?
 set -e
 mv "$SAVED_MODEL" "$MODEL"   # restore immediately
