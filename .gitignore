@@ -2,6 +2,8 @@
 .DS_Store
 # Local working WAVs (Phase 1 uses /tmp; this guards future repo-local debugging)
 *.wav
+# Exception: committed reference WAVs for the hyperfine benchmark harness (DST-04 / Plan 03-03)
+!tests/benchmark/*.wav
 /tmp/voice-cc/
 # Model files (downloaded via setup.sh, never committed)
 *.bin

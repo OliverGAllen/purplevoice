@@ -54,6 +54,10 @@ rm tmp.aiff
 ## Last regenerated
 
 - macOS version: 15.7.5 (Sequoia)
-- Date: [filled by Plan 03-03 executor when committing the binary WAVs]
-- Hardware: Apple Silicon M-series (Oliver's MacBook Pro)
-- shasum -a 256 of each WAV: [filled at commit time]
+- Date: 2026-05-04
+- Hardware: Apple M2 Max (Oliver's MacBook Pro)
+- shasum -a 256 of each WAV:
+  - `2s.wav`  → `07bd01fde4d40e40d33dd433f42018b05087030114e3172bfe243787377d78f7`
+  - `5s.wav`  → `014944e680b51b0b6df339b47c3b8576114c009d64bbd21a532b135c3be8fcd2`
+  - `10s.wav` → `f5f8673173c24f887371371597417fd8553d40bd2ec8b8754e591e2f49238f32`
+- Generated via canonical `--data-format=LEI16@16000` path (no fallback needed); soxi confirms 16kHz mono 16-bit PCM, durations 1.97s / 4.31s / 9.42s (all within ±0.5s tolerance).
