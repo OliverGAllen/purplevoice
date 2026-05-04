@@ -48,11 +48,11 @@ Latency benchmarks (whisper-cli transcription, hyperfine 10-run × 3-warmup) on 
 
 | Utterance length | p50 | p95 |
 |---|---|---|
-| 2s.wav | _pending DST-04 walkthrough_ | _pending DST-04 walkthrough_ |
-| 5s.wav | _pending DST-04 walkthrough_ | _pending DST-04 walkthrough_ |
-| 10s.wav | _pending DST-04 walkthrough_ | _pending DST-04 walkthrough_ |
+| 2s.wav | 0.583 s | 0.591 s |
+| 5s.wav | 0.589 s | 0.605 s |
+| 10s.wav | 1.093 s | 1.101 s |
 
-**Phase 5 (warm-process upgrade) trigger:** `p50 > 2s OR p95 > 4s on the 5s.wav benchmark`. Currently: _pending DST-04 walkthrough — Phase 5 verdict deferred until benchmark numbers are produced (see [BACKLOG.md](.planning/BACKLOG.md) item 2 for the resume recipe)._ The harness, reference WAVs, and BENCHMARK.md template all ship in this release; running `bash tests/benchmark/run.sh` on Apple Silicon with AC power produces the numbers and Phase 5 verdict in ~3 minutes. See [BENCHMARK.md](BENCHMARK.md) for full methodology + raw JSON.
+**Phase 5 (warm-process upgrade) trigger:** `p50 > 2s OR p95 > 4s on the 5s.wav benchmark`. Currently: **DEFERRED** — 5s.wav p50 = 0.589 s and p95 = 0.605 s, both well within budget (~3.4× and ~6.6× margin). Cold-start pipeline is fast enough on M2 Max; warm-process daemon is not required for v1.x. Re-run `bash tests/benchmark/run.sh` on AC power if you change hardware or move to a larger model. See [BENCHMARK.md](BENCHMARK.md) for full methodology + Environment block + raw JSON.
 
 ## Detailed Install
 

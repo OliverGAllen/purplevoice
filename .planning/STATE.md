@@ -28,10 +28,11 @@ progress:
 
 ## Current Position
 
-Phase: 03 (distribution-public-install) — COMPLETE 2026-05-04
-Plan: 5 of 5 (all plans landed; Plan 03-03 Task 3-5 walkthrough DEFERRED per Oliver to BACKLOG#2 — phase row marked Complete with annotation per Phase 4 CHECKPOINT-3 precedent)
-Repo PUBLIC: https://github.com/OliverGAllen/purplevoice (visibility=PUBLIC, MIT licensed, INSTALL_TOKEN soft-gate active, 118+ commits on origin/main, anonymous curl serves install.sh with HTTP 200)
-Next: Phase 3 verification + closure (gsd-verifier + phase complete via gsd-tools). After that: v1 has shipped publicly; only outstanding work is Plan 03-03 Task 3-5 (BACKLOG#2 — pending Oliver's hardware time for hyperfine benchmark). Phase 5 (warm-process upgrade) stays Conditional until DST-04 lands.
+Phase: 03 (distribution-public-install) — COMPLETE 2026-05-04 (5/5 plans, DST-04 walkthrough signed off same-day)
+Plan: 5 of 5 — all complete. Plan 03-03 Task 3-5 hyperfine benchmark signed off 2026-05-04 on AC-power M2 Max; Phase 5 verdict computed.
+Repo PUBLIC: https://github.com/OliverGAllen/purplevoice (visibility=PUBLIC, MIT licensed, INSTALL_TOKEN soft-gate active, 122+ commits on origin/main, anonymous curl serves install.sh with HTTP 200)
+v1 coverage: 43/43 = **100%**. DST-01..06 all [x] Complete. Phase 5 (warm-process upgrade): DEFERRED 2026-05-04 — 5s.wav p50/p95 = 0.589/0.605 s, within budget (~3.4×/6.6× margin against 2s/4s thresholds).
+Next: v1 milestone is functionally complete. Available actions: `/gsd:complete-milestone` (formally archive v1) / `/gsd:audit-uat` (sweep outstanding UAT items) / `/gsd:plant-seed` (capture v1.1 ideas).
 
 - **Milestone:** v1
 - **Phase:** 03.5

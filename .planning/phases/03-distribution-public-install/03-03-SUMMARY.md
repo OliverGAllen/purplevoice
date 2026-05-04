@@ -2,8 +2,8 @@
 phase: 03-distribution-public-install
 plan: 03
 subsystem: distribution
-tags: [hyperfine, benchmark-harness, dst-04, phase-5-trigger-d09, walkthrough-deferred]
-status: walkthrough-deferred
+tags: [hyperfine, benchmark-harness, dst-04, phase-5-trigger-d09, phase-5-deferred]
+status: complete
 
 # Dependency graph
 requires:
@@ -64,7 +64,7 @@ patterns-established:
   - "Pre-walkthrough SUMMARY draft + checkpoint return is now a phase-3-checkpoint-task convention: same approach used by Plans 03-01 (b52606b draft pre-walkthrough) and 03-02 (4e0c4f1 draft pre-walkthrough). Continuation agent finalises post-sign-off."
   - "Hyperfine harness third-allowed-WHISPER_BIN-site precedent: benchmark / test infrastructure may invoke /opt/homebrew/bin/whisper-cli directly without breaking Pattern 2. The invariant grep is anchored to purplevoice-record specifically; non-production scripts are out of scope."
 
-requirements-completed: []  # DST-04 pending Task 3-5 walkthrough sign-off; finalised by continuation agent
+requirements-completed: [DST-04]  # Plan 03-03 Task 3-5 walkthrough signed off 2026-05-04 on M2 Max; Phase 5 verdict DEFERRED
 
 # Metrics
 duration: ~30 minutes wall-clock for Tasks 3-1..3-4 (commits e934486 → 645323d, 2026-05-04)
@@ -215,23 +215,33 @@ None — no auth flows in scope for this plan.
 
 ## Status
 
-**WALKTHROUGH DEFERRED 2026-05-04 by Oliver** — Tasks 3-1..3-4 deliverables committed atomically (4 commits e934486 / 8f60937 / 3a1a7b8 / 645323d). Functional 16/0; security 5/0; brand + framing lints GREEN; Pattern 2 invariant intact. Task 3-5 (live hyperfine benchmark on Oliver's M2 Max) DEFERRED per Oliver's request — no time pressure, run later. Plan 03-03 stays in `walkthrough-deferred` status (not Complete) until Oliver runs `bash tests/benchmark/run.sh` and commits the populated numbers.
+**COMPLETE 2026-05-04** — Tasks 3-1..3-4 deliverables committed atomically (4 commits e934486 / 8f60937 / 3a1a7b8 / 645323d) + Task 3-5 live walkthrough signed off later same day on AC-power M2 Max. Earlier in the day the walkthrough had been deferred to BACKLOG#2 per Oliver's call, then reversed when he asked to start Phase 5 — running DST-04 first to get an informed Phase 5 trigger verdict was the chosen path.
 
-**Resume path when Oliver runs the benchmark:**
+### Walkthrough numbers (signed off 2026-05-04)
 
-1. `brew install hyperfine` (one-time prerequisite)
-2. Confirm laptop on AC power (RESEARCH §Pitfall 10)
-3. `bash tests/benchmark/run.sh 2>&1 | tee /tmp/p3-benchmark.log` — produces `tests/benchmark/results-{2,5,10}s.{json,md}` + per-WAV p50/p95 + 5s.wav-only Phase-5 trigger verdict
-4. Populate `BENCHMARK.md` "Latest results" table + Environment block + Phase 5 verdict
-5. Populate `README.md` `## Performance` section placeholder rows with same numbers (CONTEXT D-10)
-6. Sign off `tests/manual/test_benchmark_run.md` with verbatim numbers
-7. Commit + flip REQUIREMENTS.md DST-04 [ ] → [x] + STATE.md/ROADMAP.md plan progress + this SUMMARY status `walkthrough-deferred` → `complete`
+| Length | min | mean | p50 | p95 | max | stddev |
+|--------|-----|------|-----|-----|-----|--------|
+| 2s.wav | 0.574 s | 0.583 s | 0.583 s | 0.591 s | 0.591 s | 0.006 s |
+| 5s.wav | 0.583 s | 0.590 s | 0.589 s | 0.605 s | 0.605 s | 0.006 s |
+| 10s.wav | 1.085 s | 1.092 s | 1.093 s | 1.101 s | 1.101 s | 0.005 s |
 
-**Phase 3 closure implications:**
+Environment: macOS 15.7.5 (Sequoia), Apple M2 Max (8 P + 4 E), AC power, hyperfine 1.20.0; 30 measured runs across 3 WAV lengths; stddev ~5-6 ms across all lengths.
 
-- DST-04 stays `[ ]` Pending in REQUIREMENTS.md with annotation "DEFERRED Plan 03-03 Task 3-5 walkthrough 2026-05-04 — harness ready, benchmark execution pending Oliver's hardware time"
-- v1 coverage: 43 reqs total; 42 Complete + 1 Pending (DST-04)
-- Phase 5 trigger verdict: stays "Conditional" in ROADMAP.md (cannot compute DEFERRED vs ACTIVE without numbers)
-- Plan 03-04 (public flip + DST-05 end-to-end) is technically unblocked from a code-deliverable standpoint — the public flip and curl|bash live test do not depend on DST-04 numbers. Decision pending Oliver: proceed to Plan 03-04 with DST-04 deferred, or pause Phase 3 here.
+### Phase 5 trigger verdict: DEFERRED
 
-**Backlog reference:** `.planning/BACKLOG.md` item 2 (filed 2026-05-04) tracks the deferred benchmark execution.
+- 5s.wav p50 = 0.589 s — under 2 s threshold (~3.4× margin)
+- 5s.wav p95 = 0.605 s — under 4 s threshold (~6.6× margin)
+- Cold-start pipeline within budget on M2 Max; warm-process daemon NOT required for v1.x
+- Pattern 2 (`transcribe()` boundary in purplevoice-record) preserved as latent drop-in swap point if future hardware/model crosses the trigger thresholds
+- ROADMAP.md Phase 5 row flipped from "Conditional on Phase 3 hyperfine" → "DEFERRED 2026-05-04 — within budget"
+
+### Closure work landed alongside Task 3-5 sign-off
+
+- `BENCHMARK.md` Latest results table + Environment block + Phase 5 verdict block populated (replaces the pre-walkthrough placeholder block).
+- `README.md` `## Performance` section placeholder rows replaced with the actual numbers (per CONTEXT D-10 same-numbers-as-BENCHMARK requirement).
+- `tests/manual/test_benchmark_run.md` Status flipped from DEFERRED → signed off; sign-off block populated with verbatim numbers + 4 informational live findings.
+- `REQUIREMENTS.md` DST-04 flipped from [ ] Pending/DEFERRED → [x] Complete (v1 subsection + traceability table); v1 coverage 42/43 → 43/43 = 100%.
+- `BACKLOG.md` item #2 closed with outcome.
+- ROADMAP.md Phase 5 row flipped to DEFERRED 2026-05-04 + high-level Phases list checkbox flipped to [x].
+- STATE.md updated to reflect v1 100% coverage + Phase 5 DEFERRED.
+- PROJECT.md evolution-log entry appended.

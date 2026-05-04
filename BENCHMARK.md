@@ -10,29 +10,27 @@
 
 ## Latest results
 
-**Status:** _pending DST-04 walkthrough — deferred 2026-05-04 by Oliver per [BACKLOG.md](.planning/BACKLOG.md) item 2. Harness, reference WAVs, and this template all ship in v1; running `bash tests/benchmark/run.sh` on the install machine with AC power produces the populated table + Phase 5 verdict in ~3 minutes._
-
-**Environment:** _to be populated by walkthrough run_
-- macOS version: _____
-- Apple Silicon: M_ (cores: ___ E + ___ P)
+**Environment:** signed off 2026-05-04 by Oliver
+- macOS version: 15.7.5 (Sequoia)
+- Apple Silicon: M2 Max (cores: 8 P + 4 E)
 - Power state: AC adapter (battery throttles aggressively per RESEARCH §Pitfall 10)
-- Date: 2026-__-__
-- hyperfine version: _____
+- Date: 2026-05-04
+- hyperfine version: 1.20.0
 
 | Utterance length | min | mean | median (p50) | p95 | max | stddev |
 |---|---|---|---|---|---|---|
-| 2s.wav | __ s | __ s | __ s | __ s | __ s | __ s |
-| 5s.wav | __ s | __ s | __ s | __ s | __ s | __ s |
-| 10s.wav | __ s | __ s | __ s | __ s | __ s | __ s |
+| 2s.wav | 0.574 s | 0.583 s | 0.583 s | 0.591 s | 0.591 s | 0.006 s |
+| 5s.wav | 0.583 s | 0.590 s | 0.589 s | 0.605 s | 0.605 s | 0.006 s |
+| 10s.wav | 1.085 s | 1.092 s | 1.093 s | 1.101 s | 1.101 s | 0.005 s |
 
 ## Phase 5 trigger evaluation
 
 **Trigger rule (Phase 3 CONTEXT D-09):** Phase 5 (warm-process upgrade) becomes active scope IF the 5s.wav benchmark shows `p50 > 2s OR p95 > 4s`.
 
-**Result:** _pending DST-04 walkthrough_
-- 5s.wav p50 = __ s (pending)
-- 5s.wav p95 = __ s (pending)
-- Phase 5: **PENDING DST-04** (verdict computed when walkthrough runs; ROADMAP.md row stays "Conditional" until then)
+**Result:** Phase 5 DEFERRED (cold-start pipeline within budget on M2 Max).
+- 5s.wav p50 = 0.589 s — **under** 2 s threshold (~3.4× margin)
+- 5s.wav p95 = 0.605 s — **under** 4 s threshold (~6.6× margin)
+- Phase 5: **DEFERRED** — warm-process upgrade is not needed for v1.x. The bash glue's `transcribe()` Pattern 2 boundary is preserved as a future drop-in swap point if a slower machine or larger model ever crosses the trigger thresholds.
 
 ## Raw JSON
 

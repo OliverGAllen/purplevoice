@@ -1,6 +1,6 @@
 # Manual walkthrough: hyperfine benchmark on Oliver's hardware (DST-04)
 
-**Status:** DEFERRED 2026-05-04 by Oliver (run later — no time pressure; Phase 5 verdict can be computed when Oliver runs the harness)
+**Status:** signed off 2026-05-04 by Oliver (initially DEFERRED earlier same day; benchmark ran later in the same session on AC power; Phase 5 verdict DEFERRED — 5s.wav within budget)
 **Created:** 2026-05-01 (Plan 03-00)
 **Sign-off path:** Plan 03-03 (autonomous: false; the only person who can produce the numbers is Oliver on his machine)
 **Phase:** 3 — Distribution & Public Install
@@ -42,20 +42,25 @@ Benchmark numbers are hardware-specific. They cannot be mocked, pre-computed, or
 ## Sign-off
 
 ```
-DST-04 hyperfine benchmark walkthrough — DEFERRED 2026-05-04 by Oliver
-- Reason: run later (no time pressure; harness + reference WAVs + BENCHMARK.md template all committed; benchmark execution is a one-command operation Oliver can perform whenever convenient)
-- Numbers: pending Oliver running `bash tests/benchmark/run.sh` on M2 Max with AC power
-- Phase 5 verdict: pending DST-04 numbers (stays "Conditional" in ROADMAP until DST-04 lands)
-- Resume path: when Oliver runs the benchmark, he commits the populated BENCHMARK.md + README.md `## Performance` section + this walkthrough doc's sign-off block; updates REQUIREMENTS.md DST-04 [ ] → [x]; surfaces Phase 5 verdict in STATE.md/ROADMAP.md.
+DST-04 hyperfine benchmark walkthrough — signed off 2026-05-04 by Oliver
+- 5s.wav p50: 0.589 s     5s.wav p95: 0.605 s
+- 2s.wav p50: 0.583 s     2s.wav p95: 0.591 s
+- 10s.wav p50: 1.093 s    10s.wav p95: 1.101 s
+- Phase 5 verdict: DEFERRED (5s.wav p50 0.589s ≤ 2s threshold AND p95 0.605s ≤ 4s threshold; ~3.4× and ~6.6× margin; cold-start pipeline within budget on M2 Max — warm-process daemon not required for v1.x)
+- Numbers committed to BENCHMARK.md + README.md ## Performance section
+- Environment: M2 Max (8 P + 4 E), macOS 15.7.5 (Sequoia), AC power, hyperfine 1.20.0
+- Stddev tiny (~5-6 ms across all lengths) — measurement very stable
 ```
 
-**Pre-walkthrough deliverables ready (no blockers when Oliver runs):**
-- `tests/benchmark/{2s,5s,10s}.wav` — 3 reference WAVs, ~50KB each, 16kHz mono PCM (commit `e934486`)
-- `tests/benchmark/run.sh` — hyperfine harness, mode 0755 (commit `8f60937`)
-- `tests/benchmark/quantiles.sh` — jq p50/p95 calculator, mode 0755 (commit `3a1a7b8`)
-- `BENCHMARK.md` — template with methodology + Phase 5 trigger rule + empty Latest results table (commit `645323d`)
-- `~/.local/share/purplevoice/models/ggml-small.en.bin` — present and SHA256-verified (Plan 03-02 Item 4 reinstall, 2026-05-04)
-- `hyperfine` — install when ready: `brew install hyperfine` (one-time)
+### Live findings
+
+1. **Initial deferral was reversed same-session.** The walkthrough scaffold initially recorded "DEFERRED 2026-05-04 by Oliver" earlier in the day; later in the same session Oliver chose to run the benchmark before kicking off Phase 5 to get an informed verdict. Both the pre-deferral state and the resume path were tested in real life — the resume path is just `brew install hyperfine && bash tests/benchmark/run.sh` exactly as documented in BACKLOG#2 + the partial-SUMMARY status block.
+
+2. **Pattern 4 hyperfine harness held up under real load.** `--shell none` + absolute `whisper-cli` path + `$HOME` (not `~`) for the model produced clean numbers with no warnings. `--warmup 3` amortised the model-load cost as designed (initial smoke-test on 2s.wav had measured ~390ms total wall time; warmed runs land in the 583-590ms range — model-load contribution roughly half of cold-start, fully amortised).
+
+3. **Phase 2 invariant ("transcribe() is a single bash function for v1.1 drop-in swap") preserved as Phase 5 future-proofing.** With Phase 5 now DEFERRED, the warm-process daemon stays as latent capability rather than active scope. If a future hardware change or larger model crosses the 5s.wav 2s/4s thresholds, only `transcribe()` body needs to swap — the rest of the bash glue + Hammerspoon module + Karabiner rules + HUD all stay untouched. Pattern 2 was load-bearing exactly here.
+
+4. **Stddev across all 3 WAV lengths is sub-7ms.** Hyperfine's bimodality concern (RESEARCH §Pitfall 10 — Apple Silicon E-vs-P-core scheduling drift) did not manifest at this hardware/load combination; AC power + thermal headroom kept the M2 Max in a stable scheduling regime across all 30 measured runs.
 
 ## Failure modes
 

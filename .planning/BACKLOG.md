@@ -68,7 +68,7 @@ Then populate BENCHMARK.md `## Latest results` table + Environment block + Phase
 
 **Priority:** v1 closure blocker for the formal 100% coverage signal, but not a ship-stopper — Plan 03-04 (public flip + DST-05) is technically unblocked from a code-deliverable standpoint and can run in parallel with Oliver scheduling the benchmark.
 
-**Status:** Open
+**Status:** **CLOSED 2026-05-04** — Oliver ran the benchmark same-day after Phase 3 closure on AC-power M2 Max. Numbers: 2s.wav p50/p95 = 0.583/0.591 s; 5s.wav p50/p95 = 0.589/0.605 s; 10s.wav p50/p95 = 1.093/1.101 s. Phase 5 verdict: **DEFERRED** (5s.wav within budget; ~3.4×/6.6× margin against 2s/4s thresholds). DST-04 flipped to [x] Complete. v1 coverage 43/43 = 100%.
 
 **Related:** Plan 03-03 partial SUMMARY (`status: walkthrough-deferred`), `tests/manual/test_benchmark_run.md` (DEFERRED sign-off block), and the existing pre-walkthrough infrastructure are all sized for the resume path. Same precedent as Phase 4 CHECKPOINT-3 deferral (sudo-mv) — destructive/time-cost walkthroughs that are DEFERRED with documented reason are a recognised GSD pattern, surfaced via `/gsd:audit-uat`.
 
@@ -76,4 +76,6 @@ Then populate BENCHMARK.md `## Latest results` table + Environment block + Phase
 
 ## Closed
 
-*(none yet)*
+### 2 (closed 2026-05-04). Run Plan 03-03 Task 3-5 hyperfine benchmark walkthrough on Oliver's M2 Max
+
+See "Open #2" entry above (now Closed). Outcome: 5s.wav p50/p95 = 0.589/0.605 s on M2 Max (macOS 15.7.5, hyperfine 1.20.0, AC power). Phase 5 trigger evaluation: DEFERRED. DST-04 [x] Complete in REQUIREMENTS.md. Phase 5 row in ROADMAP marked `DEFERRED 2026-05-04`.
