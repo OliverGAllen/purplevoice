@@ -1,6 +1,6 @@
 # Manual walkthrough: public curl|bash install (DST-05)
 
-**Status:** unsigned
+**Status:** signed off 2026-05-04 by Oliver
 **Created:** 2026-05-01 (Plan 03-00)
 **Sign-off path:** Plan 03-04 (autonomous: false; runs AFTER `gh repo edit --visibility public --accept-visibility-change-consequences` — this is the only end-to-end test of the public-installer story)
 **Phase:** 3 — Distribution & Public Install
@@ -39,12 +39,21 @@ The curl|bash entry point cannot be tested while the repo is private (anonymous 
 ## Sign-off
 
 ```
-DST-05 curl|bash public install walkthrough — signed off YYYY-MM-DD by Oliver
-- Anonymous smoke test (Step 1): PASS — first 5 lines of install.sh returned via curl
-- Full curl|bash install (Step 2): PASS — clone + re-exec + final banner all correct
-- Idempotency on re-run (Step 3): PASS — git pull + idempotent re-install
-- gh repo view confirms PUBLIC: confirmed
+DST-05 curl|bash public install walkthrough — signed off 2026-05-04 by Oliver
+- Anonymous smoke test (Step 1, INSTALL_TOKEN gate empty path): PASS — gate fires correctly; friendly error block + exit 1; no clone happens.
+- Wrong INSTALL_TOKEN (Step 1 variant): PASS — "INSTALL_TOKEN does not match" error; exit 1.
+- Full curl|bash install with valid INSTALL_TOKEN (Step 2): PASS — banner says "PurpleVoice installer (via curl | bash)"; bootstrap_clone_then_re_exec clones into ~/.local/share/purplevoice/src/; install.sh re-execs from clone; idempotent steps print "already X / skipping"; final banner contains require("purplevoice") + F19/backtick reminders + HUD env reminders; exit 0.
+- gh repo view confirms PUBLIC: confirmed (post Task 4-3 flip)
+- Anonymous curl smoke test served install.sh's shebang + comment header as the public source: confirmed (orchestrator-side curl).
 ```
+
+### Live findings
+
+1. **INSTALL_TOKEN soft-gate verified end-to-end.** The 3 sub-checks (empty token, wrong token, correct token) all behaved as documented. The gate prints a request-channel message + exits 1 on empty/wrong; only the correct token (SHA256 baked into install.sh) proceeds to bootstrap_clone_then_re_exec. Public source readability is acknowledged honestly in SECURITY.md §"Distribution model — Install gate" — anyone reading install.sh on GitHub can see the gate and remove it locally; the gate's purpose is filtering casual installs and creating a "ping Oliver" channel, not access control.
+
+2. **Curl-vs-clone detection holds under public-flip transport.** detect_invocation_mode correctly identified the curl|bash path (BASH_SOURCE not resolving to a real file inside a git checkout) and delegated to bootstrap_clone_then_re_exec, which git-cloned OliverGAllen/purplevoice into ~/.local/share/purplevoice/src/ and re-execed cleanly. No regressions from Plan 03-01's Step 0 work.
+
+3. **Idempotency on second run held with valid token.** Re-run with INSTALL_TOKEN set hit the existing-clone branch in bootstrap_clone_then_re_exec; git pull --ff-only succeeded; subsequent install steps printed "already X / skipping" idempotency markers; exit 0.
 
 ## Failure modes
 
