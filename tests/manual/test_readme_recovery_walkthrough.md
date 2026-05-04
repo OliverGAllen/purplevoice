@@ -1,6 +1,6 @@
 # Manual walkthrough: README recovery procedures (DST-03)
 
-**Status:** unsigned
+**Status:** signed off 2026-05-04 by Oliver
 **Created:** 2026-05-01 (Plan 03-00)
 **Sign-off path:** Plan 03-02 (autonomous: false; checkpoint after README rewrite + uninstall.sh land)
 **Phase:** 3 — Distribution & Public Install
@@ -48,12 +48,22 @@ The README's "Recovery" section claims 4 procedures work: TCC reset, Karabiner r
 ## Sign-off
 
 ```
-DST-03 README recovery walkthrough — signed off YYYY-MM-DD by Oliver
+DST-03 README recovery walkthrough — signed off 2026-05-04 by Oliver
 - TCC reset (item 1): PASS
 - Karabiner troubleshoot (item 2): PASS
 - "I lost my hotkeys" 5-step (item 3): PASS
-- uninstall.sh + reinstall (item 4): PASS [or DEFERRED if destructive run skipped per Phase 4 CHECKPOINT-3 precedent — record reason]
+- uninstall.sh + reinstall (item 4): PASS
 ```
+
+### Live findings (informational — do not block sign-off)
+
+1. **Post-TCC-reset F18 half-bound state.** After Item 1 (TCC reset + Hammerspoon relaunch), F19 push-to-talk worked once Mic + Accessibility re-grant prompts fired and were granted, but F18 backtick re-paste was silent until a separate Reload Config (menubar → Hammerspoon → Reload Config). Plausible cause: init.lua loaded before Accessibility was granted; F19 path picks up the grant on first push-to-talk via natural rebind, but F18 binding requires a fresh init.lua load. README's Item 3 ("I lost my hotkeys") Step 1 (Reload Hammerspoon) catches this exact symptom — diagnostic flow validated in real life. No README fix needed.
+
+2. **HUD env var change recipe verified.** `PURPLEVOICE_HUD_POSITION=top-right open -a Hammerspoon` (after `osascript -e 'tell application "Hammerspoon" to quit'`) successfully repositioned the HUD; confirms the README §HUD privacy table's "fully quit Hammerspoon and relaunch from a shell that already has the env var set" recipe. Env var persisted across the install.sh module-symlink rotation in Item 4 (Hammerspoon process stays alive — Reload Config is sufficient post-reinstall).
+
+3. **vocab.txt loss confirms README preserve recipe is load-bearing.** Item 4's destructive uninstall removed `~/.config/purplevoice/vocab.txt`; install.sh re-seeded a fresh default. README's `### Uninstalling` `cp ~/.config/purplevoice/vocab.txt /tmp/my-vocab.txt` recipe is accurate and necessary for users with edited vocab. No README fix needed; recipe already prominent.
+
+4. **install.sh Step 9 Karabiner check passed without re-import.** Karabiner-Elements rules (PurpleVoice — fn → F19 + PurpleVoice — backtick → F18) survived the uninstall — uninstall.sh correctly does NOT touch `~/.config/karabiner/` or Karabiner Preferences. Reinstall picked up the existing rules cleanly.
 
 ## Failure modes
 
