@@ -36,6 +36,44 @@ There is no commit chain that satisfies the "running install.sh post-SBOM-commit
 
 ---
 
+### 2. Run Plan 03-03 Task 3-5 hyperfine benchmark walkthrough on Oliver's M2 Max
+
+**Origin:** Phase 3 / Plan 03-03 Task 3-5 DEFERRED 2026-05-04 by Oliver (no time pressure; harness + reference WAVs + BENCHMARK.md template all committed; benchmark execution pending Oliver's hardware time).
+
+**Description:** Plan 03-03 Wave 3 deliverables (Tasks 3-1..3-4) are complete and committed: 3 reference WAVs, hyperfine `run.sh` harness, jq-based `quantiles.sh`, BENCHMARK.md template with the Phase 5 trigger rule (`p50 > 2s OR p95 > 4s on 5s.wav` per CONTEXT D-09). Task 3-5 (the live benchmark on Oliver's hardware) was deferred per Oliver's explicit request during Phase 3 execution. Without these numbers, DST-04 stays `[ ]` Pending and the Phase 5 verdict stays "Conditional" in ROADMAP.md.
+
+**Why this is a backlog item, not a deviation:**
+
+- The harness was never broken or wrong. It's ready to run.
+- The benchmark is a one-command operation (`bash tests/benchmark/run.sh`) once `hyperfine` is installed.
+- The deferral is a scheduling preference, not a technical blocker.
+
+**Resume recipe (verbatim):**
+
+```bash
+brew install hyperfine            # one-time prerequisite
+brew info hyperfine | head -3     # confirm v1.20.0+
+sw_vers -productVersion           # capture for BENCHMARK.md Environment block
+sysctl -n machdep.cpu.brand_string  # capture for BENCHMARK.md Environment block
+# (laptop on AC power per RESEARCH §Pitfall 10)
+bash tests/benchmark/run.sh 2>&1 | tee /tmp/p3-benchmark.log
+```
+
+Then populate BENCHMARK.md `## Latest results` table + Environment block + Phase 5 verdict; populate README.md `## Performance` section placeholder rows; sign off `tests/manual/test_benchmark_run.md`; commit; flip REQUIREMENTS.md DST-04 [ ] → [x] in v1 subsection AND traceability table; update STATE.md + ROADMAP.md plan progress; flip Plan 03-03 SUMMARY status `walkthrough-deferred` → `complete`.
+
+**Phase 5 verdict implications:**
+
+- If 5s.wav `p50 ≤ 2s AND p95 ≤ 4s` → Phase 5 stays DEFERRED (ROADMAP "Conditional" → "Deferred"); v1.1 ships without the warm-process upgrade.
+- Otherwise → Phase 5 ACTIVE (ROADMAP "Conditional" → "Planning v1.1"); next milestone cycle picks up the warm-process work.
+
+**Priority:** v1 closure blocker for the formal 100% coverage signal, but not a ship-stopper — Plan 03-04 (public flip + DST-05) is technically unblocked from a code-deliverable standpoint and can run in parallel with Oliver scheduling the benchmark.
+
+**Status:** Open
+
+**Related:** Plan 03-03 partial SUMMARY (`status: walkthrough-deferred`), `tests/manual/test_benchmark_run.md` (DEFERRED sign-off block), and the existing pre-walkthrough infrastructure are all sized for the resume path. Same precedent as Phase 4 CHECKPOINT-3 deferral (sudo-mv) — destructive/time-cost walkthroughs that are DEFERRED with documented reason are a recognised GSD pattern, surfaced via `/gsd:audit-uat`.
+
+---
+
 ## Closed
 
 *(none yet)*

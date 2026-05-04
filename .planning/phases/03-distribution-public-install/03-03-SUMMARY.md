@@ -2,8 +2,8 @@
 phase: 03-distribution-public-install
 plan: 03
 subsystem: distribution
-tags: [hyperfine, benchmark-harness, dst-04, phase-5-trigger-d09, partial-pre-walkthrough]
-status: pre-walkthrough-draft
+tags: [hyperfine, benchmark-harness, dst-04, phase-5-trigger-d09, walkthrough-deferred]
+status: walkthrough-deferred
 
 # Dependency graph
 requires:
@@ -215,6 +215,23 @@ None — no auth flows in scope for this plan.
 
 ## Status
 
-**PRE-WALKTHROUGH DRAFT** — Tasks 3-1..3-4 deliverables committed atomically (4 commits e934486 / 8f60937 / 3a1a7b8 / 645323d). Functional 16/0; security 5/0; brand + framing lints GREEN; Pattern 2 invariant intact. Task 3-5 (`tests/manual/test_benchmark_run.md` walkthrough on Oliver's M2 Max) is the blocking checkpoint — orchestrator will run the walkthrough with Oliver, then a continuation agent finalises this SUMMARY with the populated hyperfine numbers, the Phase 5 DEFERRED/ACTIVE verdict, and any walkthrough-surfaced deviations.
+**WALKTHROUGH DEFERRED 2026-05-04 by Oliver** — Tasks 3-1..3-4 deliverables committed atomically (4 commits e934486 / 8f60937 / 3a1a7b8 / 645323d). Functional 16/0; security 5/0; brand + framing lints GREEN; Pattern 2 invariant intact. Task 3-5 (live hyperfine benchmark on Oliver's M2 Max) DEFERRED per Oliver's request — no time pressure, run later. Plan 03-03 stays in `walkthrough-deferred` status (not Complete) until Oliver runs `bash tests/benchmark/run.sh` and commits the populated numbers.
 
-Plan 03-04 (public flip + DST-05) remains blocked on Plan 03-03 closure — the Phase 5 verdict materially affects the ROADMAP.md state Plan 03-04 commits to.
+**Resume path when Oliver runs the benchmark:**
+
+1. `brew install hyperfine` (one-time prerequisite)
+2. Confirm laptop on AC power (RESEARCH §Pitfall 10)
+3. `bash tests/benchmark/run.sh 2>&1 | tee /tmp/p3-benchmark.log` — produces `tests/benchmark/results-{2,5,10}s.{json,md}` + per-WAV p50/p95 + 5s.wav-only Phase-5 trigger verdict
+4. Populate `BENCHMARK.md` "Latest results" table + Environment block + Phase 5 verdict
+5. Populate `README.md` `## Performance` section placeholder rows with same numbers (CONTEXT D-10)
+6. Sign off `tests/manual/test_benchmark_run.md` with verbatim numbers
+7. Commit + flip REQUIREMENTS.md DST-04 [ ] → [x] + STATE.md/ROADMAP.md plan progress + this SUMMARY status `walkthrough-deferred` → `complete`
+
+**Phase 3 closure implications:**
+
+- DST-04 stays `[ ]` Pending in REQUIREMENTS.md with annotation "DEFERRED Plan 03-03 Task 3-5 walkthrough 2026-05-04 — harness ready, benchmark execution pending Oliver's hardware time"
+- v1 coverage: 43 reqs total; 42 Complete + 1 Pending (DST-04)
+- Phase 5 trigger verdict: stays "Conditional" in ROADMAP.md (cannot compute DEFERRED vs ACTIVE without numbers)
+- Plan 03-04 (public flip + DST-05 end-to-end) is technically unblocked from a code-deliverable standpoint — the public flip and curl|bash live test do not depend on DST-04 numbers. Decision pending Oliver: proceed to Plan 03-04 with DST-04 deferred, or pause Phase 3 here.
+
+**Backlog reference:** `.planning/BACKLOG.md` item 2 (filed 2026-05-04) tracks the deferred benchmark execution.

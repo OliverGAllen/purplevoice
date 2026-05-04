@@ -1,6 +1,6 @@
 # Manual walkthrough: hyperfine benchmark on Oliver's hardware (DST-04)
 
-**Status:** unsigned
+**Status:** DEFERRED 2026-05-04 by Oliver (run later — no time pressure; Phase 5 verdict can be computed when Oliver runs the harness)
 **Created:** 2026-05-01 (Plan 03-00)
 **Sign-off path:** Plan 03-03 (autonomous: false; the only person who can produce the numbers is Oliver on his machine)
 **Phase:** 3 — Distribution & Public Install
@@ -42,13 +42,20 @@ Benchmark numbers are hardware-specific. They cannot be mocked, pre-computed, or
 ## Sign-off
 
 ```
-DST-04 hyperfine benchmark walkthrough — signed off YYYY-MM-DD by Oliver
-- 5s.wav p50: __ s     5s.wav p95: __ s
-- 2s.wav p50: __ s     2s.wav p95: __ s
-- 10s.wav p50: __ s    10s.wav p95: __ s
-- Phase 5 verdict: DEFERRED / ACTIVE
-- Numbers committed to BENCHMARK.md
+DST-04 hyperfine benchmark walkthrough — DEFERRED 2026-05-04 by Oliver
+- Reason: run later (no time pressure; harness + reference WAVs + BENCHMARK.md template all committed; benchmark execution is a one-command operation Oliver can perform whenever convenient)
+- Numbers: pending Oliver running `bash tests/benchmark/run.sh` on M2 Max with AC power
+- Phase 5 verdict: pending DST-04 numbers (stays "Conditional" in ROADMAP until DST-04 lands)
+- Resume path: when Oliver runs the benchmark, he commits the populated BENCHMARK.md + README.md `## Performance` section + this walkthrough doc's sign-off block; updates REQUIREMENTS.md DST-04 [ ] → [x]; surfaces Phase 5 verdict in STATE.md/ROADMAP.md.
 ```
+
+**Pre-walkthrough deliverables ready (no blockers when Oliver runs):**
+- `tests/benchmark/{2s,5s,10s}.wav` — 3 reference WAVs, ~50KB each, 16kHz mono PCM (commit `e934486`)
+- `tests/benchmark/run.sh` — hyperfine harness, mode 0755 (commit `8f60937`)
+- `tests/benchmark/quantiles.sh` — jq p50/p95 calculator, mode 0755 (commit `3a1a7b8`)
+- `BENCHMARK.md` — template with methodology + Phase 5 trigger rule + empty Latest results table (commit `645323d`)
+- `~/.local/share/purplevoice/models/ggml-small.en.bin` — present and SHA256-verified (Plan 03-02 Item 4 reinstall, 2026-05-04)
+- `hyperfine` — install when ready: `brew install hyperfine` (one-time)
 
 ## Failure modes
 

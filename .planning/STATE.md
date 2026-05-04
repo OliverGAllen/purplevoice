@@ -28,9 +28,9 @@ progress:
 
 ## Current Position
 
-Phase: 03 (distribution-public-install) — EXECUTING (Wave 2 complete 2026-05-04)
-Plan: 3 of 5 (03-00 staging + 03-01 install.sh rename + 03-02 LICENSE/uninstall/README rewrite COMPLETE; 03-03..04 next)
-Next: Wave 3 (Plan 03-03 hyperfine benchmarks + BENCHMARK.md + DST-04 walkthrough — populates the 3 placeholder rows in README ## Performance and gates the Phase 5 warm-process trigger evaluation). Plan 03-04 (public flip + DST-05 end-to-end live test + REQUIREMENTS/ROADMAP closure) follows. Per ROADMAP execution order: Phase 3 is final v1 phase.
+Phase: 03 (distribution-public-install) — EXECUTING (Wave 3 partial 2026-05-04)
+Plan: 3.5 of 5 (03-00 + 03-01 + 03-02 COMPLETE; 03-03 Tasks 3-1..3-4 COMPLETE, Task 3-5 DEFERRED per Oliver; 03-04 awaiting decision)
+Next: Decision pending — proceed to Plan 03-04 (public flip + DST-05 end-to-end + closure) with DST-04 deferred to BACKLOG#2, OR pause Phase 3 here until DST-04 walkthrough runs. Plan 03-03 harness + WAVs + BENCHMARK.md template all committed (4 atomic commits e934486 → 645323d + ded69c2 partial SUMMARY); resume recipe in BACKLOG#2 + Plan 03-03 SUMMARY. Phase 5 verdict stays "Conditional" in ROADMAP until DST-04 lands.
 
 - **Milestone:** v1
 - **Phase:** 5
