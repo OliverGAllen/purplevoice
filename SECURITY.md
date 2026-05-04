@@ -623,6 +623,19 @@ PurpleVoice's current architecture (Hammerspoon Spoon + bash glue + brew-install
 
 Phase 3 (Distribution & Public Install) introduces a public one-line installer (`curl -fsSL .../install | bash`). The installer payload itself is not a `.app` bundle, but the **decision** of whether to wrap PurpleVoice as a notarised `.app` is open at Phase 3 planning time.
 
+### Distribution model (Phase 3, v1)
+
+PurpleVoice is **distributed as source-available code** under the MIT license (see [LICENSE](LICENSE)). The v1 release ships via:
+
+- **Public GitHub repository** at https://github.com/OliverGAllen/purplevoice — every line of bash glue, Lua module, install.sh, uninstall.sh, and configuration is plain text and reviewable.
+- **One-line installer** at https://raw.githubusercontent.com/OliverGAllen/purplevoice/main/install.sh — invoked via `curl -fsSL ... | bash`. The installer git-clones the repo into `~/.local/share/purplevoice/src/` and runs the same idempotent `install.sh` a local-clone user runs.
+- **No notarised installer artefact** — the architecture (Hammerspoon Spoon + bash glue + brew-installed binaries) does not produce a signable PurpleVoice bundle. The `Hammerspoon.app` users install via `brew install --cask hammerspoon` carries Hammerspoon's own Apple Developer ID notarisation.
+
+This distribution model is a deliberate trade-off: zero opaque-binary surface in exchange for slightly higher install friction (the user manually adds `require("purplevoice")` to `~/.hammerspoon/init.lua`). For audiences whose threat model includes "distrust signed binaries and prefer reviewable source", source-available distribution is the load-bearing posture.
+
+Operators who require a notarised binary distribution should consult the deferred Phase 3 path documented in [If PurpleVoice ever ships as a notarised .app](#if-purplevoice-ever-ships-as-a-notarised-app-phase-3-scope) below.
+
+
 ### If PurpleVoice ever ships as a notarised `.app` (Phase 3 scope)
 
 - **Apple Developer Program enrolment**: $99/year (individual) or $299/year (organisation). Includes Apple Developer ID certificate.
