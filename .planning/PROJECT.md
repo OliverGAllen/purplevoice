@@ -2,7 +2,34 @@
 
 ## What This Is
 
-**PurpleVoice** is a local, push-to-talk voice input system for Claude Code on macOS Apple Silicon. Hold a hotkey, speak, release — your transcript appears in the focused Claude Code terminal. Built for individuals and organisations whose privacy requirements rule out cloud-based dictation. Working name was `voice-cc`; renamed during Phase 2.5 (2026-04-29).
+**PurpleVoice** is a local, push-to-talk voice input system for Claude Code (and any focused window) on macOS Apple Silicon. Hold a hotkey, speak, release — your transcript appears in the focused window in under ~600 ms (M2 Max, hyperfine-measured). Built for individuals and organisations whose privacy requirements rule out cloud-based dictation. Working name was `voice-cc`; renamed during Phase 2.5 (2026-04-29). **v1.0 shipped publicly 2026-05-04** at https://github.com/OliverGAllen/purplevoice (MIT licensed; INSTALL_TOKEN soft-gate active for the curl one-liner — request a token from oliver@olivergallen.com).
+
+## Current State (post v1.0)
+
+- **Shipped:** 2026-05-04. 8 phases, 29 plans, 178 commits, 8 days end-to-end.
+- **Public repo:** https://github.com/OliverGAllen/purplevoice (visibility=PUBLIC, MIT, anonymous curl serves install.sh with HTTP 200).
+- **Coverage:** 43/43 v1 requirements [x] Complete (100%).
+- **Performance:** transcription p50/p95 = 0.589s/0.605s on M2 Max (5s.wav, hyperfine 1.20.0, AC power) — well under the 2s/4s thresholds.
+- **Test suites:** functional 16/0, security 5/0, brand + framing GREEN. Pattern 2 invariant intact.
+- **Distribution model:** source-available via curl|bash + INSTALL_TOKEN soft-gate. Hammerspoon module + Karabiner JSON rules + bash glue + Lua. No notarised .app (per CONTEXT D-02 deferral).
+- **Phase 5 (warm-process daemon):** evaluated 2026-05-04, **DEFERRED** — cold-start within budget; Pattern 2 (`transcribe()` boundary) preserved as latent drop-in swap point if future hardware/model crosses thresholds.
+- **Audit trail:** full per-phase SUMMARY.md files in `.planning/phases/`; v1.0 archive in `.planning/milestones/v1.0-{ROADMAP,REQUIREMENTS}.md`.
+
+## Next Milestone Goals
+
+User direction (2026-05-04): **"turn this into a full on application."** Scope for v2.0 to be defined via `/gsd:new-milestone`. Open questions the new-milestone discussion needs to resolve:
+
+- **Native macOS .app bundle** — currently shipping as Hammerspoon-substrate (Option B per Phase 3 D-01). v2 may revisit Option C (signed/notarised wrapping) or Option A (full standalone app). Trade-off: signed-binary trust vs source-readability + zero-opaque-binary posture.
+- **Settings UI** — directly contradicts current constraint ("no settings UI"). v2 may add a SwiftUI / native preferences pane (env var → GUI). Risk: scope creep + Electron-adjacent footprint.
+- **Multi-platform** — currently macOS Apple Silicon only (constraint locked at v1). v2 could add Linux (Vosk or whisper.cpp + ALSA) and/or Windows (whisper.cpp + Win32 hotkeys). Doubles platform-specific surface area.
+- **Audience expansion** — v1 served Oliver primarily, with the audience-broadening pivot in Phase 2.5 forward-pointing at institutional audiences. v2 may target real institutional adoption: SSO/auth/team management (directly contradicts current "no auth, no multi-user" constraint), or stay individual-first with stronger institutional messaging.
+- **Voice commands beyond dictation** — currently Out of Scope. v2 candidate: parser + state machine for "send", "clear", agent-mode meta-commands.
+- **TTS / spoken replies** — currently Out of Scope. v2 candidate per original positioning.
+- **Toggle-to-record / wake word** — currently Out of Scope (pure push-and-hold v1). v2 candidate.
+- **App Store distribution** — vs current curl|bash + INSTALL_TOKEN. App Store requires .app bundle + Apple Developer enrolment ($99/year); fundamentally changes the trust model.
+- **Hosted backend / sync / telemetry** — directly conflicts with v1 privacy-first core value. Probably should stay Out of Scope for v2.0 unless audience pivot demands it.
+
+These are scope decisions for `/gsd:new-milestone`, not pre-commitments.
 
 ## Core Value
 
@@ -49,25 +76,33 @@ The Phase 2.7 `SECURITY.md` document substantiates these claims with a threat mo
 - [x] **Floating recording-state HUD** — translucent lavender pill with `● Recording` text appears at top-center of active screen during press-hold, hidden when idle. Six named positions configurable via `PURPLEVOICE_HUD_POSITION`. Disable via `PURPLEVOICE_HUD_OFF=1`. Honest framing about ScreenCaptureKit screen-recording limitation in README + SECURITY.md (no over-claims about hide-from-recording behaviour) *(Phase 3.5 — completed 2026-04-30; HUD-01..04 — see `.planning/phases/03.5-hover-ui-hud/`)*
 - [x] **Quality-of-life hotkeys** — F19 push-and-hold via Karabiner fn-remap (replaces the original cmd+shift+e binding to eliminate the VS Code/Cursor "Show Explorer" collision); F18 re-paste via Karabiner backtick-hold (in-memory `lastTranscript` cache, supersedes the original cmd+shift+v plan after live-walkthrough discovery of an opaque clipboard-manager Carbon RegisterEventHotKey collision). Both hotkeys ship with bundled JSON rule files in `assets/`; `setup.sh` Step 9 refuses to declare install complete without Karabiner-Elements installed *(Phase 4 — completed 2026-05-01; QOL-01 + QOL-NEW-01 — see `.planning/phases/04-quality-of-life-v1-x/`)*
 
+- [x] **Loop hardened** against TCC silent-deny, hallucinations (VAD + denylist), re-entrancy, clipboard manager retention (`org.nspasteboard.TransientType`), AirPods surprises, paste-restore races, WAV leaks (EXIT-trap cleanup) *(Phase 2 — completed 2026-04-28; TRA-04..06, INJ-02..04, FBK-01..03, ROB-01..04 — see `.planning/phases/02-hardening/`)*
+- [x] **Public-facing product name** rebrand voice-cc → PurpleVoice + lavender visual identity *(Phase 2.5 — completed 2026-04-29; BRD-01..03 — see `.planning/phases/02.5-branding/`)*
+- [x] **Reproducible install** — single canonical `install.sh` (renamed from `setup.sh` in Phase 3) idempotent + curl-vs-clone detection + `bootstrap_clone_then_re_exec` for the curl|bash path; LICENSE (canonical MIT) + uninstall.sh + README D-11/D-12 rewrite (Quickstart-at-top + Detailed Install + 4-item Recovery + Uninstalling) *(Phase 3 — completed 2026-05-04; DST-01..04 — see `.planning/phases/03-distribution-public-install/`)*
+- [x] **Public one-line installer** with INSTALL_TOKEN soft-gate (honest framing as request-channel signal, not access control); repo flipped to PUBLIC at github.com/OliverGAllen/purplevoice 2026-05-04 *(Phase 3 — completed 2026-05-04; DST-05, DST-06)*
+- [x] **Hyperfine-measured performance** — p50 0.589s / p95 0.605s on 5s.wav (M2 Max, AC power); well within Phase 5 trigger thresholds (~3.4×/6.6× margin) *(Phase 3 — DST-04 completed 2026-05-04)*
+
 ### Active
 
-- [ ] Loop is robust against TCC silent-deny, hallucinations, re-entrancy, clipboard manager retention *(Phase 2; TRA-04..06, INJ-02..04, FBK-01..03, ROB-01..04)*
-- [x] **Public-facing product name (rebrand from working name "voice-cc")** *(Phase 2.5 — completed 2026-04-29; BRD-01..03 — see `.planning/phases/02.5-branding/`)*
-- [ ] Setup is reproducible from a single install script / README *(Phase 3; DST-01..04)*
-- [ ] **Public one-line installer (`curl ... | bash`) so others can install voice-cc** *(Phase 3 extension — added 2026-04-27; DST-05)*
-- ~~**Small floating recording-state HUD (hideable)** *(Phase 3.5 — added 2026-04-27; HUD-01..04)*~~ — **VALIDATED in Phase 3.5 (2026-04-30); see Validated section above.**
+**v2.0 scope: TBD via `/gsd:new-milestone`.** User direction: "turn this into a full on application." See [Next Milestone Goals](#next-milestone-goals) above for the open questions the new-milestone discussion needs to resolve.
 
-### Out of Scope
+### Out of Scope (v1 — to be re-audited for v2)
 
-- **TTS / spoken replies** — v2 candidate; v1 is text-only to keep scope tight
-- **Voice commands beyond dictation** ("send", "clear", agent-mode meta-commands) — v2 candidate; v1 is pure dictation
-- **Project-aware context / per-project hotkeys** — v2 candidate; v1 just injects into whatever window is focused
-- **Toggle-to-record mode** — push-and-hold only for v1; toggle adds state management complexity
-- **Wake word activation** — explicit hotkey only; wake words add false-trigger and always-on mic concerns
-- **Cross-platform support (Linux, Windows)** — macOS Apple Silicon only; cross-platform deferred indefinitely
-- **Cloud STT (Whisper API, Deepgram, etc.)** — violates the no-subscriptions / no-limits constraint
-- **GUI / preferences app** — config lives in dotfiles; no Electron/SwiftUI shell needed (a small floating HUD is in scope per Phase 3.5, but it's not a settings UI)
-- ~~**Distribution to other users** — personal tool first; if it generalises, package later~~ — **REVERSED 2026-04-27 by user**: now in scope as Phase 3 Public Install + Phase 2.5 Branding. Phase 1 demonstrably worked, so the case for sharing it has materialised earlier than anticipated.
+These are the v1 Out-of-Scope items. The v2 scope decision (in `/gsd:new-milestone`) may **reverse** several of these — Phase 3.5 HUD and Phase 3 Distribution were both reversed in v1 from Out-of-Scope. Items flagged as **v2 candidate** are the most likely reversal targets.
+
+- **TTS / spoken replies** — *v2 candidate*; v1 is text-only to keep scope tight.
+- **Voice commands beyond dictation** ("send", "clear", agent-mode meta-commands) — *v2 candidate*; v1 is pure dictation.
+- **Project-aware context / per-project hotkeys** — *v2 candidate*; v1 just injects into whatever window is focused.
+- **Toggle-to-record mode** — *v2 candidate if a "full app" wants more interaction modes*; v1 is push-and-hold only.
+- **Wake word activation** — explicit hotkey only; wake words add false-trigger and always-on mic concerns. Probably stays Out of Scope.
+- **Cross-platform support (Linux, Windows)** — *v2 may revisit if "full app" implies broader audience*; v1 is macOS Apple Silicon only.
+- **Cloud STT (Whisper API, Deepgram, etc.)** — violates the no-subscriptions / no-limits + privacy-first constraint. **Should stay Out of Scope for v2** unless the project's core value pivots — which it shouldn't.
+- **GUI / preferences app** — *v2 candidate if "full app" means native Settings pane*; v1 config lives in dotfiles + env vars + Karabiner JSON. The Phase 3.5 HUD does not count as a settings UI.
+- **Hosted backend / sync / telemetry** — directly conflicts with v1 privacy-first core value. **Should stay Out of Scope for v2** unless audience pivot demands it; if so, Oliver should re-audit `Core Value` first.
+- **Multi-user / SSO / auth / team management** — currently constrained ("built for one user"). *v2 candidate if the audience pivot to institutional adoption is real.*
+- ~~**Distribution to other users** — personal tool first; if it generalises, package later~~ — **REVERSED 2026-04-27 by user**, validated in Phase 3 Public Install (2026-05-04).
+- ~~**Public-facing product name (rebrand)**~~ — **REVERSED 2026-04-27 by user**, validated in Phase 2.5 (PurpleVoice, 2026-04-29).
+- ~~**Floating recording-state HUD (hideable)**~~ — **REVERSED 2026-04-27 by user**, validated in Phase 3.5 (2026-04-30).
 
 ## Context
 
@@ -126,3 +161,5 @@ This document evolves at phase transitions and milestone boundaries.
 *Updated: 2026-04-30 — Phase 3.5 Hover UI / HUD closed; floating lavender translucent pill (alpha 0.70, no backdrop blur, "● Recording" text) wired into onPress / resetState lifecycle in purplevoice-lua/init.lua; six named positions via PURPLEVOICE_HUD_POSITION env var; PURPLEVOICE_HUD_OFF=1 disable; honest D-14 framing about ScreenCaptureKit limitation (does NOT pursue NSWindowSharingNone exclusion) in README + SECURITY.md + REQUIREMENTS.md; HUD-01..04 marked complete; functional suite 10/0; security suite 5/0; 5 manual walkthroughs signed off live by user. DST-06 (Hammerspoon-as-PurpleVoice wrapping decision; A/B/C trade-off) added to Phase 3 backlog per user direction.*
 *Updated: 2026-05-01 — Phase 4 Quality of Life closed; QOL-01 (F18 re-paste via Karabiner backtick-hold) + QOL-NEW-01 (F19 push-to-talk via Karabiner fn-remap) marked Complete. Karabiner-Elements added as required runtime dep; setup.sh Step 9 enforces presence with actionable error. Mid-execution deviation: original D-02 cmd+shift+v re-paste superseded by F18-via-backtick-hold after live walkthrough surfaced an opaque clipboard-manager Carbon hotkey collision (no Hammerspoon binding-failed alert; keystroke silently consumed). Functional suite 11/0; security 5/0; brand + framing lints GREEN; Pattern 2 invariants intact. 2 walkthroughs signed off live (F19 5/5, re-paste 3/3); test_setup_karabiner_missing deferred to a deliberate safe break (HUMAN-UAT.md tracked).*
 *Updated: 2026-05-04 — Phase 3 Distribution & Public Install closed 5/5 — **PurpleVoice v1 publicly shipping**. Repo flipped PRIVATE → PUBLIC at https://github.com/OliverGAllen/purplevoice (MIT licensed; 118+ commits on origin/main; anonymous curl serves install.sh with HTTP 200). Plan 03-01 (install.sh rename + curl|bash bootstrap + DST-01 walkthrough) + Plan 03-02 (LICENSE + uninstall.sh + README D-11/D-12 rewrite + DST-03 walkthrough) + Plan 03-03 (hyperfine harness + reference WAVs + BENCHMARK.md template; Task 3-5 live walkthrough DEFERRED to BACKLOG#2 per Oliver — harness ready, benchmark execution pending hardware time) + Plan 03-04 (SECURITY.md "Distribution model" H3 + INSTALL_TOKEN soft-gate + public flip + DST-05 walkthrough). DST-01..03, DST-05, DST-06 [x] Complete; DST-04 [ ] Pending/DEFERRED with annotation pointing at BACKLOG#2; v1 coverage 42/43 = 97.7%. Phase 5 trigger verdict stays "Conditional" until DST-04 lands. Plan 03-04 introduced the **INSTALL_TOKEN soft-gate** (SHA256 baked into install.sh; honestly framed in SECURITY.md §"Distribution model — Install gate" as a request-channel signal, not access control — public source means a determined party can read install.sh + remove the gate; purpose is filtering casual installs + creating a "ping Oliver" channel; tokens issued per request to oliver@olivergallen.com). New deviation classes: (a) "destructive walkthrough item run by orchestrator on user's machine — user retains GUI re-grant + post-condition verification authority"; (b) "informational walkthrough findings that validate the documented diagnostic flow are recorded in walkthrough doc + SUMMARY § Live findings, not as plan deviations"; (c) "soft access-control gate on public source — honest framing acknowledges public-readability bypassability; purpose is request-channel norm, not control surface". Phase 4 CHECKPOINT-3 (sudo-mv DEFERRED) precedent applied to DST-04. Suite at close: functional 16/0; security 5/0; brand + framing GREEN; Pattern 2 invariants intact.*
+
+*Last updated: 2026-05-04 after **v1.0 milestone completion**. DST-04 closed same-day on AC-power M2 Max (5s.wav p50/p95 = 0.589/0.605s; Phase 5 trigger DEFERRED — within budget). v1 coverage 43/43 = 100%. Milestone archived to `.planning/milestones/v1.0-{ROADMAP,REQUIREMENTS}.md`. Original `.planning/REQUIREMENTS.md` deleted (fresh one created by `/gsd:new-milestone` for v2). PROJECT.md fully evolved: Active section emptied (v2 scope TBD); v1 requirements moved to Validated; Out of Scope re-audited with v2-candidate flags; Current State + Next Milestone Goals sections added documenting the public release + v2 scope open questions ("turn this into a full on application" — native .app, settings UI, multi-platform, audience pivot, voice commands, TTS, App Store, etc., to be resolved via `/gsd:new-milestone` discussion).*
